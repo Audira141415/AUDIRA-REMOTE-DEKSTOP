@@ -1,6 +1,6 @@
 /**
  * AUDIRA REMOTE DESKTOP — Admin Panel & Fleet Management Controller
- * Fully integrated with Landing Cockpit, Webhooks (Telegram & Discord), and Fleet Sync
+ * Fully integrated with Central Auth, Multi-Device 1-Account Sync, Webhooks & Fleet Telemetry
  * Author: Agus Dwi Rianto (AUDIRA) — https://audira.my.id
  */
 
@@ -28,15 +28,300 @@ function initLiveFleetSync() {
   fetchFleetData();
   fetchMetricsData();
   fetchSessionsData();
+  fetchAccountsData();
   if (!fleetPollingTimer) {
     fleetPollingTimer = setInterval(() => {
       fetchFleetData();
       fetchMetricsData();
       fetchSessionsData();
+      fetchAccountsData();
     }, 4000);
   }
 }
 
+// ==========================================================================
+// Theme & Language Initialization
+// ==========================================================================
+function initAdminTheme() {
+  const savedTheme = localStorage.getItem('audira_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  const toggleBtn = document.getElementById('adminThemeToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('audira_theme', next);
+      showToast(`Mode visual diubah ke: ${next.toUpperCase()}`, 'info');
+    });
+  }
+}
+
+function initAdminLanguage() {
+  const savedLang = localStorage.getItem('audira_lang') || 'ID';
+  const label = document.getElementById('adminLangLabel');
+  if (label) label.textContent = savedLang;
+
+  const toggleBtn = document.getElementById('adminLangToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const current = localStorage.getItem('audira_lang') || 'ID';
+      const next = current === 'ID' ? 'EN' : 'ID';
+      localStorage.setItem('audira_lang', next);
+      if (label) label.textContent = next;
+      showToast(`Bahasa diubah ke: ${next}`, 'info');
+    });
+  }
+}
+
+function checkOperatorSession() {
+  const operatorEl = document.getElementById('adminTopbarOperatorName');
+  if (operatorEl) {
+    operatorEl.textContent = 'Agus Dwi Rianto (AUDIRA)';
+  }
+}
+
+// ==========================================================================
+// Sidebar Navigation Viewport Switching
+// ==========================================================================
+function initAdminNavigation() {
+  const navItems = document.querySelectorAll('.admin-nav-item');
+  const viewSections = document.querySelectorAll('.view-section');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const targetViewId = item.getAttribute('data-view');
+      if (!targetViewId) return;
+
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+
+      viewSections.forEach(sec => {
+        if (sec.id === targetViewId) {
+          sec.classList.add('active');
+        } else {
+          sec.classList.remove('active');
+        }
+      });
+    });
+  });
+}
+
+// ==========================================================================
+// Accounts & Linked Devices (Multi-Device 1 Akun)
+// ==========================================================================
+async function fetchAccountsData(showToastFeedback = false) {
+  try {
+    const res = await fetch('/api/accounts');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.accounts)) {
+      renderAccountsView(data.accounts);
+
+      const totalAccounts = data.accounts.length;
+      const totalLinkedDevices = data.accounts.reduce((acc, u) => acc + (u.total_devices || 0), 0);
+      const totalOnlineDevices = data.accounts.reduce((acc, u) => acc + (u.online_devices || 0), 0);
+
+      const badge = document.getElementById('navAccountsBadge');
+      if (badge) badge.textContent = totalAccounts.toString();
+
+      const kpiAcc = document.getElementById('kpiTotalAccounts');
+      if (kpiAcc) kpiAcc.textContent = totalAccounts.toString();
+
+      const kpiDev = document.getElementById('kpiTotalLinkedDevices');
+      if (kpiDev) kpiDev.textContent = totalLinkedDevices.toString();
+
+      const kpiOnlineMeta = document.getElementById('kpiOnlineLinkedDevices');
+      if (kpiOnlineMeta) kpiOnlineMeta.innerHTML = `<span>● ${totalOnlineDevices} Online via LAN/WAN</span>`;
+
+      if (showToastFeedback) {
+        showToast('Data akun & perangkat tersinkronisasi!', 'success');
+      }
+    }
+  } catch (e) {
+    console.debug('Accounts API not reachable.');
+  }
+}
+
+function renderAccountsView(accounts) {
+  const container = document.getElementById('accountsListContainer');
+  if (!container) return;
+
+  if (accounts.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:3rem; color:var(--color-text-dim); background:var(--color-admin-card); border-radius:var(--radius-md);">
+        Belum ada akun yang terdaftar. Klik "+ Buat Akun Baru" di atas untuk menambahkan akun.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = accounts.map(u => {
+    const initials = (u.username || 'AU').slice(0, 2).toUpperCase();
+    const isAdmin = u.is_admin === true;
+    const devices = u.devices || [];
+
+    let devicesHtml = '';
+    if (devices.length === 0) {
+      devicesHtml = `
+        <div style="padding:1.5rem; text-align:center; color:var(--color-text-dim); font-size:0.875rem;">
+          Belum ada PC atau perangkat yang login menggunakan akun <strong>${escapeHtml(u.username)}</strong>.<br>
+          Buka Audira Desk di PC kamu, klik <strong>Login</strong>, dan masukkan username ini untuk menghubungkan perangkat secara otomatis.
+        </div>
+      `;
+    } else {
+      devicesHtml = `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>NAMA PERANGKAT / ALIAS</th>
+                <th>REMOTE ID</th>
+                <th>SISTEM OPERASI</th>
+                <th>ALAMAT IP</th>
+                <th>TAG KELOMPOK</th>
+                <th>STATUS KONEKSI</th>
+                <th>TERAKHIR AKTIF</th>
+                <th>AKSI</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${devices.map(d => {
+                const statusHtml = d.is_online
+                  ? `<span class="status-pill online"><span class="pulse-dot" style="display:inline-block; width:7px; height:7px; margin-right:5px; background:var(--color-emerald); border-radius:50%;"></span>ONLINE</span>`
+                  : `<span class="status-pill standby" style="color:var(--color-text-dim);"><span style="display:inline-block; width:7px; height:7px; margin-right:5px; background:var(--color-text-dim); border-radius:50%;"></span>OFFLINE</span>`;
+
+                return `
+                  <tr>
+                    <td>
+                      <div style="font-weight:700; color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname)}</div>
+                      <div style="font-size:0.75rem; color:var(--color-text-dim);">${escapeHtml(d.hostname)} (${escapeHtml(d.username)})</div>
+                    </td>
+                    <td class="admin-code-cell" style="font-weight:700; color:var(--color-primary); cursor:pointer;" onclick="navigator.clipboard.writeText('${d.raw_id}'); showToast('ID ${d.raw_id} disalin!', 'info');" title="Klik untuk salin ID">
+                      ${d.id}
+                    </td>
+                    <td>${escapeHtml(d.os)}</td>
+                    <td class="admin-code-cell">${escapeHtml(d.ip)}</td>
+                    <td><span class="mgmt-tag-pill">${escapeHtml((d.tags && d.tags[0]) || 'My Devices')}</span></td>
+                    <td>${statusHtml}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${escapeHtml(d.last_login || '-')}</td>
+                    <td style="white-space:nowrap;">
+                      <button class="mgmt-action-btn" onclick="launchSession('${d.id}')">Connect</button>
+                      <button class="icon-btn-inline" style="color:var(--color-rose); margin-left:6px;" title="Putus integrasi dari akun ini" onclick="unlinkDevice('${escapeHtml(u.username)}', '${d.raw_id}')">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="account-group-card">
+        <div class="account-group-header">
+          <div class="account-user-meta">
+            <div class="account-user-avatar">${initials}</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-weight:800; font-size:1.05rem; color:var(--color-text-heading);">${escapeHtml(u.display_name || u.username)}</span>
+                <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--color-text-dim);">@${escapeHtml(u.username)}</span>
+                ${isAdmin ? '<span class="nav-badge-pill" style="background:rgba(0,240,255,0.15); color:var(--color-primary); border-color:rgba(0,240,255,0.3);">ADMIN</span>' : '<span class="nav-badge-pill">USER</span>'}
+              </div>
+              <div style="font-size:0.75rem; color:var(--color-text-dim); margin-top:2px;">
+                ${escapeHtml(u.email || '-')} &bull; Terdaftar: ${escapeHtml(u.created_at || 'Baru')}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div style="font-size:0.8rem; font-weight:700; color:var(--color-emerald); background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); padding:0.3rem 0.65rem; border-radius:var(--radius-xs);">
+              ${devices.length} Perangkat Terhubung (${u.online_devices || 0} Online)
+            </div>
+          </div>
+        </div>
+        ${devicesHtml}
+      </div>
+    `;
+  }).join('');
+}
+
+// Modal: Create New Account
+function openCreateAccountModal() {
+  const modal = document.getElementById('modalCreateAccount');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('accUsername')?.focus();
+  }
+}
+
+function closeCreateAccountModal() {
+  const modal = document.getElementById('modalCreateAccount');
+  if (modal) modal.style.display = 'none';
+  document.getElementById('createAccountForm')?.reset();
+}
+
+async function submitCreateAccount(e) {
+  e.preventDefault();
+  const username = document.getElementById('accUsername')?.value.trim();
+  const password = document.getElementById('accPassword')?.value.trim();
+  const displayName = document.getElementById('accDisplayName')?.value.trim() || username;
+  const email = document.getElementById('accEmail')?.value.trim() || `${username}@audira.my.id`;
+
+  if (!username || !password) {
+    showToast('Username dan Password wajib diisi!', 'warning');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/accounts/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        display_name: displayName,
+        email: email,
+        is_admin: false
+      })
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      showToast(`Akun "${username}" berhasil dibuat!`, 'success');
+      closeCreateAccountModal();
+      fetchAccountsData();
+    } else {
+      showToast(result.error || 'Gagal membuat akun.', 'warning');
+    }
+  } catch (err) {
+    showToast('Error koneksi saat membuat akun.', 'error');
+  }
+}
+
+async function unlinkDevice(username, rawId) {
+  if (!confirm(`Putus hubungan perangkat ID ${rawId} dari akun ${username}?`)) return;
+
+  try {
+    const res = await fetch('/api/accounts/delete-device', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, device_id: rawId })
+    });
+    if (res.ok) {
+      showToast(`Perangkat ${rawId} dilepas dari akun ${username}`, 'info');
+      fetchAccountsData();
+    }
+  } catch (e) {
+    showToast('Gagal melepas perangkat.', 'error');
+  }
+}
+
+// ==========================================================================
+// Fleet Data Fetching & Table Rendering
+// ==========================================================================
 async function fetchFleetData() {
   try {
     const res = await fetch('/api/fleet');
@@ -201,6 +486,7 @@ function refreshMetrics() {
   fetchMetricsData();
   fetchFleetData();
   fetchSessionsData();
+  fetchAccountsData();
   showToast('Cluster metrics refreshed from daemon.', 'success');
 }
 

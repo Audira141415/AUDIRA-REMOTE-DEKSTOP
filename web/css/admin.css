@@ -660,3 +660,87 @@ body.admin-body {
   color: var(--color-primary);
   background: rgba(0, 240, 255, 0.1);
 }
+
+/* Modal Backdrop & Card */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.admin-modal-card {
+  background: var(--color-admin-card);
+  border: 1px solid var(--color-admin-border-active);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 240, 255, 0.15);
+  overflow: hidden;
+  animation: modal-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-enter {
+  from { opacity: 0; transform: scale(0.96) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.admin-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--color-admin-surface);
+  border-bottom: 1px solid var(--color-admin-border);
+}
+
+/* User Account & Linked Device Cards */
+.account-group-card {
+  background: var(--color-admin-card);
+  border: 1px solid var(--color-admin-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.account-group-card:hover {
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+.account-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--color-admin-surface);
+  border-bottom: 1px solid var(--color-admin-border);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.account-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.account-user-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), #0088ff);
+  color: #06070a;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+}
+

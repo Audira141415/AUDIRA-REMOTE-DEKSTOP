@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-AUDIRA Remote Desktop — Central Management & Heartbeat API Server
-Runs on port 21114 (RustDesk/Audira HTTP API) and integrates with Admin Console.
+AUDIRA Remote Desktop — Central Management, Auth & Heartbeat API Server
+Runs on port 21114 (RustDesk/Audira HTTP API) and integrates with Admin Console & Client App.
 Author: Agus Dwi Rianto (AUDIRA) • Audira Studio
 """
 
@@ -9,6 +9,7 @@ import os
 import sys
 import json
 import time
+import uuid
 import sqlite3
 import datetime
 import threading
@@ -20,12 +21,56 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "db_v2.sqlite3")
 META_PATH = os.path.join(DATA_DIR, "devices_meta.json")
+ACCOUNTS_PATH = os.path.join(DATA_DIR, "accounts.json")
 
-# In-memory peer tracking
+# In-memory tracking
 PEERS_LOCK = threading.Lock()
 ACTIVE_PEERS = {}
 DISCONNECT_QUEUE = {}
 SESSION_HISTORY = []
+
+ACCOUNTS_LOCK = threading.Lock()
+
+def get_default_accounts():
+    return {
+        "audira": {
+            "username": "audira",
+            "password": "Sigma1993",
+            "display_name": "Agus Dwi Rianto (AUDIRA)",
+            "email": "agus@audira.my.id",
+            "note": "Audira Certified Administrator",
+            "is_admin": True,
+            "status": 1,
+            "created_at": "2026-10-18 00:00:00",
+            "tokens": {},
+            "devices": {},
+            "tags": ["My Devices", "Audira Fleet"],
+            "tag_colors": {"My Devices": 4282557947, "Audira Fleet": 4280391411}
+        }
+    }
+
+def load_accounts():
+    if os.path.exists(ACCOUNTS_PATH):
+        try:
+            with open(ACCOUNTS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict) and data:
+                    return data
+        except Exception as e:
+            print(f"[!] Error loading accounts.json: {e}")
+    accounts = get_default_accounts()
+    save_accounts(accounts)
+    return accounts
+
+def save_accounts(accounts):
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        temp_path = ACCOUNTS_PATH + ".tmp"
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(accounts, f, indent=2)
+        os.replace(temp_path, ACCOUNTS_PATH)
+    except Exception as e:
+        print(f"[!] Error saving accounts.json: {e}")
 
 def load_meta():
     if os.path.exists(META_PATH):
@@ -38,6 +83,7 @@ def load_meta():
 
 def save_meta(meta):
     try:
+        os.makedirs(DATA_DIR, exist_ok=True)
         with open(META_PATH, "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2)
     except Exception as e:
@@ -91,6 +137,36 @@ def format_id(raw_id):
         return f"{s[:3]} {s[3:6]} {s[6:]}"
     return s
 
+def is_device_online(rid, ip="", reachable_ips=None):
+    if reachable_ips is None:
+        reachable_ips = get_reachable_ips()
+    now = time.time()
+    with PEERS_LOCK:
+        lp = ACTIVE_PEERS.get(str(rid))
+        if lp:
+            if (now - lp.get("last_heartbeat", 0)) < 45:
+                return True
+            peer_ip = lp.get("ip") or ip
+            if peer_ip and peer_ip in reachable_ips:
+                return True
+    if ip and ip in reachable_ips:
+        return True
+    return False
+
+def find_user_by_token(auth_header):
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None, None
+    token = auth_header.split(" ", 1)[1].strip()
+    if not token:
+        return None, None
+    with ACCOUNTS_LOCK:
+        accounts = load_accounts()
+        for uname, u in accounts.items():
+            tokens = u.get("tokens", {})
+            if token in tokens:
+                return uname, u
+    return None, None
+
 def build_fleet_devices():
     meta = load_meta()
     sqlite_peers = get_sqlite_peers()
@@ -99,7 +175,7 @@ def build_fleet_devices():
 
     merged_devices = {}
 
-    # First fill with SQLite peers
+    # 1. Fill with SQLite peers
     for sp in sqlite_peers:
         rid = sp["id"]
         custom = meta.get(rid, {})
@@ -121,7 +197,7 @@ def build_fleet_devices():
             "conns": []
         }
 
-    # Then overlay live memory peers
+    # 2. Overlay live memory peers
     with PEERS_LOCK:
         for rid, lp in ACTIVE_PEERS.items():
             custom = meta.get(rid, {})
@@ -150,11 +226,12 @@ def build_fleet_devices():
     devices_list.sort(key=lambda x: (not x["is_online"], x["last_seen"]), reverse=True)
     return devices_list
 
+
 class AudiraAPIHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept-Encoding")
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -164,7 +241,9 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
+        auth_header = self.headers.get("Authorization", "")
 
+        # 1. Health check
         if path == "/api/health" or path == "/health":
             self.send_response(200)
             self.send_cors_headers()
@@ -173,6 +252,156 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"status": "ok", "service": "Audira API", "version": "1.5.0"}).encode())
             return
 
+        # 2. Login options (Empty array = standard username/password login in client)
+        if path == "/api/login-options":
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b"[]")
+            return
+
+        # 3. Address Book (GET /api/ab) — Multi-device account synchronization
+        if path == "/api/ab":
+            uname, user = find_user_by_token(auth_header)
+            if not uname:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Unauthorized"}).encode())
+                return
+
+            # Build peers list from all devices linked to this user's account
+            reachable_ips = get_reachable_ips()
+            peers_list = []
+            user_devices = user.get("devices", {})
+
+            for clean_id, d in user_devices.items():
+                is_online = is_device_online(clean_id, d.get("ip", ""), reachable_ips)
+                
+                # Fetch latest live data if peer is currently reporting
+                with PEERS_LOCK:
+                    lp = ACTIVE_PEERS.get(clean_id, {})
+                
+                alias = d.get("alias") or lp.get("hostname") or d.get("hostname") or f"PC-{clean_id[-4:]}"
+                hostname = lp.get("hostname") or d.get("hostname") or f"PC-{clean_id[-4:]}"
+                username = lp.get("username") or d.get("username") or "User"
+                os_str = lp.get("os") or d.get("os") or "Windows"
+                platform = "Windows"
+                if "linux" in os_str.lower(): platform = "Linux"
+                elif "mac" in os_str.lower(): platform = "macOS"
+                elif "android" in os_str.lower(): platform = "Android"
+
+                peers_list.append({
+                    "id": clean_id,
+                    "alias": alias,
+                    "username": username,
+                    "hostname": hostname,
+                    "platform": platform,
+                    "tags": d.get("tags", ["My Devices"]),
+                    "same_server": True,
+                    "online": is_online,
+                    "hash": d.get("hash", ""),
+                    "password": d.get("password", ""),
+                    "note": d.get("note", f"Akun: {uname}")
+                })
+
+            tags = user.get("tags", ["My Devices", "Audira Fleet"])
+            tag_colors = user.get("tag_colors", {"My Devices": 4282557947, "Audira Fleet": 4280391411})
+
+            ab_payload = {
+                "tags": tags,
+                "tag_colors": json.dumps(tag_colors),
+                "peers": peers_list
+            }
+
+            resp = {
+                "data": json.dumps(ab_payload),
+                "licensed_devices": 100
+            }
+
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode())
+            return
+
+        # 4. Users endpoint (/api/users)
+        if path == "/api/users":
+            with ACCOUNTS_LOCK:
+                accounts = load_accounts()
+                user_list = []
+                for u in accounts.values():
+                    user_list.append({
+                        "name": u["username"],
+                        "display_name": u.get("display_name", u["username"]),
+                        "email": u.get("email", ""),
+                        "status": u.get("status", 1),
+                        "is_admin": u.get("is_admin", False)
+                    })
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"total": len(user_list), "data": user_list}).encode())
+            return
+
+        # 5. Accounts & Linked Devices endpoint (/api/accounts) for Web Admin Console
+        if path == "/api/accounts":
+            reachable_ips = get_reachable_ips()
+            with ACCOUNTS_LOCK:
+                accounts = load_accounts()
+                accounts_data = []
+                for uname, u in accounts.items():
+                    devices_data = []
+                    user_devs = u.get("devices", {})
+                    for clean_id, d in user_devs.items():
+                        online = is_device_online(clean_id, d.get("ip", ""), reachable_ips)
+                        with PEERS_LOCK:
+                            lp = ACTIVE_PEERS.get(clean_id, {})
+
+                        devices_data.append({
+                            "raw_id": clean_id,
+                            "id": format_id(clean_id),
+                            "hostname": lp.get("hostname") or d.get("hostname", ""),
+                            "username": lp.get("username") or d.get("username", ""),
+                            "alias": d.get("alias") or lp.get("hostname") or d.get("hostname", ""),
+                            "os": lp.get("os") or d.get("os", "Windows"),
+                            "ip": lp.get("ip") or d.get("ip", ""),
+                            "tags": d.get("tags", ["My Devices"]),
+                            "last_login": d.get("last_login", ""),
+                            "is_online": online,
+                            "status": "online" if online else "offline"
+                        })
+
+                    online_count = sum(1 for x in devices_data if x["is_online"])
+                    accounts_data.append({
+                        "username": uname,
+                        "display_name": u.get("display_name", uname),
+                        "email": u.get("email", f"{uname}@audira.my.id"),
+                        "note": u.get("note", "Audira Member"),
+                        "is_admin": u.get("is_admin", False),
+                        "status": u.get("status", 1),
+                        "created_at": u.get("created_at", ""),
+                        "total_devices": len(devices_data),
+                        "online_devices": online_count,
+                        "devices": devices_data
+                    })
+
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "success": True,
+                "total_accounts": len(accounts_data),
+                "accounts": accounts_data
+            }).encode())
+            return
+
+        # 6. Fleet devices endpoint (/api/fleet or /api/devices)
         if path == "/api/fleet" or path == "/api/devices":
             devices_list = build_fleet_devices()
             online_count = sum(1 for d in devices_list if d["is_online"])
@@ -191,6 +420,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode())
             return
 
+        # 7. Metrics endpoint (/api/metrics)
         if path == "/api/metrics":
             devices_list = build_fleet_devices()
             online_count = sum(1 for d in devices_list if d["is_online"])
@@ -217,6 +447,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(metrics).encode())
             return
 
+        # 8. Sessions endpoint (/api/sessions)
         if path == "/api/sessions":
             sessions = []
             now = time.time()
@@ -233,7 +464,6 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             "protocol": "Direct P2P UDP",
                             "started_at": datetime.datetime.fromtimestamp(lp.get("last_heartbeat", now)).strftime("%Y-%m-%d %H:%M:%S")
                         })
-            # Include history
             for sh in SESSION_HISTORY[-20:]:
                 sessions.append(sh)
 
@@ -252,12 +482,13 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
+        auth_header = self.headers.get("Authorization", "")
 
         content_len = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else ""
         client_ip = self.client_address[0].replace("::ffff:", "")
 
-        # 1. SYSINFO_VER (Client queries if sysinfo changed)
+        # 1. SYSINFO_VER
         if path == "/api/sysinfo_ver":
             self.send_response(200)
             self.send_cors_headers()
@@ -270,7 +501,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         if path == "/api/sysinfo":
             try:
                 data = json.loads(body) if body else {}
-                rid = str(data.get("id", "")).strip()
+                rid = str(data.get("id", "")).strip().replace(" ", "")
                 if rid:
                     with PEERS_LOCK:
                         peer = ACTIVE_PEERS.get(rid, {})
@@ -286,6 +517,23 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             "conns": peer.get("conns", [])
                         })
                         ACTIVE_PEERS[rid] = peer
+
+                    # Also update this device under any linked account
+                    with ACCOUNTS_LOCK:
+                        accounts = load_accounts()
+                        changed = False
+                        for u in accounts.values():
+                            if rid in u.get("devices", {}):
+                                dev = u["devices"][rid]
+                                dev["ip"] = client_ip
+                                dev["hostname"] = peer["hostname"]
+                                dev["username"] = peer["username"]
+                                dev["os"] = peer["os"]
+                                dev["last_seen_ts"] = time.time()
+                                changed = True
+                        if changed:
+                            save_accounts(accounts)
+
                     print(f"[+] Sysinfo registered from {rid} ({peer.get('hostname')}) at {client_ip}")
             except Exception as e:
                 print(f"[!] Error processing sysinfo: {e}")
@@ -302,7 +550,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             disconnect_list = []
             try:
                 data = json.loads(body) if body else {}
-                rid = str(data.get("id", "")).strip()
+                rid = str(data.get("id", "")).strip().replace(" ", "")
                 if rid:
                     conns = data.get("conns", [])
                     with PEERS_LOCK:
@@ -318,6 +566,13 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
                         if rid in DISCONNECT_QUEUE:
                             disconnect_list = DISCONNECT_QUEUE.pop(rid)
+
+                    with ACCOUNTS_LOCK:
+                        accounts = load_accounts()
+                        for u in accounts.values():
+                            if rid in u.get("devices", {}):
+                                u["devices"][rid]["last_seen_ts"] = time.time()
+                                u["devices"][rid]["ip"] = client_ip
             except Exception as e:
                 print(f"[!] Error processing heartbeat: {e}")
 
@@ -332,11 +587,244 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(resp).encode())
             return
 
-        # 4. ADMIN ACTIONS: Terminate session
+        # 4. USER AUTHENTICATION: LOGIN (POST /api/login)
+        if path == "/api/login":
+            try:
+                data = json.loads(body) if body else {}
+                username = str(data.get("username", "")).strip()
+                password = str(data.get("password", "")).strip()
+                device_id = str(data.get("id", "")).strip().replace(" ", "")
+                device_uuid = str(data.get("uuid", "")).strip()
+                device_info = data.get("deviceInfo", {})
+
+                if not username:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Username tidak boleh kosong"}).encode())
+                    return
+
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+
+                    # Authenticate or auto-register account
+                    if username in accounts:
+                        user = accounts[username]
+                        if user.get("password") and user.get("password") != password:
+                            self.send_response(400)
+                            self.send_cors_headers()
+                            self.send_header("Content-Type", "application/json")
+                            self.end_headers()
+                            self.wfile.write(json.dumps({"error": "Kata sandi salah / Invalid password"}).encode())
+                            return
+                    else:
+                        # Auto-create user account if not existing
+                        user = {
+                            "username": username,
+                            "password": password,
+                            "display_name": username,
+                            "email": f"{username}@audira.my.id",
+                            "note": "Audira Registered Member",
+                            "is_admin": False,
+                            "status": 1,
+                            "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "tokens": {},
+                            "devices": {},
+                            "tags": ["My Devices", "Audira Fleet"],
+                            "tag_colors": {"My Devices": 4282557947, "Audira Fleet": 4280391411}
+                        }
+                        accounts[username] = user
+
+                    # Generate new session access token
+                    access_token = uuid.uuid4().hex
+                    if "tokens" not in user: user["tokens"] = {}
+                    user["tokens"][access_token] = {
+                        "created_at": time.time(),
+                        "device_id": device_id
+                    }
+
+                    # Link device to user's account
+                    if device_id:
+                        if "devices" not in user: user["devices"] = {}
+                        
+                        # Lookup live peer info if available
+                        with PEERS_LOCK:
+                            lp = ACTIVE_PEERS.get(device_id, {})
+
+                        hostname = device_info.get("hostname") or lp.get("hostname") or data.get("hostname") or f"PC-{device_id[-4:]}"
+                        dev_username = device_info.get("username") or lp.get("username") or data.get("username") or "User"
+                        os_str = device_info.get("os") or lp.get("os") or data.get("os") or "Windows / Desktop"
+
+                        user["devices"][device_id] = {
+                            "id": device_id,
+                            "uuid": device_uuid,
+                            "hostname": hostname,
+                            "username": dev_username,
+                            "os": os_str,
+                            "ip": client_ip,
+                            "alias": hostname,
+                            "tags": ["My Devices"],
+                            "last_login": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "last_seen_ts": time.time(),
+                            "note": f"Perangkat terhubung pada akun {username}"
+                        }
+                        print(f"[+] Device {device_id} ({hostname}) linked to account '{username}'")
+
+                    save_accounts(accounts)
+
+                # Return Flutter LoginResponse
+                resp = {
+                    "type": "access_token",
+                    "access_token": access_token,
+                    "user": {
+                        "name": user["username"],
+                        "display_name": user.get("display_name", user["username"]),
+                        "avatar": "",
+                        "email": user.get("email", f"{user['username']}@audira.my.id"),
+                        "note": user.get("note", "Audira Certified Member"),
+                        "status": user.get("status", 1),
+                        "is_admin": user.get("is_admin", True)
+                    }
+                }
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(resp).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 5. CURRENT USER (POST /api/currentUser)
+        if path == "/api/currentUser":
+            uname, user = find_user_by_token(auth_header)
+            if not uname:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Session expired / Sesi tidak valid"}).encode())
+                return
+
+            try:
+                data = json.loads(body) if body else {}
+                rid = str(data.get("id", "")).strip().replace(" ", "")
+                if rid and rid in user.get("devices", {}):
+                    user["devices"][rid]["last_seen_ts"] = time.time()
+                    user["devices"][rid]["ip"] = client_ip
+                    with ACCOUNTS_LOCK:
+                        accounts = load_accounts()
+                        if uname in accounts and rid in accounts[uname].get("devices", {}):
+                            accounts[uname]["devices"][rid]["last_seen_ts"] = time.time()
+                            accounts[uname]["devices"][rid]["ip"] = client_ip
+                            save_accounts(accounts)
+            except Exception:
+                pass
+
+            resp = {
+                "name": user["username"],
+                "display_name": user.get("display_name", user["username"]),
+                "avatar": "",
+                "email": user.get("email", f"{user['username']}@audira.my.id"),
+                "note": user.get("note", "Audira Certified Member"),
+                "status": user.get("status", 1),
+                "is_admin": user.get("is_admin", True)
+            }
+
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode())
+            return
+
+        # 6. LOGOUT (POST /api/logout)
+        if path == "/api/logout":
+            token = auth_header.split(" ", 1)[1].strip() if auth_header.startswith("Bearer ") else ""
+            if token:
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    for u in accounts.values():
+                        if "tokens" in u and token in u["tokens"]:
+                            del u["tokens"][token]
+                    save_accounts(accounts)
+
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b"{}")
+            return
+
+        # 7. ADDRESS BOOK POST (POST /api/ab) — Update user tags, aliases, etc.
+        if path == "/api/ab":
+            uname, user = find_user_by_token(auth_header)
+            if not uname:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Unauthorized"}).encode())
+                return
+
+            try:
+                data = json.loads(body) if body else {}
+                ab_data_str = data.get("data", "")
+                if ab_data_str:
+                    ab_data = json.loads(ab_data_str)
+                    tags = ab_data.get("tags")
+                    peers = ab_data.get("peers", [])
+                    tag_colors_str = ab_data.get("tag_colors", "")
+
+                    with ACCOUNTS_LOCK:
+                        accounts = load_accounts()
+                        u = accounts.get(uname, user)
+                        if tags is not None:
+                            u["tags"] = tags
+                        if tag_colors_str:
+                            try:
+                                u["tag_colors"] = json.loads(tag_colors_str)
+                            except Exception:
+                                pass
+
+                        # Update aliases and tags for devices
+                        for p in peers:
+                            pid = str(p.get("id", "")).replace(" ", "")
+                            if pid in u.get("devices", {}):
+                                if "alias" in p: u["devices"][pid]["alias"] = p["alias"]
+                                if "tags" in p: u["devices"][pid]["tags"] = p["tags"]
+                                if "note" in p: u["devices"][pid]["note"] = p["note"]
+
+                        save_accounts(accounts)
+            except Exception as e:
+                print(f"[!] Error updating address book: {e}")
+
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(b"{}")
+            return
+
+        # 8. Address book personal & settings endpoints: return 404 so Flutter client activates LegacyAb mode
+        if path in ["/api/ab/personal", "/api/ab/settings", "/api/ab/shared/profiles"]:
+            self.send_response(404)
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(b"Not Found")
+            return
+
+        # 9. ADMIN ACTIONS: Terminate session
         if path == "/api/sessions/terminate":
             try:
                 data = json.loads(body) if body else {}
-                rid = str(data.get("id", "")).strip()
+                rid = str(data.get("id", "")).strip().replace(" ", "")
                 conn_id = data.get("conn_id", 0)
                 if rid:
                     with PEERS_LOCK:
@@ -345,7 +833,6 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         if conn_id:
                             DISCONNECT_QUEUE[rid].append(int(conn_id))
                         else:
-                            # Disconnect all
                             peer = ACTIVE_PEERS.get(rid, {})
                             DISCONNECT_QUEUE[rid].extend(peer.get("conns", []))
 
@@ -363,11 +850,11 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
                 return
 
-        # 5. ADMIN ACTIONS: Update device alias/group
+        # 10. ADMIN ACTIONS: Update device alias/group
         if path == "/api/devices/alias":
             try:
                 data = json.loads(body) if body else {}
-                rid = str(data.get("id", "")).strip()
+                rid = str(data.get("id", "")).strip().replace(" ", "")
                 if rid:
                     meta = load_meta()
                     entry = meta.get(rid, {})
@@ -388,13 +875,100 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
                 return
 
+        # 11. ADMIN ACTIONS: Create Account (/api/accounts/create)
+        if path == "/api/accounts/create":
+            try:
+                data = json.loads(body) if body else {}
+                uname = str(data.get("username", "")).strip()
+                pwd = str(data.get("password", "")).strip()
+                dname = str(data.get("display_name", "")).strip() or uname
+                email = str(data.get("email", "")).strip() or f"{uname}@audira.my.id"
+
+                if not uname or not pwd:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Username & Password wajib diisi"}).encode())
+                    return
+
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if uname in accounts:
+                        self.send_response(400)
+                        self.send_cors_headers()
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": f"Akun '{uname}' sudah ada"}).encode())
+                        return
+
+                    accounts[uname] = {
+                        "username": uname,
+                        "password": pwd,
+                        "display_name": dname,
+                        "email": email,
+                        "note": "Audira Managed User",
+                        "is_admin": data.get("is_admin", False),
+                        "status": 1,
+                        "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "tokens": {},
+                        "devices": {},
+                        "tags": ["My Devices", "Audira Fleet"],
+                        "tag_colors": {"My Devices": 4282557947, "Audira Fleet": 4280391411}
+                    }
+                    save_accounts(accounts)
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 12. ADMIN ACTIONS: Unlink Device from Account (/api/accounts/delete-device)
+        if path == "/api/accounts/delete-device":
+            try:
+                data = json.loads(body) if body else {}
+                uname = str(data.get("username", "")).strip()
+                dev_id = str(data.get("device_id", "")).strip().replace(" ", "")
+
+                if uname and dev_id:
+                    with ACCOUNTS_LOCK:
+                        accounts = load_accounts()
+                        if uname in accounts and dev_id in accounts[uname].get("devices", {}):
+                            del accounts[uname]["devices"][dev_id]
+                            save_accounts(accounts)
+                            print(f"[-] Unlinked device {dev_id} from account {uname}")
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
         self.send_response(404)
         self.send_cors_headers()
         self.end_headers()
         self.wfile.write(b"Not Found")
 
+
 def main():
-    print(f"[*] Starting AUDIRA Remote Desktop Heartbeat & Fleet API on port {PORT}...")
+    print(f"[*] Starting AUDIRA Remote Desktop Central Fleet & Auth API on port {PORT}...")
+    # Preload accounts
+    load_accounts()
     server = HTTPServer(("0.0.0.0", PORT), AudiraAPIHandler)
     try:
         server.serve_forever()
