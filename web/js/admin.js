@@ -77,6 +77,16 @@ function initAdminLanguage() {
 
 function checkOperatorSession() {
   const operatorEl = document.getElementById('adminTopbarOperatorName');
+  const storedUser = localStorage.getItem('audira_user');
+  if (storedUser) {
+    try {
+      const u = JSON.parse(storedUser);
+      if (operatorEl && (u.display_name || u.name)) {
+        operatorEl.textContent = `${u.display_name || u.name} (@${u.name})`;
+        return;
+      }
+    } catch (_) {}
+  }
   if (operatorEl) {
     operatorEl.textContent = 'Agus Dwi Rianto (AUDIRA)';
   }

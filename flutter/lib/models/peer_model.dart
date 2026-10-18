@@ -45,6 +45,7 @@ class Peer {
         loginName = json['loginName'] ?? '',
         device_group_name = json['device_group_name'] ?? '',
         note = json['note'] is String ? json['note'] : '',
+        online = json['online'] == true || json['online'] == 'true',
         sameServer = json['same_server'];
 
   Map<String, dynamic> toJson() {

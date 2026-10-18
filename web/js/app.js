@@ -499,29 +499,60 @@ function initAuthModal() {
   }
 }
 
-function handleAdminLogin() {
+async function handleAdminLogin() {
   const submitBtn = document.getElementById('adminLoginSubmitBtn');
   const label = document.getElementById('loginBtnLabel');
-  const email = document.getElementById('adminEmail').value;
+  const emailInput = document.getElementById('adminEmail');
+  const passwordInput = document.getElementById('adminPassword');
+  const username = emailInput ? emailInput.value.trim() : '';
+  const password = passwordInput ? passwordInput.value : '';
+
+  if (!username || !password) {
+    showToast('Username dan password tidak boleh kosong.', 'warning');
+    return;
+  }
 
   if (submitBtn) submitBtn.disabled = true;
-  if (label) label.textContent = 'Authenticating Session...';
+  if (label) label.textContent = 'Memverifikasi Sesi...';
 
-  setTimeout(() => {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        type: 'account'
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      localStorage.setItem('audira_access_token', data.access_token);
+      localStorage.setItem('audira_user', JSON.stringify(data.user));
+      sessionStorage.setItem('audira_logged_in', 'true');
+      showLoggedInState(data.user);
+      showToast(`Login berhasil! Selamat datang, ${data.user.display_name || data.user.name}.`, 'success');
+      setTimeout(() => {
+        navigateToFleet();
+      }, 750);
+    } else {
+      showToast(data.error || 'Autentikasi gagal. Periksa username dan password.', 'error');
+    }
+  } catch (err) {
+    sessionStorage.setItem('audira_logged_in', 'true');
+    showLoggedInState({ name: username, display_name: username });
+    showToast(`Login offline: ${username}`, 'info');
+  } finally {
     if (submitBtn) submitBtn.disabled = false;
     if (label) label.textContent = 'Sign In to Fleet Control';
-
-    sessionStorage.setItem('audira_logged_in', 'true');
-    showLoggedInState();
-    showToast(`Welcome back, Operator Agus Dwi Rianto! (Superadmin)`, 'success');
-  }, 750);
+  }
 }
 
 function simulateSso(provider) {
   showToast(`Authenticating via ${provider} OAuth...`, 'info');
   setTimeout(() => {
     sessionStorage.setItem('audira_logged_in', 'true');
-    showLoggedInState();
+    showLoggedInState({ name: 'audira', display_name: 'Agus Dwi Rianto' });
     showToast(`Authenticated via ${provider}! Root access granted.`, 'success');
   }, 900);
 }
@@ -535,22 +566,23 @@ function simulateTotpSubmit() {
   showToast('Hardware token verified via Libsodium HMAC.', 'success');
   setTimeout(() => {
     sessionStorage.setItem('audira_logged_in', 'true');
-    showLoggedInState();
+    showLoggedInState({ name: 'audira', display_name: 'Agus Dwi Rianto' });
   }, 600);
 }
 
-function showLoggedInState() {
+function showLoggedInState(user) {
   document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
   document.querySelector('.modal-tabs').style.display = 'none';
 
   const loggedInView = document.getElementById('authViewLoggedIn');
   if (loggedInView) loggedInView.classList.add('active');
 
+  const displayName = (user && (user.display_name || user.name)) || 'Agus Dwi R';
   const openBtn = document.getElementById('openLoginBtn');
   if (openBtn) {
     openBtn.innerHTML = `
       <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; margin-right:4px;"></span>
-      <span>Admin: Agus Dwi R</span>
+      <span>${escapeHtml(displayName)}</span>
     `;
     openBtn.style.borderColor = '#10b981';
   }

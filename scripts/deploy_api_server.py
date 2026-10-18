@@ -14,6 +14,10 @@ sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\nginx.conf', '/home/audira/projects/audi
 print("[*] Uploading docker-compose.yml...")
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\docker-compose.yml', '/home/audira/projects/audira-remote-desktop/docker-compose.yml')
 
+print("[*] Uploading web/js/app.js and admin.js...")
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\js\app.js', '/home/audira/projects/audira-remote-desktop/web/js/app.js')
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\js\admin.js', '/home/audira/projects/audira-remote-desktop/web/js/admin.js')
+
 # Write service file to /tmp/audira-api.service
 service_unit = """[Unit]
 Description=AUDIRA Remote Desktop Fleet & Heartbeat API

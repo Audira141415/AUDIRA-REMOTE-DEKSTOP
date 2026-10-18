@@ -231,7 +231,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept-Encoding")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept-Encoding, X-Requested-With, Cache-Control")
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -284,14 +284,17 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 with PEERS_LOCK:
                     lp = ACTIVE_PEERS.get(clean_id, {})
                 
-                alias = d.get("alias") or lp.get("hostname") or d.get("hostname") or f"PC-{clean_id[-4:]}"
-                hostname = lp.get("hostname") or d.get("hostname") or f"PC-{clean_id[-4:]}"
-                username = lp.get("username") or d.get("username") or "User"
                 os_str = lp.get("os") or d.get("os") or "Windows"
                 platform = "Windows"
                 if "linux" in os_str.lower(): platform = "Linux"
-                elif "mac" in os_str.lower(): platform = "macOS"
+                elif "mac" in os_str.lower() or "darwin" in os_str.lower(): platform = "macOS"
                 elif "android" in os_str.lower(): platform = "Android"
+                elif "ios" in os_str.lower(): platform = "iOS"
+
+                is_mobile_dev = platform in ["Android", "iOS"]
+                alias = d.get("alias") or lp.get("hostname") or d.get("hostname") or (f"Phone-{clean_id[-4:]}" if is_mobile_dev else f"PC-{clean_id[-4:]}")
+                hostname = lp.get("hostname") or d.get("hostname") or (f"Phone-{clean_id[-4:]}" if is_mobile_dev else f"PC-{clean_id[-4:]}")
+                username = lp.get("username") or d.get("username") or ("Mobile User" if is_mobile_dev else "User")
 
                 peers_list.append({
                     "id": clean_id,
@@ -652,9 +655,24 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         with PEERS_LOCK:
                             lp = ACTIVE_PEERS.get(device_id, {})
 
-                        hostname = device_info.get("hostname") or lp.get("hostname") or data.get("hostname") or f"PC-{device_id[-4:]}"
-                        dev_username = device_info.get("username") or lp.get("username") or data.get("username") or "User"
-                        os_str = device_info.get("os") or lp.get("os") or data.get("os") or "Windows / Desktop"
+                        raw_os = str(device_info.get("os") or lp.get("os") or data.get("os") or "Windows / Desktop")
+                        if "android" in raw_os.lower():
+                            os_str = "Android Mobile"
+                        elif "ios" in raw_os.lower():
+                            os_str = "iOS Mobile"
+                        elif "windows" in raw_os.lower():
+                            os_str = "Windows Desktop"
+                        elif "mac" in raw_os.lower() or "darwin" in raw_os.lower():
+                            os_str = "macOS Desktop"
+                        elif "linux" in raw_os.lower():
+                            os_str = "Linux Workstation"
+                        else:
+                            os_str = raw_os
+
+                        is_mobile = "Mobile" in os_str
+                        default_fallback = f"Phone-{device_id[-4:]}" if is_mobile else f"PC-{device_id[-4:]}"
+                        hostname = device_info.get("hostname") or device_info.get("name") or lp.get("hostname") or data.get("hostname") or default_fallback
+                        dev_username = device_info.get("username") or lp.get("username") or data.get("username") or ("Mobile User" if is_mobile else "User")
 
                         user["devices"][device_id] = {
                             "id": device_id,
