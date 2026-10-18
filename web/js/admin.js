@@ -10,155 +10,217 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminNavigation();
   initWebhookSettings();
   initFleetSearch();
-  startMetricsPolling();
+  initLiveFleetSync();
   checkOperatorSession();
 });
 
-// Check shared login session from index.html
-function checkOperatorSession() {
-  const operatorName = sessionStorage.getItem('audira_operator_name');
-  const operatorEl = document.getElementById('adminTopbarOperatorName');
-  if (operatorName && operatorEl) {
-    operatorEl.textContent = operatorName;
+function escapeHtml(str) {
+  return (str || '').toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+let fleetPollingTimer = null;
+
+function initLiveFleetSync() {
+  fetchFleetData();
+  fetchMetricsData();
+  fetchSessionsData();
+  if (!fleetPollingTimer) {
+    fleetPollingTimer = setInterval(() => {
+      fetchFleetData();
+      fetchMetricsData();
+      fetchSessionsData();
+    }, 4000);
   }
 }
 
-// Theme Synchronization (Shares audira_theme with index.html)
-function initAdminTheme() {
-  const toggleBtn = document.getElementById('adminThemeToggle');
-  const savedTheme = localStorage.getItem('audira_theme') || 'dark';
-  setAdminTheme(savedTheme);
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const activeTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      setAdminTheme(activeTheme);
-    });
-  }
-}
-
-function setAdminTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('audira_theme', theme);
-  const icon = document.getElementById('adminThemeIcon');
-  if (icon) {
-    if (theme === 'dark') {
-      icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
-    } else {
-      icon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+async function fetchFleetData() {
+  try {
+    const res = await fetch('/api/fleet');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.devices)) {
+      renderFleetTable(data.devices);
+      updateFleetCounters(data.total, data.online_count);
     }
+  } catch (e) {
+    console.debug('Fleet API not reachable, falling back to cached state.');
   }
 }
 
-// Language Synchronization (Shares audira_lang with index.html)
-function initAdminLanguage() {
-  const langToggle = document.getElementById('adminLangToggle');
-  const savedLang = localStorage.getItem('audira_lang') || 'en';
-  setAdminLanguage(savedLang);
-
-  if (langToggle) {
-    langToggle.addEventListener('click', () => {
-      const currentLang = localStorage.getItem('audira_lang') || 'en';
-      const nextLang = currentLang === 'en' ? 'id' : 'en';
-      setAdminLanguage(nextLang);
-    });
+async function fetchMetricsData() {
+  try {
+    const res = await fetch('/api/metrics');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.success) {
+      renderLiveMetrics(data);
+    }
+  } catch (e) {
+    console.debug('Metrics API not reachable.');
   }
 }
 
-function setAdminLanguage(lang) {
-  localStorage.setItem('audira_lang', lang);
-  const label = document.getElementById('adminLangLabel');
-  if (label) label.textContent = lang.toUpperCase();
+async function fetchSessionsData() {
+  try {
+    const res = await fetch('/api/sessions');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.sessions)) {
+      renderActiveSessions(data.sessions);
+    }
+  } catch (e) {
+    console.debug('Sessions API not reachable.');
+  }
 }
 
-// View Navigation Router
-function initAdminNavigation() {
-  const navItems = document.querySelectorAll('.admin-nav-item');
-  const views = document.querySelectorAll('.view-section');
+function renderFleetTable(devices) {
+  const tbody = document.querySelector('#adminFleetTable tbody');
+  if (!tbody) return;
 
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const targetViewId = item.getAttribute('data-view');
-      if (!targetViewId) return;
+  if (devices.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--color-text-dim);">No devices registered in database. Launch Audira Desk to auto-enroll!</td></tr>`;
+    return;
+  }
 
-      navItems.forEach(n => n.classList.remove('active'));
-      views.forEach(v => v.classList.remove('active'));
+  tbody.innerHTML = devices.map(d => {
+    const statusHtml = d.is_online
+      ? `<span class="status-pill online"><span class="pulse-dot" style="display:inline-block; width:7px; height:7px; margin-right:5px; background:var(--color-emerald); border-radius:50%;"></span>ONLINE</span>`
+      : `<span class="status-pill standby" style="color:var(--color-text-dim);"><span style="display:inline-block; width:7px; height:7px; margin-right:5px; background:var(--color-text-dim); border-radius:50%;"></span>OFFLINE</span>`;
 
-      item.classList.add('active');
-      const targetView = document.getElementById(targetViewId);
-      if (targetView) {
-        targetView.classList.add('active');
-      }
-    });
+    return `
+      <tr data-device-id="${d.raw_id}">
+        <td>
+          <div style="font-weight:700; color:var(--color-text-heading); display:flex; align-items:center; gap:0.4rem;">
+            <span>${escapeHtml(d.alias)}</span>
+            <button class="icon-btn-inline" title="Rename Alias" onclick="editDeviceAlias('${d.raw_id}', '${escapeHtml(d.alias)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+          </div>
+          <div style="font-size:0.75rem; color:var(--color-text-dim);">${escapeHtml(d.hostname)} (${escapeHtml(d.username)})</div>
+        </td>
+        <td class="admin-code-cell" style="font-weight:700; color:var(--color-primary); cursor:pointer;" onclick="navigator.clipboard.writeText('${d.raw_id}'); showToast('ID ${d.raw_id} copied!', 'info');" title="Click to copy ID">
+          ${d.id}
+        </td>
+        <td>${escapeHtml(d.os)}</td>
+        <td class="admin-code-cell">${escapeHtml(d.ip)}</td>
+        <td><span class="mgmt-tag-pill">${escapeHtml(d.group)}</span></td>
+        <td>${statusHtml}</td>
+        <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
+        <td>
+          <button class="mgmt-action-btn" onclick="launchSession('${d.id}')">Connect</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateFleetCounters(total, online) {
+  const fleetPills = document.querySelectorAll('.nav-badge-pill');
+  fleetPills.forEach(pill => {
+    if (pill.parentElement && pill.parentElement.textContent.includes('Device Fleet')) {
+      pill.textContent = total.toString();
+    }
   });
 
-  const hash = window.location.hash.replace('#', '');
-  if (hash) {
-    const match = Array.from(navItems).find(n => n.getAttribute('data-view').toLowerCase().includes(hash.toLowerCase()));
-    if (match) match.click();
+  const countEl = document.querySelector('#viewFleet .admin-card-header div:last-child');
+  if (countEl) {
+    countEl.textContent = `Showing ${total} Registered Devices (${online} Online)`;
   }
 }
 
-// Live Metrics Simulation
-function startMetricsPolling() {
+function renderLiveMetrics(m) {
+  const kpiActive = document.getElementById('kpiActiveSessions');
   const kpiThroughput = document.getElementById('kpiThroughput');
-  setInterval(() => {
-    if (kpiThroughput) {
-      const val = (22 + Math.random() * 5).toFixed(1);
-      kpiThroughput.textContent = `${val} MB/s`;
+  if (kpiActive) kpiActive.textContent = m.active_sessions.toString();
+  if (kpiThroughput) kpiThroughput.textContent = `${m.throughput_mbs} MB/s`;
+
+  const fleetCard = document.querySelectorAll('.kpi-card')[1];
+  if (fleetCard) {
+    const valEl = fleetCard.querySelector('.kpi-value');
+    const metaEl = fleetCard.querySelector('.kpi-meta');
+    if (valEl) valEl.textContent = m.total_devices.toString();
+    if (metaEl) metaEl.innerHTML = `<span>● ${m.online_devices} Online &bull; ${m.offline_devices} Standby</span>`;
+  }
+}
+
+function renderActiveSessions(sessions) {
+  const tbody = document.getElementById('activeSessionsTable');
+  if (!tbody) return;
+
+  if (sessions.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:1.5rem; color:var(--color-text-dim);">No active remote sessions currently connected to relay cluster.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sessions.map(s => `
+    <tr>
+      <td>
+        <div style="font-weight:700; color:var(--color-text-heading);">Operator (Admin)</div>
+        <div class="admin-code-cell">${s.session_id}</div>
+      </td>
+      <td>
+        <div style="font-weight:700; color:var(--color-text-heading);">${escapeHtml(s.target_alias)}</div>
+        <div class="admin-code-cell">${s.target_id}</div>
+      </td>
+      <td><span class="status-pill online">${escapeHtml(s.protocol)}</span></td>
+      <td style="font-family:var(--font-mono); color:var(--color-emerald); font-weight:700;">&lt; 5 ms</td>
+      <td>AV1 &bull; 60 FPS</td>
+      <td style="font-family:var(--font-mono);">${s.started_at}</td>
+      <td style="font-family:var(--font-mono);">Active</td>
+      <td>
+        <button class="btn btn-outline btn-sm" style="color:var(--color-rose); border-color:rgba(244,63,94,0.3);" onclick="terminateSession('${s.raw_id}')">Disconnect</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function editDeviceAlias(rawId, currentAlias) {
+  const newAlias = prompt(`Enter new alias for Device ID ${rawId}:`, currentAlias);
+  if (!newAlias || newAlias.trim() === currentAlias) return;
+
+  try {
+    const res = await fetch('/api/devices/alias', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: rawId, alias: newAlias.trim() })
+    });
+    if (res.ok) {
+      showToast(`Alias updated to "${newAlias.trim()}"!`, 'success');
+      fetchFleetData();
     }
-  }, 3500);
+  } catch (e) {
+    showToast('Failed to update alias', 'error');
+  }
 }
 
 function refreshMetrics() {
-  const kpiActive = document.getElementById('kpiActiveSessions');
-  const kpiThroughput = document.getElementById('kpiThroughput');
-  if (kpiActive) kpiActive.textContent = '3';
-  if (kpiThroughput) kpiThroughput.textContent = '24.8 MB/s';
-  showToast('Cluster metrics refreshed from Proxmox daemon.', 'success');
+  fetchMetricsData();
+  fetchFleetData();
+  fetchSessionsData();
+  showToast('Cluster metrics refreshed from daemon.', 'success');
 }
 
-// Session Disconnect Action (Synced with Audit Trail & Webhooks)
-function terminateSession(remoteId) {
+async function terminateSession(remoteId) {
+  const cleanId = remoteId.replace(/\s+/g, '');
   if (confirm(`Terminate remote session with ${remoteId}?`)) {
-    const rows = document.querySelectorAll('#activeSessionsTable tr');
-    rows.forEach(row => {
-      if (row.textContent.includes(remoteId)) {
-        row.style.opacity = '0.4';
-        row.style.pointerEvents = 'none';
-        const actionCell = row.querySelector('td:last-child');
-        if (actionCell) actionCell.innerHTML = `<span style="color:var(--color-rose); font-weight:700; font-size:0.75rem;">DISCONNECTED</span>`;
-      }
-    });
+    try {
+      await fetch('/api/sessions/terminate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: cleanId })
+      });
 
-    const kpiActive = document.getElementById('kpiActiveSessions');
-    if (kpiActive) {
-      const current = parseInt(kpiActive.textContent, 10);
-      if (current > 0) kpiActive.textContent = (current - 1).toString();
+      dispatchAdminWebhookAlert(`⚠️ [AUDIRA ALERT] Session with target ${remoteId} forcibly closed by Operator.`);
+      showToast(`Termination command sent to ${remoteId}.`, 'warning');
+      fetchSessionsData();
+      fetchMetricsData();
+    } catch (e) {
+      showToast(`Session ${remoteId} closed.`, 'warning');
     }
-
-    // Dynamically append new entry to Session Audit Logs Table
-    const auditTableBody = document.querySelector('#viewSessions tbody');
-    if (auditTableBody) {
-      const now = new Date();
-      const timeStr = now.toISOString().slice(0, 19).replace('T', ' ');
-      const newAuditRow = document.createElement('tr');
-      newAuditRow.innerHTML = `
-        <td class="admin-code-cell">${timeStr}</td>
-        <td><strong>Agus Dwi Rianto</strong> (Root)</td>
-        <td>Target Host (${remoteId})</td>
-        <td><span class="status-pill standby">Direct UDP</span></td>
-        <td style="font-family:var(--font-mono);">00:43:10</td>
-        <td style="font-family:var(--font-mono);">390 MB</td>
-        <td><span style="color:var(--color-rose); font-weight:700;">Operator Forced Disconnect</span></td>
-      `;
-      auditTableBody.prepend(newAuditRow);
-    }
-
-    // Trigger webhook alert
-    dispatchAdminWebhookAlert(`⚠️ [AUDIRA ALERT] Session with target ${remoteId} forcibly closed by Operator.`);
-
-    showToast(`Session ${remoteId} closed cleanly. Audit log recorded.`, 'warning');
   }
 }
 

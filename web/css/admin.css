@@ -643,3 +643,20 @@ body.admin-body {
   padding: 0.35rem 0.65rem;
   font-size: 0.75rem;
 }
+
+.icon-btn-inline {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-dim);
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.icon-btn-inline:hover {
+  color: var(--color-primary);
+  background: rgba(0, 240, 255, 0.1);
+}
