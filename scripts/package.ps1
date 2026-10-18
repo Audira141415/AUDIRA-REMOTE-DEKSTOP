@@ -53,13 +53,17 @@ if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
     if (Test-Path $builtExe) {
         Copy-Item -Path $builtExe -Destination $standaloneExe -Force
         Copy-Item -Path $builtExe -Destination $rootExe -Force
+        Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force
+        Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force
         Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
-# Salin juga ke root jika belum
+# Salin juga ke root dan semua file dist jika belum
 if (Test-Path $standaloneExe) {
     Copy-Item -Path $standaloneExe -Destination $rootExe -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force -ErrorAction SilentlyContinue
 }
 
 Write-Host "==============================================================================" -ForegroundColor Green
