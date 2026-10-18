@@ -18,15 +18,24 @@ Write-Host ""
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
     Write-Host "[UAC] Hak akses Administrator diperlukan untuk menginstal ke Program Files & Service Windows." -ForegroundColor Yellow
-    Write-Host "Meminta elevasi Administrator..." -ForegroundColor Gray
+    Write-Host "Membuka prompt persetujuan Administrator (UAC)..." -ForegroundColor Gray
     
     $argsList = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     if ($Silent) { $argsList += " -Silent" }
     if ($ServiceOnly) { $argsList += " -ServiceOnly" }
     if ($Gui) { $argsList += " -Gui" }
     
-    Start-Process -FilePath "powershell.exe" -ArgumentList $argsList -Verb RunAs
-    exit 0
+    try {
+        Start-Process -FilePath "powershell.exe" -ArgumentList $argsList -Verb RunAs
+        exit 0
+    } catch {
+        Write-Host ""
+        Write-Host "[ERROR] Gagal meminta elevasi otomatis: $_" -ForegroundColor Red
+        Write-Host "Silakan klik kanan pada 'install.bat' dan pilih 'Run as administrator'." -ForegroundColor Yellow
+        Write-Host ""
+        Read-Host "Tekan Enter untuk keluar..."
+        exit 1
+    }
 }
 
 $rootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
@@ -60,7 +69,7 @@ if (-not $srcExe) {
 
 Write-Host "[INFO] Menggunakan executable sumber: $srcExe" -ForegroundColor Green
 $exeSizeMB = [math]::Round((Get-Item $srcExe).Length / 1MB, 2)
-Write-Host "       Ukuran binary mandiri: $exeSizeMB MB (Sangat ringan, bukan 15 GB!)" -ForegroundColor Gray
+Write-Host "       Ukuran binary mandiri: $exeSizeMB MB" -ForegroundColor Gray
 Write-Host ""
 
 # 3. Mode Menu Interaktif jika tidak ada flag switch
@@ -88,20 +97,50 @@ switch ($choice) {
         Write-Host ""
         Write-Host "=== Memulai Instalasi Sistem Audira Desk ===" -ForegroundColor Cyan
         
-        # A. Buat Direktori Instalasi
+        # A. Buat Direktori Instalasi C:\Program Files\Audira Desk
         if (-not (Test-Path $InstallPath)) {
-            Write-Host "[1/6] Membuat folder: $InstallPath..." -ForegroundColor Gray
+            Write-Host "[1/7] Membuat folder: $InstallPath..." -ForegroundColor Gray
             New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
         }
         
         # B. Hentikan proses yang berjalan sebelum menimpa file
-        Write-Host "[2/6] Memeriksa & menghentikan proses Audira Desk yang aktif..." -ForegroundColor Gray
+        Write-Host "[2/7] Memeriksa & menghentikan proses Audira Desk yang aktif..." -ForegroundColor Gray
         & (Join-Path $PSScriptRoot "stop.ps1") | Out-Null
         
-        # C. Salin Executable dan Runtime DLL
-        Write-Host "[3/6] Menyalin file aplikasi ke $InstallPath..." -ForegroundColor Gray
+        # C. Salin Seluruh Bundel Runtime Lengkap (Engine, Plugins, DLL, Drivers)
+        Write-Host "[3/7] Menyalin seluruh berkas aplikasi ke $InstallPath..." -ForegroundColor Gray
+        $bundleSources = @(
+            "C:\Program Files\RustDesk",
+            "$env:LOCALAPPDATA\audiradesk",
+            (Join-Path $rootDir "dist\audira_payload")
+        )
+        
+        $bundleCopied = $false
+        foreach ($bSrc in $bundleSources) {
+            if (Test-Path $bSrc) {
+                Write-Host "      Menyalin runtime bundle dari: $bSrc" -ForegroundColor Gray
+                Copy-Item -Path "$bSrc\*" -Destination $InstallPath -Recurse -Force
+                $bundleCopied = $true
+                break
+            }
+        }
+        
+        # Pastikan AudiraDesk.exe utama disalin
         $destExe = Join-Path $InstallPath "AudiraDesk.exe"
-        Copy-Item -Path $srcExe -Destination $destExe -Force
+        if (Test-Path $srcExe) {
+            Copy-Item -Path $srcExe -Destination $destExe -Force
+        }
+        
+        # Bersihkan direktori legacy C:\Program Files\RustDesk jika ada
+        $legacyDir = "C:\Program Files\RustDesk"
+        if ((Test-Path $legacyDir) -and ($InstallPath -ne $legacyDir)) {
+            Write-Host "      Membersihkan direktori sisa instalasi lama di $legacyDir..." -ForegroundColor Gray
+            Remove-Item -Path $legacyDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+        
+        # Hapus shortcut uninstall lama jika ikut tersalin
+        $legacyLnk = Join-Path $InstallPath "Uninstall RustDesk.lnk"
+        if (Test-Path $legacyLnk) { Remove-Item -Path $legacyLnk -Force -ErrorAction SilentlyContinue }
         
         $srcSciter = Join-Path $rootDir "sciter.dll"
         if (Test-Path $srcSciter) {
@@ -109,7 +148,7 @@ switch ($choice) {
         }
         
         # D. Daftarkan Service Background Windows
-        Write-Host "[4/6] Mendaftarkan Windows Background Service..." -ForegroundColor Gray
+        Write-Host "[4/7] Mendaftarkan Windows Background Service..." -ForegroundColor Gray
         try {
             $serviceProcess = Start-Process -FilePath $destExe -ArgumentList "--install-service" -Wait -PassThru -NoNewWindow
             Write-Host "      Service terdaftar dengan kode keluar: $($serviceProcess.ExitCode)" -ForegroundColor Green
@@ -118,7 +157,7 @@ switch ($choice) {
         }
         
         # E. Buat Desktop & Start Menu Shortcut
-        Write-Host "[5/6] Membuat pintasan (Shortcut) Desktop & Start Menu..." -ForegroundColor Gray
+        Write-Host "[5/7] Membuat pintasan (Shortcut) Desktop & Start Menu..." -ForegroundColor Gray
         try {
             $wshShell = New-Object -ComObject WScript.Shell
             
@@ -140,7 +179,7 @@ switch ($choice) {
             $menuShortcut.Description = "Audira Desk Remote Desktop Client"
             $menuShortcut.Save()
             
-            Write-Host "      Pintasan berhasil dibuat!" -ForegroundColor Green
+            Write-Host "      Pintasan 'Audira Desk' berhasil dibuat di Desktop & Start Menu!" -ForegroundColor Green
         } catch {
             Write-Host "      [WARN] Gagal membuat pintasan: $_" -ForegroundColor Yellow
         }
@@ -157,34 +196,42 @@ switch ($choice) {
             Write-Host "      [WARN] Gagal mengatur firewall: $_" -ForegroundColor Yellow
         }
         
-        # G. Daftarkan Entri Windows Add/Remove Programs (EstimatedSize Akurat ~41 MB)
+        # G. Daftarkan Entri Windows Add/Remove Programs & Bersihkan Registry Lama
         Write-Host "[7/7] Mendaftarkan informasi aplikasi ke Windows Registry..." -ForegroundColor Gray
         try {
+            # Bersihkan registry lama RustDesk
+            $oldUninstallKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk"
+            if (Test-Path $oldUninstallKey) {
+                Remove-Item -Path $oldUninstallKey -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            
             $uninstallKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Audira Desk"
             if (-not (Test-Path $uninstallKey)) { New-Item -Path $uninstallKey -Force | Out-Null }
             Set-ItemProperty -Path $uninstallKey -Name "DisplayName" -Value "Audira Desk"
-            Set-ItemProperty -Path $uninstallKey -Name "DisplayVersion" -Value "1.5.0"
-            Set-ItemProperty -Path $uninstallKey -Name "Publisher" -Value "Audira Desk"
+            Set-ItemProperty -Path $uninstallKey -Name "DisplayVersion" -Value "1.5.1"
+            Set-ItemProperty -Path $uninstallKey -Name "Publisher" -Value "AUDIRA (Agus Dwi R)"
             Set-ItemProperty -Path $uninstallKey -Name "DisplayIcon" -Value "$destExe,0"
             Set-ItemProperty -Path $uninstallKey -Name "InstallLocation" -Value $InstallPath
             Set-ItemProperty -Path $uninstallKey -Name "UninstallString" -Value "`"$destExe`" --uninstall"
             $installedSizeKB = [math]::Round(((Get-ChildItem -Path $InstallPath -Recurse -File | Measure-Object -Property Length -Sum).Sum) / 1KB)
             Set-ItemProperty -Path $uninstallKey -Name "EstimatedSize" -Value $installedSizeKB -Type DWord
-            Write-Host "      Ukuran terdaftar di Windows: $([math]::Round($installedSizeKB / 1024, 2)) MB (Sangat ringan seperti AnyDesk!)" -ForegroundColor Green
+            Write-Host "      Registrasi sistem berhasil: Audira Desk terdaftar resmi di Windows Apps!" -ForegroundColor Green
         } catch {
             Write-Host "      [WARN] Gagal mendaftarkan registry program: $_" -ForegroundColor Yellow
         }
         
         Write-Host ""
         Write-Host "==============================================================================" -ForegroundColor Green
-        Write-Host "    [SUKSES] Audira Desk Berhasil Diinstal di Komputer Ini!                   " -ForegroundColor Green
+        Write-Host "    [SUKSES] Audira Desk Berhasil Diinstal di C:\Program Files\Audira Desk!  " -ForegroundColor Green
         Write-Host "    Lokasi: $destExe                                                          " -ForegroundColor White
         Write-Host "==============================================================================" -ForegroundColor Green
         Write-Host ""
         
-        $launchNow = Read-Host "Apakah Anda ingin meluncurkan Audira Desk sekarang? [Y/n]"
-        if ($launchNow -eq "" -or $launchNow -match "^[yY]") {
-            Start-Process -FilePath $destExe
+        if (-not $Silent) {
+            $launchNow = Read-Host "Apakah Anda ingin meluncurkan Audira Desk sekarang? [Y/n]"
+            if ($launchNow -eq "" -or $launchNow -match "^[yY]") {
+                Start-Process -FilePath $destExe
+            }
         }
     }
     
@@ -212,6 +259,9 @@ switch ($choice) {
         # Bersihkan Registry dan Shortcut yang tersisa
         $uninstallKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Audira Desk"
         if (Test-Path $uninstallKey) { Remove-Item -Path $uninstallKey -Recurse -Force -ErrorAction SilentlyContinue }
+        
+        $oldUninstallKey = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk"
+        if (Test-Path $oldUninstallKey) { Remove-Item -Path $oldUninstallKey -Recurse -Force -ErrorAction SilentlyContinue }
         
         $desktopLnk = Join-Path ([Environment]::GetFolderPath("CommonDesktopDirectory")) "Audira Desk.lnk"
         if (Test-Path $desktopLnk) { Remove-Item -Path $desktopLnk -Force -ErrorAction SilentlyContinue }
