@@ -520,6 +520,20 @@ class _ConnectionPageState extends State<ConnectionPage>
               child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 SizedBox(
                   height: 28.0,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    icon: const Icon(Icons.folder_shared_outlined, size: 14),
+                    onPressed: () {
+                      onConnect(isFileTransfer: true);
+                    },
+                    label: Text(translate("Transfer file")),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  height: 28.0,
                   child: ElevatedButton(
                     onPressed: () {
                       onConnect();

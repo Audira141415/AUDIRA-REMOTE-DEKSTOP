@@ -225,23 +225,53 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                     ),
                   ),
                   Flexible(
-                    child: GestureDetector(
-                      onDoubleTap: () {
-                        Clipboard.setData(
-                            ClipboardData(text: model.serverId.text));
-                        showToast(translate("Copied"));
-                      },
-                      child: TextFormField(
-                        controller: model.serverId,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onDoubleTap: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: model.serverId.text));
+                              showToast(translate("Copied"));
+                            },
+                            child: TextFormField(
+                              controller: model.serverId,
+                              readOnly: true,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                contentPadding:
+                                    EdgeInsets.only(top: 10, bottom: 10),
+                              ),
+                              style: const TextStyle(
+                                fontSize: 22,
+                              ),
+                            ).workaroundFreezeLinuxMint(),
+                          ),
                         ),
-                        style: TextStyle(
-                          fontSize: 22,
+                        Tooltip(
+                          message: translate("Copy"),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(15),
+                            onTap: () {
+                              Clipboard.setData(
+                                  ClipboardData(text: model.serverId.text));
+                              showToast(translate("Copied"));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                size: 18,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.color
+                                    ?.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
                         ),
-                      ).workaroundFreezeLinuxMint(),
+                      ],
                     ),
                   )
                 ],
