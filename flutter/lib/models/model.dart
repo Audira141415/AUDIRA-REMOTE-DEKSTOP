@@ -1624,6 +1624,7 @@ class FfiModel with ChangeNotifier {
     d.y = evt['y']?.toDouble() ?? d.y;
     d.width = evt['width'] ?? d.width;
     d.height = evt['height'] ?? d.height;
+    d.name = evt['name']?.toString() ?? '';
     d.cursorEmbedded = evt['cursor_embedded'] == 1;
     d.originalWidth = evt['original_width'] ?? kInvalidResolutionValue;
     d.originalHeight = evt['original_height'] ?? kInvalidResolutionValue;
@@ -4444,6 +4445,7 @@ class Display {
   double y = 0;
   int width = 0;
   int height = 0;
+  String name = '';
   bool cursorEmbedded = false;
   int originalWidth = kInvalidResolutionValue;
   int originalHeight = kInvalidResolutionValue;
