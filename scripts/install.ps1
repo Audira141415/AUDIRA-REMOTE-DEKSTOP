@@ -156,18 +156,44 @@ switch ($choice) {
             Write-Host "      [WARN] Gagal mendaftarkan service langsung: $_" -ForegroundColor Yellow
         }
         
-        # E. Buat Desktop & Start Menu Shortcut
+        # E. Buat Desktop & Start Menu Shortcut di Semua Lokasi (Public, User, OneDrive)
         Write-Host "[5/7] Membuat pintasan (Shortcut) Desktop & Start Menu..." -ForegroundColor Gray
         try {
             $wshShell = New-Object -ComObject WScript.Shell
             
-            # Desktop Shortcut
-            $desktopPath = [Environment]::GetFolderPath("CommonDesktopDirectory")
-            $desktopShortcut = $wshShell.CreateShortcut((Join-Path $desktopPath "Audira Desk.lnk"))
-            $desktopShortcut.TargetPath = $destExe
-            $desktopShortcut.WorkingDirectory = $InstallPath
-            $desktopShortcut.Description = "Audira Desk Remote Desktop Client"
-            $desktopShortcut.Save()
+            # Kumpulkan semua kemungkinan lokasi Desktop pengguna
+            $desktopLocations = @(
+                [Environment]::GetFolderPath("CommonDesktopDirectory"),
+                [Environment]::GetFolderPath("Desktop")
+            )
+            
+            # Cek jika pengguna memakai OneDrive Desktop
+            $oneDriveDesktop = Join-Path $env:USERPROFILE "OneDrive\Desktop"
+            if (Test-Path $oneDriveDesktop) {
+                $desktopLocations += $oneDriveDesktop
+            }
+            
+            # Cari juga folder Desktop di setiap profil user C:\Users\*
+            $userFolders = Get-ChildItem "C:\Users" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -notin @("Public", "Default", "All Users") }
+            foreach ($u in $userFolders) {
+                $uDesktop = Join-Path $u.FullName "Desktop"
+                if (Test-Path $uDesktop) { $desktopLocations += $uDesktop }
+                $uOneDriveDesktop = Join-Path $u.FullName "OneDrive\Desktop"
+                if (Test-Path $uOneDriveDesktop) { $desktopLocations += $uOneDriveDesktop }
+            }
+            
+            # Buat shortcut di setiap lokasi desktop yang valid
+            $desktopLocations = $desktopLocations | Select-Object -Unique
+            foreach ($dLoc in $desktopLocations) {
+                if (Test-Path $dLoc) {
+                    $shortcutFile = Join-Path $dLoc "Audira Desk.lnk"
+                    $desktopShortcut = $wshShell.CreateShortcut($shortcutFile)
+                    $desktopShortcut.TargetPath = $destExe
+                    $desktopShortcut.WorkingDirectory = $InstallPath
+                    $desktopShortcut.Description = "Audira Desk Remote Desktop Client"
+                    $desktopShortcut.Save()
+                }
+            }
             
             # Start Menu Shortcut
             $startMenuPrograms = [Environment]::GetFolderPath("CommonPrograms")
