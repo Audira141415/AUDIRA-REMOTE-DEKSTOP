@@ -34,14 +34,14 @@ class OnlineStatusWidget extends StatefulWidget {
 /// State for the connection page.
 class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   final _svcStopped = Get.find<RxBool>(tag: 'stop-service');
-  final _svcIsUsingPublicServer = true.obs;
+  final _svcIsUsingPublicServer = false.obs;
   Timer? _updateTimer;
 
   double get em => 14.0;
   double? get height => bind.isIncomingOnly() ? null : em * 3;
 
   void onUsePublicServerGuide() {
-    const url = "https://rustdesk.com/pricing";
+    const url = "http://192.168.100.175:5050";
     canLaunchUrlString(url).then((can) {
       if (can) {
         launchUrlString(url);
@@ -180,7 +180,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
     } else {
       stateGlobal.svcStatus.value = SvcStatus.notReady;
     }
-    _svcIsUsingPublicServer.value = await bind.mainIsUsingPublicServer();
+    _svcIsUsingPublicServer.value = false;
     try {
       stateGlobal.videoConnCount.value = status['video_conn_count'] as int;
     } catch (_) {}
