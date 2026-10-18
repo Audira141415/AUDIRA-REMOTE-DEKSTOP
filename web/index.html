@@ -46,6 +46,7 @@
           <li><a href="#comparison" class="nav-link" data-i18n="navComparison">Compare</a></li>
           <li><a href="#selfhost" class="nav-link" data-i18n="navSelfHost">Self-Hosting</a></li>
           <li><a href="#latency" class="nav-link" data-i18n="navLatency">Latency</a></li>
+          <li><a href="#pricing" class="nav-link" data-i18n="navPricing">Pricing</a></li>
           <li><a href="#downloads" class="nav-link" data-i18n="navDownloads">Downloads</a></li>
           <li><a href="#faq" class="nav-link" data-i18n="navFaq">FAQ</a></li>
         </ul>
@@ -726,6 +727,329 @@
             </div>
             <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">eu-relay.audira.net</div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing & Edition Matrix (RustDesk Pro / Community Model) -->
+  <section id="pricing" class="section" style="border-top:1px solid var(--color-border);">
+    <div class="container">
+      <div class="section-tag" data-i18n="tagPricing">Licensing & Plans</div>
+      <h2 class="section-title" data-i18n="titlePricing">Transparent Pricing. Zero Hidden Fees.</h2>
+      <p class="section-desc" data-i18n="descPricing">
+        From 100% free open-source self-hosting to enterprise centralized fleet control. Compare plans tailored to your infrastructure.
+      </p>
+
+      <!-- Billing Toggle -->
+      <div class="pricing-toggle-wrap">
+        <span class="pricing-toggle-label" id="pricingMonthlyLabel" data-i18n="lblMonthly">Monthly</span>
+        <label class="pricing-toggle-switch">
+          <input type="checkbox" id="pricingBillingToggle" checked>
+          <span class="pricing-slider"></span>
+        </label>
+        <span class="pricing-toggle-label active" id="pricingAnnualLabel">
+          <span data-i18n="lblAnnual">Annual</span>
+          <span class="pricing-save-badge" data-i18n="badgeSave">SAVE 20%</span>
+        </span>
+      </div>
+
+      <!-- 4-Tier Pricing Grid -->
+      <div class="pricing-grid">
+        <!-- Tier 1: Free Community OSS -->
+        <div class="pricing-card">
+          <div class="pricing-card-header">
+            <div class="pricing-tier-tag" data-i18n="tierFreeTag">OPEN SOURCE</div>
+            <h3 class="pricing-title" data-i18n="tierFreeTitle">Community Free</h3>
+            <p class="pricing-subtitle" data-i18n="tierFreeSub">For individuals, homelabs & tech enthusiasts managing their own relay.</p>
+            <div class="pricing-price-wrap">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-amount">0</span>
+              <span class="pricing-period">/ forever</span>
+            </div>
+            <div class="pricing-billing-note" data-i18n="noteFree">100% Free & Open Source (MIT)</div>
+          </div>
+
+          <ul class="pricing-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Unlimited</strong> Device Connections</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>P2P NAT Traversal (Direct UDP)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Libsodium E2EE Cryptography</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Self-Hosted Server (hbbs &amp; hbbr)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Windows, Mac, Linux, Android, iOS</span>
+            </li>
+            <li class="dimmed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span>Central Web Admin Console</span>
+            </li>
+            <li class="dimmed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span>Cloud Address Book Sync</span>
+            </li>
+          </ul>
+
+          <div class="pricing-card-footer">
+            <a href="#downloads" class="btn btn-secondary">
+              <span data-i18n="btnFree">Get Started Free</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Tier 2: Pro Individual -->
+        <div class="pricing-card">
+          <div class="pricing-card-header">
+            <div class="pricing-tier-tag" data-i18n="tierProTag">INDIVIDUAL PRO</div>
+            <h3 class="pricing-title" data-i18n="tierProTitle">Pro Individual</h3>
+            <p class="pricing-subtitle" data-i18n="tierProSub">For IT technicians & consultants needing centralized management.</p>
+            <div class="pricing-price-wrap">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-amount" id="priceProIndiv">11.88</span>
+              <span class="pricing-period">/ month</span>
+            </div>
+            <div class="pricing-billing-note" id="noteProIndiv" data-i18n="noteProIndiv">Billed annually ($142.50 / yr)</div>
+          </div>
+
+          <ul class="pricing-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>1 Operator</strong> Login Account</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>20 Managed</strong> Workstations</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Centralized Web Admin Console</strong></span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Address Book &amp; Device Tagging</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Two-Factor Authentication (2FA)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Audit Logs &amp; Session History</span>
+            </li>
+            <li class="dimmed">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span>OIDC / LDAP Single Sign-On</span>
+            </li>
+          </ul>
+
+          <div class="pricing-card-footer">
+            <button class="btn btn-secondary pricing-select-btn" onclick="openLoginModalWithTab('credentials')">
+              <span data-i18n="btnPro">Choose Pro Individual</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tier 3: Pro Team (Featured) -->
+        <div class="pricing-card featured">
+          <div class="pricing-card-badge" data-i18n="badgePopular">MOST POPULAR • FLEET READY</div>
+          <div class="pricing-card-header">
+            <div class="pricing-tier-tag" style="color:var(--color-primary);" data-i18n="tierTeamTag">TEAM &amp; MSP</div>
+            <h3 class="pricing-title" data-i18n="tierTeamTitle">Pro Team</h3>
+            <p class="pricing-subtitle" data-i18n="tierTeamSub">For IT support departments, MSPs & growing distributed teams.</p>
+            <div class="pricing-price-wrap">
+              <span class="pricing-currency">$</span>
+              <span class="pricing-amount" id="priceProTeam" style="color:var(--color-primary);">23.88</span>
+              <span class="pricing-period">/ month</span>
+            </div>
+            <div class="pricing-billing-note" id="noteProTeam" data-i18n="noteProTeam">Billed annually ($286.50 / yr)</div>
+          </div>
+
+          <ul class="pricing-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>10 Operator</strong> Accounts (Scalable)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>100 Managed</strong> Workstations &amp; Servers</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>OIDC Single Sign-On (SSO) &amp; LDAP</strong></span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Custom Client Generator</strong> (Branding)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Role-Based Access Control (RBAC)</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Central Web Admin Console + 2FA</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Priority High-Speed Relay Routing</span>
+            </li>
+          </ul>
+
+          <div class="pricing-card-footer">
+            <button class="btn btn-primary pricing-select-btn" onclick="openLoginModalWithTab('credentials')">
+              <span data-i18n="btnTeam">Choose Pro Team</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tier 4: Enterprise Customized -->
+        <div class="pricing-card">
+          <div class="pricing-card-header">
+            <div class="pricing-tier-tag" data-i18n="tierEntTag">ENTERPRISE</div>
+            <h3 class="pricing-title" data-i18n="tierEntTitle">Enterprise</h3>
+            <p class="pricing-subtitle" data-i18n="tierEntSub">For large enterprises requiring private cluster &amp; custom SLAs.</p>
+            <div class="pricing-price-wrap">
+              <span class="pricing-amount" style="font-size:2rem;" data-i18n="priceCustom">Custom</span>
+            </div>
+            <div class="pricing-billing-note" data-i18n="noteEnt">Tailored capacity &amp; dedicated relay</div>
+          </div>
+
+          <ul class="pricing-features-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span><strong>Unlimited</strong> Operators &amp; Devices</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Dedicated High-Throughput Relays</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Custom Domain &amp; SSL Certificates</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>White-Label Binary Generator</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>99.99% Uptime SLA Guarantee</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>24/7 Dedicated Engineering Support</span>
+            </li>
+          </ul>
+
+          <div class="pricing-card-footer">
+            <a href="mailto:contact@audira.my.id?subject=Audira%20Desk%20Enterprise%20Inquiry" class="btn btn-secondary">
+              <span data-i18n="btnEnt">Contact Enterprise</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Matrix Table -->
+      <div class="pricing-matrix-box">
+        <div class="pricing-matrix-header">
+          <h3 class="pricing-matrix-title" data-i18n="matrixTitle">Feature Comparison Across Editions</h3>
+          <span style="font-size:0.75rem; color:var(--color-text-dim); font-family:var(--font-mono);">RUSTDESK COMPATIBLE SPEC</span>
+        </div>
+        <div class="comparison-table-wrap" style="border:none; border-radius:0;">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th style="width:34%;" data-i18n="colFeature">CORE CAPABILITY</th>
+                <th style="width:16%; text-align:center;">Community Free</th>
+                <th style="width:16%; text-align:center;">Pro Individual</th>
+                <th style="width:17%; text-align:center; color:var(--color-primary);">Pro Team</th>
+                <th style="width:17%; text-align:center;">Enterprise</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Hosting Infrastructure</strong></td>
+                <td style="text-align:center;">Self-Hosted OSS</td>
+                <td style="text-align:center;">Self-Hosted Pro</td>
+                <td style="text-align:center; font-weight:700; color:var(--color-primary);">Self-Hosted Pro</td>
+                <td style="text-align:center;">Dedicated Cluster</td>
+              </tr>
+              <tr>
+                <td><strong>Central Web Admin Console</strong></td>
+                <td style="text-align:center; color:var(--color-text-dim);">&mdash;</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+              </tr>
+              <tr>
+                <td><strong>Operator Accounts (Users)</strong></td>
+                <td style="text-align:center;">1 User</td>
+                <td style="text-align:center;">1 User</td>
+                <td style="text-align:center; font-weight:700; color:var(--color-primary);">10 Users (Scalable)</td>
+                <td style="text-align:center; font-weight:700;">Unlimited</td>
+              </tr>
+              <tr>
+                <td><strong>Managed Workstations / Devices</strong></td>
+                <td style="text-align:center;">Unlimited</td>
+                <td style="text-align:center;">20 Devices</td>
+                <td style="text-align:center; font-weight:700; color:var(--color-primary);">100 Devices</td>
+                <td style="text-align:center; font-weight:700;">Unlimited</td>
+              </tr>
+              <tr>
+                <td><strong>Address Book &amp; Device Tagging</strong></td>
+                <td style="text-align:center; color:var(--color-text-dim);">Local Only</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Cloud Sync</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Cloud Sync</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Cloud Sync</td>
+              </tr>
+              <tr>
+                <td><strong>OIDC Single Sign-On (SSO) &amp; LDAP</strong></td>
+                <td style="text-align:center; color:var(--color-text-dim);">&mdash;</td>
+                <td style="text-align:center; color:var(--color-text-dim);">&mdash;</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Included</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Custom IdP</td>
+              </tr>
+              <tr>
+                <td><strong>Custom Client Generator (Branding)</strong></td>
+                <td style="text-align:center; color:var(--color-text-dim);">&mdash;</td>
+                <td style="text-align:center; color:var(--color-text-dim);">&mdash;</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Included</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Full White-label</td>
+              </tr>
+              <tr>
+                <td><strong>Audit Logs &amp; Session History</strong></td>
+                <td style="text-align:center; color:var(--color-text-dim);">&mdash;</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Extended Export</td>
+              </tr>
+              <tr>
+                <td><strong>End-to-End Encryption (Libsodium)</strong></td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+                <td style="text-align:center; color:var(--color-emerald); font-weight:700;">&#10003; Yes</td>
+              </tr>
+              <tr>
+                <td><strong>Concurrent Connection Limit</strong></td>
+                <td style="text-align:center;">Unlimited</td>
+                <td style="text-align:center;">Unlimited</td>
+                <td style="text-align:center; font-weight:700; color:var(--color-primary);">Unlimited</td>
+                <td style="text-align:center; font-weight:700;">Unlimited</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -18,6 +18,10 @@ print("[*] Uploading web/js/app.js and admin.js...")
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\js\app.js', '/home/audira/projects/audira-remote-desktop/web/js/app.js')
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\js\admin.js', '/home/audira/projects/audira-remote-desktop/web/js/admin.js')
 
+print("[*] Uploading web/index.html and web/css/styles.css...")
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\index.html', '/home/audira/projects/audira-remote-desktop/web/index.html')
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\css\styles.css', '/home/audira/projects/audira-remote-desktop/web/css/styles.css')
+
 # Write service file to /tmp/audira-api.service
 service_unit = """[Unit]
 Description=AUDIRA Remote Desktop Fleet & Heartbeat API

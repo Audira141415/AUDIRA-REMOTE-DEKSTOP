@@ -83,7 +83,38 @@ const i18n = {
     btnSignIn: "Sign In to Fleet Control",
     ssoDesc: "Authenticate using your enterprise identity provider or open OAuth directory:",
     tokenDesc: "Enter the 6-digit verification code from your TOTP Authenticator (Google Authenticator, YubiKey):",
-    copiedToast: "Copied to clipboard!"
+    copiedToast: "Copied to clipboard!",
+    navPricing: "Pricing",
+    tagPricing: "Licensing & Plans",
+    titlePricing: "Transparent Pricing. Zero Hidden Fees.",
+    descPricing: "From 100% free open-source self-hosting to enterprise centralized fleet control. Compare plans tailored to your infrastructure.",
+    lblMonthly: "Monthly",
+    lblAnnual: "Annual",
+    badgeSave: "SAVE 20%",
+    tierFreeTag: "OPEN SOURCE",
+    tierFreeTitle: "Community Free",
+    tierFreeSub: "For individuals, homelabs & tech enthusiasts managing their own relay.",
+    noteFree: "100% Free & Open Source (MIT)",
+    btnFree: "Get Started Free",
+    tierProTag: "INDIVIDUAL PRO",
+    tierProTitle: "Pro Individual",
+    tierProSub: "For IT technicians & consultants needing centralized management.",
+    noteProIndiv: "Billed annually ($142.50 / yr)",
+    btnPro: "Choose Pro Individual",
+    tierTeamTag: "TEAM & MSP",
+    tierTeamTitle: "Pro Team",
+    tierTeamSub: "For IT support departments, MSPs & growing distributed teams.",
+    noteProTeam: "Billed annually ($286.50 / yr)",
+    btnTeam: "Choose Pro Team",
+    badgePopular: "MOST POPULAR • FLEET READY",
+    tierEntTag: "ENTERPRISE",
+    tierEntTitle: "Enterprise",
+    tierEntSub: "For large enterprises requiring private cluster & custom SLAs.",
+    priceCustom: "Custom",
+    noteEnt: "Tailored capacity & dedicated relay",
+    btnEnt: "Contact Enterprise",
+    matrixTitle: "Feature Comparison Across Editions",
+    colFeature: "CORE CAPABILITY"
   },
   id: {
     bannerText: "Rilis Resmi: Audira Desk v1.5.0 Standalone Single-EXE siap dijalankan tanpa perlu instalasi.",
@@ -94,6 +125,7 @@ const i18n = {
     navComparison: "Perbandingan",
     navSelfHost: "Self-Hosting",
     navLatency: "Latensi",
+    navPricing: "Harga & Lisensi",
     navDownloads: "Unduhan",
     navFaq: "FAQ",
     navConsoleLogin: "Login Konsol",
@@ -144,6 +176,36 @@ const i18n = {
     tagLatency: "Jaringan Edge Global",
     titleLatency: "Tolok Ukur Latensi Relay Regional Real-Time",
     descLatency: "Uji latensi round-trip time (RTT) dari koneksi Anda ke node relay privat dan federasi di seluruh dunia.",
+    tagPricing: "Pilihan Paket & Lisensi",
+    titlePricing: "Transparansi Biaya. Tanpa Batasan Sesi Tersembunyi.",
+    descPricing: "Mulai dari 100% gratis open-source self-hosting hingga konsol manajemen armada terpusat skala enterprise.",
+    lblMonthly: "Bulanan",
+    lblAnnual: "Tahunan",
+    badgeSave: "HEMAT 20%",
+    tierFreeTag: "OPEN SOURCE",
+    tierFreeTitle: "Community Free",
+    tierFreeSub: "Untuk individu, homelab & teknisi mandiri yang menjalankan server sendiri.",
+    noteFree: "100% Gratis & Open-Source (MIT)",
+    btnFree: "Mulai Gratis",
+    tierProTag: "INDIVIDUAL PRO",
+    tierProTitle: "Pro Individual",
+    tierProSub: "Untuk teknisi IT & konsultan yang memerlukan konsol admin terpusat.",
+    noteProIndiv: "Ditagih tahunan ($142.50 / thn)",
+    btnPro: "Pilih Pro Individual",
+    tierTeamTag: "TIM & MSP",
+    tierTeamTitle: "Pro Team",
+    tierTeamSub: "Untuk departemen IT support, MSP & perusahaan yang berkembang.",
+    noteProTeam: "Ditagih tahunan ($286.50 / thn)",
+    btnTeam: "Pilih Pro Team",
+    badgePopular: "PALING POPULER • FLEET READY",
+    tierEntTag: "ENTERPRISE",
+    tierEntTitle: "Enterprise",
+    tierEntSub: "Untuk korporasi besar dengan kebutuhan kluster privat & SLA khusus.",
+    priceCustom: "Kustom",
+    noteEnt: "Kapasitas fleksibel & relay privat khusus",
+    btnEnt: "Hubungi Enterprise",
+    matrixTitle: "Tabel Perbandingan Fitur Seluruh Paket",
+    colFeature: "KEMAMPUAN UTAMA",
     tagDownloads: "Paket Platform",
     titleDownloads: "Unduh Audira Desk untuk Komputer & Mobile",
     descDownloads: "Dikompilasi dengan Rust dan Flutter. Kendali jarak jauh berdefinisi tinggi untuk Windows, Linux, macOS, dan Android.",
@@ -177,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuthModal();
   initFleetFilter();
   initLatencyBenchmark();
+  initPricingToggle();
 });
 
 // Theme Management (OLED Dark Default / Swiss Monochrome)
@@ -244,6 +307,55 @@ function setLanguage(lang) {
       el.placeholder = dict[key];
     }
   });
+
+  if (window.updatePricingBilling) {
+    window.updatePricingBilling();
+  }
+}
+
+// Pricing billing switch & modal opener
+function openLoginModalWithTab(tab) {
+  const modal = document.getElementById('loginModal');
+  if (modal) modal.classList.add('open');
+  const btn = document.querySelector(`.modal-tab-btn[data-tab="${tab || 'credentials'}"]`);
+  if (btn) btn.click();
+}
+
+function initPricingToggle() {
+  const toggle = document.getElementById('pricingBillingToggle');
+  const priceIndiv = document.getElementById('priceProIndiv');
+  const noteIndiv = document.getElementById('noteProIndiv');
+  const priceTeam = document.getElementById('priceProTeam');
+  const noteTeam = document.getElementById('noteProTeam');
+  const monthlyLabel = document.getElementById('pricingMonthlyLabel');
+  const annualLabel = document.getElementById('pricingAnnualLabel');
+
+  if (!toggle) return;
+
+  function updatePricing() {
+    const isAnnual = toggle.checked;
+    if (monthlyLabel) monthlyLabel.classList.toggle('active', !isAnnual);
+    if (annualLabel) annualLabel.classList.toggle('active', isAnnual);
+
+    const isId = currentLang === 'id';
+    if (isAnnual) {
+      if (priceIndiv) priceIndiv.textContent = '11.88';
+      if (noteIndiv) noteIndiv.textContent = isId ? 'Ditagih tahunan ($142.50 / thn)' : 'Billed annually ($142.50 / yr)';
+      if (priceTeam) priceTeam.textContent = '23.88';
+      if (noteTeam) noteTeam.textContent = isId ? 'Ditagih tahunan ($286.50 / thn)' : 'Billed annually ($286.50 / yr)';
+    } else {
+      if (priceIndiv) priceIndiv.textContent = '14.90';
+      if (noteIndiv) noteIndiv.textContent = isId ? 'Ditagih bulanan' : 'Billed monthly';
+      if (priceTeam) priceTeam.textContent = '29.90';
+      if (noteTeam) noteTeam.textContent = isId ? 'Ditagih bulanan' : 'Billed monthly';
+    }
+  }
+
+  window.updatePricingBilling = updatePricing;
+  toggle.addEventListener('change', updatePricing);
+  if (monthlyLabel) monthlyLabel.addEventListener('click', () => { toggle.checked = false; updatePricing(); });
+  if (annualLabel) annualLabel.addEventListener('click', () => { toggle.checked = true; updatePricing(); });
+  updatePricing();
 }
 
 // Interactive Simulator & Telemetry Engine
