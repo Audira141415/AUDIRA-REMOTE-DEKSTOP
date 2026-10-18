@@ -1,0 +1,29 @@
+services:
+  hbbs:
+    container_name: audira-hbbs
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r 192.168.100.175:21117 -k _
+    volumes:
+      - ./data:/root
+    network_mode: "host"
+    restart: always
+    depends_on:
+      - hbbr
+
+  hbbr:
+    container_name: audira-hbbr
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr -k _
+    volumes:
+      - ./data:/root
+    network_mode: "host"
+    restart: always
+
+  web:
+    container_name: audira-remote-web
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "5050:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
