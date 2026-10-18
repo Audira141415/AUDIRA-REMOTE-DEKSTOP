@@ -23,12 +23,21 @@ Write-Host ""
 $installDir = "C:\Program Files\Audira Desk"
 $sourceDir = "F:\AUDIRA-REMOTE-DEKSTOP\flutter\build\windows\x64\runner\Release"
 
-# 2. Stop Service and Processes
-Write-Host "[1/5] Menghentikan service & proses Audira Desk yang sedang aktif..." -ForegroundColor Yellow
+# 2. Stop Service and Processes & Clean Legacy RustDesk
+Write-Host "[1/6] Menghentikan service & proses yang sedang aktif..." -ForegroundColor Yellow
 $svc = Get-Service -Name "Audira Desk" -ErrorAction SilentlyContinue
 if ($svc -and $svc.Status -eq "Running") {
     Stop-Service -Name "Audira Desk" -Force -ErrorAction SilentlyContinue
     Write-Host "      Service 'Audira Desk' dihentikan." -ForegroundColor Green
+}
+
+# Hapus service peninggalan lama 'RustDesk' jika masih terdaftar
+$oldRustDeskSvc = Get-Service -Name "RustDesk" -ErrorAction SilentlyContinue
+if ($oldRustDeskSvc) {
+    Write-Host "      Membersihkan service peninggalan lama 'RustDesk'..." -ForegroundColor Yellow
+    Stop-Service -Name "RustDesk" -Force -ErrorAction SilentlyContinue
+    & sc.exe delete "RustDesk" | Out-Null
+    Write-Host "      Service 'RustDesk' berhasil dihapus permanen dari Windows." -ForegroundColor Green
 }
 
 $killNames = @("Audira Desk", "AudiraDesk", "audira", "rustdesk", "RustDesk")
@@ -37,8 +46,23 @@ foreach ($name in $killNames) {
 }
 Start-Sleep -Seconds 2
 
+# Bersihkan direktori dan sisa instalasi lama RustDesk
+Write-Host "[2/6] Membersihkan sisa-sisa file & log lama RustDesk..." -ForegroundColor Yellow
+if (Test-Path "C:\Program Files\RustDesk") {
+    Remove-Item -Path "C:\Program Files\RustDesk" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "      Folder C:\Program Files\RustDesk berhasil dibersihkan." -ForegroundColor Green
+}
+if (Test-Path "$env:APPDATA\RustDesk") {
+    Remove-Item -Path "$env:APPDATA\RustDesk" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "      Folder AppData\RustDesk lama berhasil dibersihkan." -ForegroundColor Green
+}
+if (Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk") {
+    Remove-Item -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk" -Recurse -Force -ErrorAction SilentlyContinue
+    Write-Host "      Entri registri lama RustDesk dibersihkan." -ForegroundColor Green
+}
+
 # 3. Synchronize Files to C:\Program Files\Audira Desk
-Write-Host "[2/5] Menyalin file build terbaru ke $installDir..." -ForegroundColor Yellow
+Write-Host "[3/6] Menyalin file build terbaru ke $installDir..." -ForegroundColor Yellow
 if (-not (Test-Path $installDir)) {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
 }
@@ -51,7 +75,7 @@ if (Test-Path $sourceDir) {
 }
 
 # 4. Synchronize Configuration for System Service
-Write-Host "[3/5] Sinkronisasi konfigurasi server 192.168.100.175 ke System Profile..." -ForegroundColor Yellow
+Write-Host "[4/6] Sinkronisasi konfigurasi server 192.168.100.175 ke System Profile..." -ForegroundColor Yellow
 $sysConfigDir = "C:\Windows\System32\config\systemprofile\AppData\Roaming\Audira Desk\config"
 $progDataConfigDir = "C:\ProgramData\Audira Desk\config"
 $userConfigDir = "$env:APPDATA\Audira Desk\config"
@@ -67,10 +91,9 @@ if (Test-Path $cfgFile) {
 }
 
 # 5. Update Registry BuildDate to suppress "Your installation is lower version"
-Write-Host "[4/5] Memperbarui registri BuildDate..." -ForegroundColor Yellow
+Write-Host "[5/6] Memperbarui registri BuildDate..." -ForegroundColor Yellow
 $regKeys = @(
-    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Audira Desk",
-    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\RustDesk"
+    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Audira Desk"
 )
 $buildDateStr = (Get-Date).ToString("yyyy-MM-dd HH:mm")
 foreach ($rk in $regKeys) {
@@ -85,7 +108,7 @@ Write-Host "      Registri BuildDate diperbarui: $buildDateStr" -ForegroundColor
 
 # 6. Start Service
 if (-not $NoStart) {
-    Write-Host "[5/5] Menjalankan kembali Windows Service 'Audira Desk'..." -ForegroundColor Yellow
+    Write-Host "[6/6] Menjalankan kembali Windows Service 'Audira Desk'..." -ForegroundColor Yellow
     Start-Service -Name "Audira Desk" -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 1
     $finalSvc = Get-Service -Name "Audira Desk" -ErrorAction SilentlyContinue

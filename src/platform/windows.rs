@@ -1825,11 +1825,20 @@ fn get_before_uninstall(kill_self: bool) -> String {
     chcp 65001
     sc stop \"{app_name}\"
     sc delete \"{app_name}\"
+    sc stop \"RustDesk\"
+    sc delete \"RustDesk\"
     taskkill /F /IM {broker_exe}
     taskkill /F /IM \"{app_name}.exe\"{filter}
+    taskkill /F /IM \"AudiraDesk.exe\"{filter}
+    taskkill /F /IM \"rustdesk.exe\"{filter}
+    taskkill /F /IM \"RustDesk.exe\"{filter}
     reg delete HKEY_CLASSES_ROOT\\.{ext} /f
     reg delete HKEY_CLASSES_ROOT\\{ext} /f
+    reg delete HKEY_CLASSES_ROOT\\.rustdesk /f
+    reg delete HKEY_CLASSES_ROOT\\rustdesk /f
+    reg delete \"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\RustDesk\" /f
     netsh advfirewall firewall delete rule name=\"{app_name} Service\"
+    netsh advfirewall firewall delete rule name=\"RustDesk Service\"
     ",
         broker_exe = WIN_TOPMOST_INJECTED_PROCESS_EXE,
     )
@@ -1875,9 +1884,13 @@ fn get_uninstall(kill_self: bool, uninstall_printer: bool) -> ResultType<String>
     reg delete {subkey} /f
     {uninstall_amyuni_idd}
     if exist \"{path}\" rd /s /q \"{path}\"
+    if exist \"%ProgramFiles%\\RustDesk\" rd /s /q \"%ProgramFiles%\\RustDesk\"
+    if exist \"%APPDATA%\\RustDesk\" rd /s /q \"%APPDATA%\\RustDesk\"
     if exist \"{start_menu}\" rd /s /q \"{start_menu}\"
     if exist \"%PUBLIC%\\Desktop\\{app_name}.lnk\" del /f /q \"%PUBLIC%\\Desktop\\{app_name}.lnk\"
+    if exist \"%PUBLIC%\\Desktop\\RustDesk.lnk\" del /f /q \"%PUBLIC%\\Desktop\\RustDesk.lnk\"
     if exist \"%PROGRAMDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\{app_name} Tray.lnk\" del /f /q \"%PROGRAMDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\{app_name} Tray.lnk\"
+    if exist \"%PROGRAMDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RustDesk Tray.lnk\" del /f /q \"%PROGRAMDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\RustDesk Tray.lnk\"
     ",
         before_uninstall=get_before_uninstall(kill_self),
         uninstall_amyuni_idd=get_uninstall_amyuni_idd(),

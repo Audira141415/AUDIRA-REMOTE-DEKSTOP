@@ -435,7 +435,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP');
+        final Uri url = Uri.parse('http://192.168.100.175:5050/#downloads');
         await launchUrl(url);
       };
       if (isToUpdate) {
@@ -451,7 +451,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           closeButton: true,
           help: isToUpdate ? 'Changelog' : null,
           link: isToUpdate
-              ? 'https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases'
+              ? 'http://192.168.100.175:5050/#downloads'
               : null);
     }
     if (systemError.isNotEmpty) {

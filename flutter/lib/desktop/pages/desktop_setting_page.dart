@@ -2554,7 +2554,7 @@ class _AboutState extends State<_About> {
                       .marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/blob/main/LICENSE');
+                    launchUrlString('http://192.168.100.175:5050');
                   },
                   child: Text(
                     translate('Privacy Statement'),
@@ -2562,7 +2562,7 @@ class _AboutState extends State<_About> {
                   ).marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP');
+                    launchUrlString('http://192.168.100.175:5050');
                   },
                   child: Text(
                     translate('Website'),

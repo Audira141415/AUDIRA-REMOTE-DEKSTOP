@@ -1176,12 +1176,12 @@ void showAbout(OverlayDialogManager dialogManager) {
         Text('Version: $version'),
         InkWell(
             onTap: () async {
-              const url = 'https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP';
+              const url = 'http://192.168.100.175:5050';
               await launchUrl(Uri.parse(url));
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP',
+              child: Text('http://192.168.100.175:5050',
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   )),
