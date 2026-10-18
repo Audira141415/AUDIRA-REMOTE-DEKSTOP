@@ -1,0 +1,80 @@
+# UPDATE HISTORY & ROADMAP — Audira Desk
+> Catatan Perkembangan Sistem, Log Perubahan Arsitektur, dan Roadmap Masa Depan.
+
+---
+
+## 1. Log Riwayat Rilis & Arsitektur
+
+### Versi v1.5.1 (Complete Rebranding "Audira Desk" & Standalone Packaging) — 2026-10-18
+- **Core Engine & Windows Platform Rebranding**:
+  - `libs/hbb_common/src/config.rs`: `APP_NAME` diubah secara fundamental menjadi `"Audira Desk"`.
+  - `src/common.rs`: Sanitasi `get_uri_prefix()` menjadi `audiradesk://` (RFC 3986 compliance, bebas spasi).
+  - `src/platform/windows.rs`: Validasi nama instalasi `validate_install_app_name` diperluas untuk mengizinkan spasi pada `"Audira Desk"`.
+  - Mengamankan seluruh sintaks command batch elevated: pemberian tanda kutip pada perintah Windows Service Manager (`sc create "Audira Desk"`, `sc start`, `sc stop`, `sc delete`), `taskkill /F /IM "Audira Desk.exe"`, dan pembersihan firewall.
+  - Path instalasi default otomatis mengarah ke `C:\Program Files\Audira Desk`.
+- **Lokalisasi Lengkap (User-Facing UI Strings)**:
+  - `src/lang/en.rs`: Seluruh string UI berbahasa Inggris (`install_tip`, `connecting_status`, `config_acc`, `config_screen`, `config_input`, `config_microphone`, `powered_by_me`, dll.) dimutakhirkan dari `RustDesk` menjadi `Audira Desk`.
+- **Windows Runner Resource & Portable Packager**:
+  - `flutter/windows/runner/Runner.rc` & `main.cpp`: Metadata `CompanyName`, `ProductName`, `FileDescription`, dan fallback window title resmi disetel ke `Audira Desk`.
+  - `libs/portable/Cargo.toml` & `src/main.rs`: Metadata Windows Resource portable wrapper disetel ke `Audira Desk`, prefix folder ekstraksi lokal `%LocalAppData%\audiradesk`, dan startup executable `AudiraDesk.exe`.
+  - Mengompilasi dan mengemas binary mandiri single-executable produksi: `dist/AudiraDesk-v1.5.0-x86_64.exe` (28.05 MB) dan `AudiraDesk.exe`.
+- **Toolchain & LLVM Resolution**:
+  - Instalasi LLVM 23.1.3 dan konfigurasi permanen `LIBCLANG_PATH` (`C:\Program Files\LLVM\bin\libclang.dll`) untuk mendukung `bindgen` FFI tanpa kendala.
+- **Open-Source GitHub Package & Licensing**:
+  - Lisensi resmi MIT License atas nama **AUDIRA (Agus Dwi R)** (`LICENSE`).
+  - Dokumentasi profesional lengkap `README.md` dengan badge status, arsitektur sistem, tabel fitur, panduan portabel, instalasi sistem, dan build steps.
+  - Panduan kontribusi (`CONTRIBUTING.md`), kebijakan keamanan (`SECURITY.md`), serta optimasi `.gitignore` untuk mencegah kebocoran build cache.
+- **Brain Memory Synchronization (BRAIN-SYNC-01)**:
+  - Sinkronisasi menyeluruh identitas sistem di `BRAIN.md`, `INDEX.md`, `SYSTEM_ARCHITECTURE.md`, `FEATURE_CATALOG.md`, dan `UPDATE_HISTORY_AND_ROADMAP.md`.
+
+### Versi v1.5.0 (Production Architecture) — 2026-10-09
+- **Core Engine & Networking**:
+  - Stabilisasi Cargo Workspace modular (`base`, `hbb_common`, `scrap`, `enigo`, `clipboard`).
+  - Single import path terpusat untuk konfigurasi di `libs/base/src/config/keys.rs`.
+  - Protokol rendezvous `hbbs` dan relay `hbbr` dengan enkripsi E2EE Libsodium (X25519 + ChaCha20-Poly1305).
+- **Media & Hardware Acceleration**:
+  - Penangkapan layar DirectX 11 DXGI Desktop Duplication (Windows) dan Wayland PipeWire Portal (Linux).
+  - Integrasi hardware codec NVENC / Intel QSV / AMD AMF via feature flag `hwcodec`.
+  - Audio loopback streaming ultra-low latency via WASAPI & PulseAudio terkompresi Opus.
+- **Enterprise Security & Management**:
+  - Implementasi Windows UAC elevation melalui background system service daemon (`src/service.rs`).
+  - Privacy Mode (layar monitor host digelapkan dan input fisik lokal ditekan).
+  - Chunked file transfer protocol dengan verifikasi hash integritas dan pencegahan path traversal.
+- **Modern Flutter UI**:
+  - Desktop multi-window canvas dengan toolbar telemetri sesi HUD.
+  - Dukungan lokalisasi 25+ bahasa di `src/lang/*.rs`.
+- **Inisialisasi Customization & Brain Ecosystem**:
+  - Adaptasi komprehensif sistem `.agents/` dari arsitektur `AUDIRA-NetOps-AI` yang disesuaikan secara presisi untuk sistem remote desktop tingkat rendah (Rust + Tokio + Flutter).
+- **Desktop Launcher & Lifecycle Scripts**:
+  - Penyediaan `start.bat` dan `scripts/start.ps1` untuk mendeteksi biner terkompilasi atau menjalankan Flutter desktop secara interaktif.
+  - Penyediaan `stop.bat` dan `scripts/stop.ps1` untuk pembersihan proses background dan port gracefully.
+- **Rebranding Executable Biner & Native Build**:
+  - Rebranding identitas biner utama dari `rustdesk.exe` ke `audira.exe`.
+  - Pembaruan konfigurasi CMake (`flutter/windows/CMakeLists.txt`), Runner Resource metadata (`flutter/windows/runner/Runner.rc`), `build.py`, serta manifest Cargo (`Cargo.toml`).
+  - Kompilasi biner native release `audira.exe` menggunakan toolchain lokal Windows (LLVM + vcpkg C++ static libraries).
+
+---
+
+## 2. Roadmap Pengembangan Selanjutnya
+
+1. **AI Predictive Latency & Mouse Smoothing**:
+   - Algoritma interpolasi berbasis AI untuk memprediksi pergerakan kursor mouse pada koneksi dengan jitter tinggi agar terasa instan di sisi klien.
+2. **WebRTC Web Client Viewer**:
+   - Kemampuan bagi operator untuk mengendalikan remote desktop langsung dari browser web modern (Chrome/Edge/Firefox) tanpa instalasi aplikasi klien lokal.
+3. **Hardware AV1 Real-Time Encoding**:
+   - Optimalisasi pipeline kompresi AV1 zero-copy untuk GPU generasi baru (NVIDIA RTX 40-series, Intel Arc, AMD RDNA3) guna memangkas konsumsi bandwidth hingga 35%.
+4. **Virtual Display Driver Integration**:
+   - Driver tampilan virtual headless mandiri untuk Windows dan Linux, memungkinkan resolusi kustom tanpa monitor fisik terpasang di host (*headless server management*).
+
+---
+
+## 3. Panduan Pembaruan Brain (Wajib Ditaati)
+
+Setiap pengembang atau AI Coding Agent yang melakukan modifikasi kode **wajib** mengikuti checklist pembaruan Brain berikut:
+
+- [ ] **Jika menambah atau memodifikasi komponen Flutter**: Tambahkan entri di [`FEATURE_CATALOG.md`](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/brain/FEATURE_CATALOG.md).
+- [ ] **Jika mengubah crate Rust, FFI, atau threading Tokio**: Perbarui diagram di [`SYSTEM_ARCHITECTURE.md`](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/brain/SYSTEM_ARCHITECTURE.md).
+- [ ] **Jika mengubah codec, format paket, atau rendezvous**: Perbarui tabel di [`PROTOCOLS_AND_CODECS.md`](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/brain/PROTOCOLS_AND_CODECS.md).
+- [ ] **Jika mengubah izin sesi atau proteksi UAC**: Perbarui kebijakan di [`SECURITY_AND_PERMISSIONS.md`](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/brain/SECURITY_AND_PERMISSIONS.md).
+- [ ] **Jika mengubah kapabilitas OS**: Perbarui matriks di [`PLATFORM_INTEGRATION_MATRIX.md`](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/brain/PLATFORM_INTEGRATION_MATRIX.md).
+- [ ] **Catat ringkasan perubahan**: Tambahkan entri pada dokumen ini ([`UPDATE_HISTORY_AND_ROADMAP.md`](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/brain/UPDATE_HISTORY_AND_ROADMAP.md)).
