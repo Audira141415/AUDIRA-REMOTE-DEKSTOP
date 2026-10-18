@@ -1,15 +1,75 @@
 /**
  * AUDIRA REMOTE DESKTOP — Admin Panel & Fleet Management Controller
- * Handles live telemetry, device inventory, audit logs, and Telegram/Discord alerts
+ * Fully integrated with Landing Cockpit, Webhooks (Telegram & Discord), and Fleet Sync
  * Author: Agus Dwi Rianto (AUDIRA) — https://audira.my.id
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initAdminTheme();
+  initAdminLanguage();
   initAdminNavigation();
   initWebhookSettings();
   initFleetSearch();
   startMetricsPolling();
+  checkOperatorSession();
 });
+
+// Check shared login session from index.html
+function checkOperatorSession() {
+  const operatorName = sessionStorage.getItem('audira_operator_name');
+  const operatorEl = document.getElementById('adminTopbarOperatorName');
+  if (operatorName && operatorEl) {
+    operatorEl.textContent = operatorName;
+  }
+}
+
+// Theme Synchronization (Shares audira_theme with index.html)
+function initAdminTheme() {
+  const toggleBtn = document.getElementById('adminThemeToggle');
+  const savedTheme = localStorage.getItem('audira_theme') || 'dark';
+  setAdminTheme(savedTheme);
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const activeTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      setAdminTheme(activeTheme);
+    });
+  }
+}
+
+function setAdminTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('audira_theme', theme);
+  const icon = document.getElementById('adminThemeIcon');
+  if (icon) {
+    if (theme === 'dark') {
+      icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+    } else {
+      icon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+    }
+  }
+}
+
+// Language Synchronization (Shares audira_lang with index.html)
+function initAdminLanguage() {
+  const langToggle = document.getElementById('adminLangToggle');
+  const savedLang = localStorage.getItem('audira_lang') || 'en';
+  setAdminLanguage(savedLang);
+
+  if (langToggle) {
+    langToggle.addEventListener('click', () => {
+      const currentLang = localStorage.getItem('audira_lang') || 'en';
+      const nextLang = currentLang === 'en' ? 'id' : 'en';
+      setAdminLanguage(nextLang);
+    });
+  }
+}
+
+function setAdminLanguage(lang) {
+  localStorage.setItem('audira_lang', lang);
+  const label = document.getElementById('adminLangLabel');
+  if (label) label.textContent = lang.toUpperCase();
+}
 
 // View Navigation Router
 function initAdminNavigation() {
@@ -32,7 +92,6 @@ function initAdminNavigation() {
     });
   });
 
-  // Check URL hash for direct view routing (e.g. admin.html#integrations)
   const hash = window.location.hash.replace('#', '');
   if (hash) {
     const match = Array.from(navItems).find(n => n.getAttribute('data-view').toLowerCase().includes(hash.toLowerCase()));
@@ -59,7 +118,7 @@ function refreshMetrics() {
   showToast('Cluster metrics refreshed from Proxmox daemon.', 'success');
 }
 
-// Session Disconnect Action
+// Session Disconnect Action (Synced with Audit Trail & Webhooks)
 function terminateSession(remoteId) {
   if (confirm(`Terminate remote session with ${remoteId}?`)) {
     const rows = document.querySelectorAll('#activeSessionsTable tr');
@@ -78,7 +137,28 @@ function terminateSession(remoteId) {
       if (current > 0) kpiActive.textContent = (current - 1).toString();
     }
 
-    showToast(`Session ${remoteId} closed cleanly. Termination packet dispatched.`, 'warning');
+    // Dynamically append new entry to Session Audit Logs Table
+    const auditTableBody = document.querySelector('#viewSessions tbody');
+    if (auditTableBody) {
+      const now = new Date();
+      const timeStr = now.toISOString().slice(0, 19).replace('T', ' ');
+      const newAuditRow = document.createElement('tr');
+      newAuditRow.innerHTML = `
+        <td class="admin-code-cell">${timeStr}</td>
+        <td><strong>Agus Dwi Rianto</strong> (Root)</td>
+        <td>Target Host (${remoteId})</td>
+        <td><span class="status-pill standby">Direct UDP</span></td>
+        <td style="font-family:var(--font-mono);">00:43:10</td>
+        <td style="font-family:var(--font-mono);">390 MB</td>
+        <td><span style="color:var(--color-rose); font-weight:700;">Operator Forced Disconnect</span></td>
+      `;
+      auditTableBody.prepend(newAuditRow);
+    }
+
+    // Trigger webhook alert
+    dispatchAdminWebhookAlert(`⚠️ [AUDIRA ALERT] Session with target ${remoteId} forcibly closed by Operator.`);
+
+    showToast(`Session ${remoteId} closed cleanly. Audit log recorded.`, 'warning');
   }
 }
 
@@ -112,17 +192,50 @@ function initFleetSearch() {
   if (groupFilter) groupFilter.addEventListener('change', filterFleet);
 }
 
+// Integrated Connect: Cross-links from Fleet Table straight into Hero Simulator
 function launchSession(remoteId) {
-  window.location.href = `index.html#telemetry`;
+  const cleanId = remoteId.replace(/\s+/g, '');
+  window.location.href = `index.html?connect=${cleanId}#telemetry`;
 }
 
+// Enroll Device with real table append & webhook notification
 function showAddDeviceModal() {
   const alias = prompt('Enter Device Hostname / Alias:');
-  if (alias) {
-    const id = Math.floor(100000000 + Math.random() * 900000000).toString();
-    const formattedId = `${id.slice(0,3)} ${id.slice(3,6)} ${id.slice(6,9)}`;
-    showToast(`Enrollment token generated for ${alias}! Temporary ID: ${formattedId}`, 'success');
+  if (!alias) return;
+  const group = prompt('Enter Group Tag (e.g. Engineering, Production, Security):', 'Engineering') || 'Engineering';
+
+  const id = Math.floor(100000000 + Math.random() * 900000000).toString();
+  const formattedId = `${id.slice(0,3)} ${id.slice(3,6)} ${id.slice(6,9)}`;
+  const lanIp = `192.168.100.${Math.floor(100 + Math.random() * 150)}`;
+
+  const fleetTableBody = document.querySelector('#adminFleetTable tbody');
+  if (fleetTableBody) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${alias}</strong></td>
+      <td class="admin-code-cell">${formattedId}</td>
+      <td>Windows 11 / Linux (Auto-enrolled)</td>
+      <td class="admin-code-cell">${lanIp}</td>
+      <td><span class="mgmt-tag-pill">${group}</span></td>
+      <td><span class="status-pill online">ONLINE (Just Enrolled)</span></td>
+      <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
+      <td>
+        <button class="mgmt-action-btn" onclick="launchSession('${formattedId}')">Connect</button>
+      </td>
+    `;
+    fleetTableBody.prepend(tr);
   }
+
+  // Update fleet counters
+  const fleetPills = document.querySelectorAll('.nav-badge-pill');
+  fleetPills.forEach(pill => {
+    if (pill.textContent === '14' || pill.textContent === '15') {
+      pill.textContent = (parseInt(pill.textContent, 10) + 1).toString();
+    }
+  });
+
+  dispatchAdminWebhookAlert(`🖥️ [AUDIRA ALERT] New Endpoint Enrolled: ${alias} (ID: ${formattedId}, Group: ${group})`);
+  showToast(`Enrolled ${alias}! Remote ID: ${formattedId}`, 'success');
 }
 
 // Session Audit CSV Export
@@ -154,7 +267,6 @@ function initWebhookSettings() {
   const dcUrl = document.getElementById('discordWebhookUrl');
   const dcChannel = document.getElementById('discordChannelName');
 
-  // Load from localStorage if previously configured
   if (tgToken && localStorage.getItem('audira_tg_token')) {
     tgToken.value = localStorage.getItem('audira_tg_token');
   }
@@ -183,6 +295,33 @@ function saveAllWebhooks() {
   showToast('All Webhook & Notification parameters persisted.', 'success');
 }
 
+// General Dispatcher for Admin Events
+function dispatchAdminWebhookAlert(messageText) {
+  const tgToken = localStorage.getItem('audira_tg_token');
+  const tgChatId = localStorage.getItem('audira_tg_chat_id');
+  const dcUrl = localStorage.getItem('audira_discord_webhook');
+
+  if (tgToken && tgChatId) {
+    fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: tgChatId, text: messageText, parse_mode: 'HTML' })
+    }).catch(() => {});
+  }
+
+  if (dcUrl && dcUrl.startsWith('http')) {
+    fetch(dcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: "Audira Sentinel Bot",
+        avatar_url: "https://audira.my.id/favicon.ico",
+        content: messageText
+      })
+    }).catch(() => {});
+  }
+}
+
 // Telegram Test Dispatcher
 function sendTestTelegramAlert() {
   const token = document.getElementById('tgBotToken')?.value.trim();
@@ -191,7 +330,6 @@ function sendTestTelegramAlert() {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-  // Update preview bubble
   const preview = document.getElementById('tgPreviewBubble');
   if (preview) {
     preview.style.transform = 'scale(1.02)';
@@ -202,7 +340,7 @@ function sendTestTelegramAlert() {
 
   if (token && chatId) {
     showToast('Sending real HTTP POST to Telegram Bot API...', 'info');
-    const message = `🚨 [AUDIRA ALERT] Test Notification\n• Target Host: eng-cad-workstation-11\n• Status: Operational\n• Time: ${timeStr} WIB\n• Server: audira-web-hub (192.168.100.175)`;
+    const message = `🚨 <b>[AUDIRA ALERT] Test Notification</b>\n• <b>Target Host:</b> eng-cad-workstation-11\n• <b>Status:</b> Operational\n• <b>Time:</b> ${timeStr} WIB\n• <b>Server:</b> audira-web-hub (192.168.100.175)`;
     
     fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
@@ -221,7 +359,7 @@ function sendTestTelegramAlert() {
         showToast(`Telegram API error: ${data.description}`, 'warning');
       }
     })
-    .catch(err => {
+    .catch(() => {
       showToast('Dispatched test alert to Telegram (simulated mode).', 'success');
     });
   } else {
@@ -237,7 +375,6 @@ function sendTestDiscordAlert() {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-  // Update preview embed card
   const embedCard = document.getElementById('dcEmbedCard');
   if (embedCard) {
     embedCard.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.4)';
@@ -279,7 +416,7 @@ function sendTestDiscordAlert() {
         showToast(`Discord webhook returned status ${res.status}`, 'warning');
       }
     })
-    .catch(err => {
+    .catch(() => {
       showToast('Dispatched test embed to Discord (simulated mode).', 'success');
     });
   } else {

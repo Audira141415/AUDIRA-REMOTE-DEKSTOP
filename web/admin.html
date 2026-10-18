@@ -38,9 +38,20 @@
     </div>
 
     <div class="admin-user-menu">
+      <!-- Language Switcher -->
+      <button id="adminLangToggle" class="lang-btn" style="height:30px; font-size:0.6875rem;" title="Toggle Language" aria-label="Toggle Language">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span id="adminLangLabel">EN</span>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button id="adminThemeToggle" class="icon-btn" style="width:30px; height:30px;" title="Toggle Visual Mode" aria-label="Toggle Visual Mode">
+        <svg id="adminThemeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+
       <div class="admin-user-badge">
         <div class="admin-avatar">AD</div>
-        <span>Agus Dwi Rianto</span>
+        <span id="adminTopbarOperatorName">Agus Dwi Rianto</span>
         <span class="nav-badge-pill" style="margin-left:0.25rem;">ROOT</span>
       </div>
 

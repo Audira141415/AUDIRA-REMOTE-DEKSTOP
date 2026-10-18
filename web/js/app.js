@@ -298,6 +298,7 @@ function initSimulator() {
         if (simRtt) simRtt.textContent = Math.floor(9 + Math.random() * 8) + ' ms';
         if (simFps) simFps.textContent = '60.0 FPS';
         showToast(`Connected to ${id}! Protocol: Direct UDP Hole-Punch (AV1 60fps)`, 'success');
+        dispatchIntegratedWebhooks(id);
       }, 900);
     });
   }
@@ -324,6 +325,69 @@ function initSimulator() {
       }
     });
   });
+
+  // URL Query Parameter Integration (?connect=512884901)
+  const urlParams = new URLSearchParams(window.location.search);
+  const connectParam = urlParams.get('connect');
+  if (connectParam && targetIdInput) {
+    targetIdInput.value = connectParam;
+    const telemetrySection = document.getElementById('telemetry');
+    if (telemetrySection) {
+      telemetrySection.scrollIntoView({ behavior: 'smooth' });
+    }
+    showToast(`Loaded ${connectParam} from Fleet Console`, 'info');
+    setTimeout(() => {
+      if (connectBtn) connectBtn.click();
+    }, 600);
+  }
+}
+
+// Integrated Webhook Dispatcher on Live Session Connect
+function dispatchIntegratedWebhooks(targetId) {
+  const tgToken = localStorage.getItem('audira_tg_token');
+  const tgChatId = localStorage.getItem('audira_tg_chat_id');
+  const dcUrl = localStorage.getItem('audira_discord_webhook');
+  const operator = sessionStorage.getItem('audira_operator_name') || 'Agus Dwi Rianto (Admin)';
+  const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  // Dispatch to Telegram
+  if (tgToken && tgChatId) {
+    const tgMsg = `🚨 <b>[AUDIRA ALERT] Sesi Baru Terhubung</b>\n• <b>Target Host:</b> <code>${targetId}</code>\n• <b>Operator:</b> ${operator}\n• <b>Protocol:</b> Direct UDP Hole-Punch (AV1 60fps)\n• <b>Waktu:</b> ${timeStr} WIB\n• <b>Server:</b> audira-web-hub (192.168.100.175)`;
+    fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: tgChatId, text: tgMsg, parse_mode: 'HTML' })
+    }).then(res => res.json()).then(data => {
+      if (data.ok) showToast('Telegram alert delivered!', 'success');
+    }).catch(() => {});
+  }
+
+  // Dispatch to Discord
+  if (dcUrl && dcUrl.startsWith('http')) {
+    const dcPayload = {
+      username: "Audira Sentinel Bot",
+      avatar_url: "https://audira.my.id/favicon.ico",
+      embeds: [{
+        title: "🛡️ Remote Desktop Session Initiated",
+        description: `Secure remote session connected to target endpoint <code>${targetId}</code>.`,
+        color: 4322490, // Emerald Green
+        fields: [
+          { name: "TARGET ID", value: targetId, inline: true },
+          { name: "OPERATOR", value: operator, inline: true },
+          { name: "PROTOCOL", value: "Direct UDP P2P (AV1 60 FPS)", inline: true },
+          { name: "SERVER NODE", value: "audira-web-hub (192.168.100.175)", inline: true }
+        ],
+        footer: { text: `Audira Sentinel Webhook • ${timeStr} WIB` }
+      }]
+    };
+    fetch(dcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dcPayload)
+    }).then(res => {
+      if (res.ok) showToast('Discord alert embed delivered!', 'success');
+    }).catch(() => {});
+  }
 }
 
 // Quick connect helper for fleet inventory
