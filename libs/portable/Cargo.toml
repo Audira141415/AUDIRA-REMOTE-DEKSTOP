@@ -26,7 +26,8 @@ windows = { version = "0.61", features = [
 native-windows-gui = {version = "1.0", default-features = false, features = ["animation-timer", "image-decoder"]}
 
 [package.metadata.winres]
-LegalCopyright = "Copyright © 2026 Audira Desk. All rights reserved."
+LegalCopyright = "Copyright © 2026 Agus Dwi R (Audira). All rights reserved."
+CompanyName = "Audira Studio (Agus Dwi R)"
 ProductName = "Audira Desk"
 OriginalFilename = "AudiraDesk.exe"
 FileDescription = "Audira Desk Remote Desktop Client"
