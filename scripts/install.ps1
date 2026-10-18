@@ -142,6 +142,12 @@ switch ($choice) {
         $legacyLnk = Join-Path $InstallPath "Uninstall RustDesk.lnk"
         if (Test-Path $legacyLnk) { Remove-Item -Path $legacyLnk -Force -ErrorAction SilentlyContinue }
         
+        # Bersihkan sisa shortcut legacy RustDesk di Desktop & Start Menu
+        $legacyDesktopLnk = "C:\Users\Public\Desktop\RustDesk.lnk"
+        if (Test-Path $legacyDesktopLnk) { [System.IO.File]::Delete($legacyDesktopLnk) }
+        $legacyStartMenu = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\RustDesk"
+        if (Test-Path $legacyStartMenu) { Remove-Item -Path $legacyStartMenu -Recurse -Force -ErrorAction SilentlyContinue }
+        
         $srcSciter = Join-Path $rootDir "sciter.dll"
         if (Test-Path $srcSciter) {
             Copy-Item -Path $srcSciter -Destination (Join-Path $InstallPath "sciter.dll") -Force
