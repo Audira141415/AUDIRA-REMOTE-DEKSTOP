@@ -3985,11 +3985,10 @@ sc start \"{app_name}\"
 fn run_after_run_cmds(silent: bool) {
     let (_, _, _, exe) = get_install_info();
     if !silent {
-        log::debug!("Spawn new window");
-        allow_err!(std::process::Command::new("cmd")
-            .args(&["/c", &format!("timeout /t 2 >nul & start \"\" \"{}\"", exe)])
-            .creation_flags(winapi::um::winbase::CREATE_NO_WINDOW)
-            .spawn());
+        let mut cmd = std::process::Command::new("cmd");
+        cmd.raw_arg(format!("/c ping 127.0.0.1 -n 3 >nul & \"{}\"", exe));
+        cmd.creation_flags(winapi::um::winbase::CREATE_NO_WINDOW);
+        allow_err!(cmd.spawn());
     }
     if Config::get_option("stop-service") != "Y" {
         allow_err!(std::process::Command::new(&exe).arg("--tray").spawn());
