@@ -46,8 +46,10 @@
         <ul class="nav-links">
           <li><a href="#architecture" class="nav-link" data-i18n="navArchitecture">Architecture</a></li>
           <li><a href="#telemetry" class="nav-link" data-i18n="navTelemetry">Live Demo</a></li>
+          <li><a href="#fleet" class="nav-link" data-i18n="navFleet">Fleet Console</a></li>
+          <li><a href="#comparison" class="nav-link" data-i18n="navComparison">Compare</a></li>
           <li><a href="#selfhost" class="nav-link" data-i18n="navSelfHost">Self-Hosting</a></li>
-          <li><a href="#cluster" class="nav-link" data-i18n="navCluster">Server Cluster</a></li>
+          <li><a href="#latency" class="nav-link" data-i18n="navLatency">Latency</a></li>
           <li><a href="#downloads" class="nav-link" data-i18n="navDownloads">Downloads</a></li>
           <li><a href="#faq" class="nav-link" data-i18n="navFaq">FAQ</a></li>
         </ul>
@@ -69,6 +71,12 @@
         <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener" class="icon-btn" title="View Source on GitHub" aria-label="GitHub">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
         </a>
+
+        <!-- Console Login Button -->
+        <button id="openLoginBtn" class="btn btn-secondary" style="padding:0.5rem 0.95rem; font-size:0.8125rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+          <span data-i18n="navConsoleLogin">Console Login</span>
+        </button>
 
         <!-- Primary CTA -->
         <a href="#downloads" class="btn btn-primary">
@@ -101,10 +109,10 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
           <span data-i18n="btnHeroWin">Download AudiraDesk.exe (Windows 64-bit)</span>
         </a>
-        <a href="#selfhost" class="btn btn-secondary btn-lg">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-          <span data-i18n="btnHeroHost">Self-Host Server Stack</span>
-        </a>
+        <button id="heroOpenLoginBtn" class="btn btn-secondary btn-lg">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+          <span data-i18n="btnHeroConsole">Access Web Console</span>
+        </button>
       </div>
 
       <div class="hero-specs-row">
@@ -244,6 +252,114 @@
     </div>
   </section>
 
+  <!-- Centralized Device Management Showcase (Fleet & Address Book) -->
+  <section id="fleet" class="section" style="border-top:1px solid var(--color-border); background:var(--color-bg-subtle);">
+    <div class="container">
+      <div class="section-tag" data-i18n="tagFleet">Fleet Orchestration</div>
+      <h2 class="section-title" data-i18n="titleFleet">Centralized Address Book &amp; Device Inventory</h2>
+      <p class="section-desc" data-i18n="descFleet">
+        Manage hundreds of workstations, unattended servers, and edge kiosks with granular role-based tags and real-time operational status.
+      </p>
+
+      <div class="console-showcase-wrap">
+        <div class="console-topbar">
+          <div class="console-tab-group">
+            <button class="console-tab-pill active" data-filter="all">All Endpoints (14)</button>
+            <button class="console-tab-pill" data-filter="windows">Windows (8)</button>
+            <button class="console-tab-pill" data-filter="linux">Linux Nodes (4)</button>
+            <button class="console-tab-pill" data-filter="macos">macOS Studios (2)</button>
+          </div>
+          <div class="console-search-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="fleetSearchInput" placeholder="Filter by host, ID, or tag...">
+          </div>
+        </div>
+
+        <div class="mgmt-table-wrap">
+          <table class="mgmt-table">
+            <thead>
+              <tr>
+                <th>ENDPOINT &amp; HOSTNAME</th>
+                <th>REMOTE ID</th>
+                <th>OPERATING SYSTEM</th>
+                <th>GROUP / TAG</th>
+                <th>LATENCY</th>
+                <th>SECURITY</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="fleetTableBody">
+              <tr>
+                <td>
+                  <div class="mgmt-node-cell">
+                    <span class="mgmt-node-status online" title="Online"></span>
+                    <strong style="color:var(--color-text-heading);">eng-cad-workstation-11</strong>
+                  </div>
+                </td>
+                <td><code>512 884 901</code></td>
+                <td>Windows 11 Pro (23H2)</td>
+                <td><span class="mgmt-tag-pill">Engineering</span></td>
+                <td style="color:var(--color-emerald); font-family:var(--font-mono); font-weight:700;">12 ms</td>
+                <td><span style="color:var(--color-primary); font-size:0.75rem;">X25519 E2EE</span></td>
+                <td>
+                  <button class="mgmt-action-btn" onclick="quickConnect('512 884 901')">Connect</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="mgmt-node-cell">
+                    <span class="mgmt-node-status online" title="Online"></span>
+                    <strong style="color:var(--color-text-heading);">audira-proxmox-dc01</strong>
+                  </div>
+                </td>
+                <td><code>914 302 774</code></td>
+                <td>Ubuntu 24.04 LTS</td>
+                <td><span class="mgmt-tag-pill">Production Server</span></td>
+                <td style="color:var(--color-emerald); font-family:var(--font-mono); font-weight:700;">2 ms (LAN)</td>
+                <td><span style="color:var(--color-primary); font-size:0.75rem;">X25519 E2EE</span></td>
+                <td>
+                  <button class="mgmt-action-btn" onclick="quickConnect('914 302 774')">Connect</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="mgmt-node-cell">
+                    <span class="mgmt-node-status online" title="Online"></span>
+                    <strong style="color:var(--color-text-heading);">devops-bastion-gateway</strong>
+                  </div>
+                </td>
+                <td><code>204 119 635</code></td>
+                <td>Debian 12 Bookworm</td>
+                <td><span class="mgmt-tag-pill">Security Ops</span></td>
+                <td style="color:var(--color-emerald); font-family:var(--font-mono); font-weight:700;">8 ms</td>
+                <td><span style="color:var(--color-primary); font-size:0.75rem;">X25519 E2EE</span></td>
+                <td>
+                  <button class="mgmt-action-btn" onclick="quickConnect('204 119 635')">Connect</button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="mgmt-node-cell">
+                    <span class="mgmt-node-status standby" title="Standby"></span>
+                    <strong style="color:var(--color-text-heading);">macbook-studio-m2</strong>
+                  </div>
+                </td>
+                <td><code>773 409 182</code></td>
+                <td>macOS 14 Sonoma (Apple M2)</td>
+                <td><span class="mgmt-tag-pill">Creative Lab</span></td>
+                <td style="color:var(--color-amber); font-family:var(--font-mono); font-weight:700;">34 ms</td>
+                <td><span style="color:var(--color-primary); font-size:0.75rem;">X25519 E2EE</span></td>
+                <td>
+                  <button class="mgmt-action-btn" onclick="quickConnect('773 409 182')">Connect</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Bento Box Architecture Grid -->
   <section id="architecture" class="section">
     <div class="container">
@@ -372,6 +488,89 @@
     </div>
   </section>
 
+  <!-- Competitor Comparison Matrix (Focus Pattern) -->
+  <section id="comparison" class="comparison-section">
+    <div class="container">
+      <div class="section-tag" data-i18n="tagComparison">Feature Matrix</div>
+      <h2 class="section-title" data-i18n="titleComparison">Why Engineering Teams Choose Audira Desk</h2>
+      <p class="section-desc" data-i18n="descComparison">
+        Compare core architecture, deployment independence, and total cost of ownership against commercial and community solutions.
+      </p>
+
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th style="width:28%;">CAPABILITY / ARCHITECTURE</th>
+              <th class="col-highlight" style="width:26%;">AUDIRA DESK (SELF-HOSTED)</th>
+              <th style="width:16%;">TEAMVIEWER</th>
+              <th style="width:15%;">ANYDESK</th>
+              <th style="width:15%;">RUSTDESK COMMUNITY</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Licensing &amp; Cost</strong></td>
+              <td class="col-highlight"><span class="check-pill">100% Free / MIT License</span></td>
+              <td><span class="cross-pill">$54.90 / mo / user</span></td>
+              <td><span class="cross-pill">$29.90 / mo / user</span></td>
+              <td><span class="check-pill">Free Community</span></td>
+            </tr>
+            <tr>
+              <td><strong>Self-Hosted Relay Server</strong></td>
+              <td class="col-highlight"><span class="check-pill">Included (Docker Cluster)</span></td>
+              <td><span class="cross-pill">No (Closed Cloud)</span></td>
+              <td><span class="cross-pill">Enterprise Tier Only</span></td>
+              <td><span class="check-pill">Manual Setup</span></td>
+            </tr>
+            <tr>
+              <td><strong>Direct P2P UDP NAT Traversal</strong></td>
+              <td class="col-highlight"><span class="check-pill">Zero-Lag UDP Hole-Punch</span></td>
+              <td><span class="cross-pill">Proprietary Tunnel</span></td>
+              <td><span class="cross-pill">Proprietary Network</span></td>
+              <td><span class="check-pill">Supported</span></td>
+            </tr>
+            <tr>
+              <td><strong>Hardware Video Codecs</strong></td>
+              <td class="col-highlight"><span class="check-pill">AV1 / VP9 / H.265 (60 FPS)</span></td>
+              <td><span class="cross-pill">H.264 Proprietary</span></td>
+              <td><span class="cross-pill">DeskRT Proprietary</span></td>
+              <td><span class="cross-pill">VP8 / H.264 Standard</span></td>
+            </tr>
+            <tr>
+              <td><strong>Windows UAC &amp; Secure Desktop</strong></td>
+              <td class="col-highlight"><span class="check-pill">Included Elevated Service</span></td>
+              <td><span class="check-pill">Supported</span></td>
+              <td><span class="check-pill">Supported</span></td>
+              <td><span class="check-pill">Supported</span></td>
+            </tr>
+            <tr>
+              <td><strong>Data Sovereignty &amp; Telemetry</strong></td>
+              <td class="col-highlight"><span class="check-pill">Zero Telemetry Leaks</span></td>
+              <td><span class="cross-pill">Closed Analytics Cloud</span></td>
+              <td><span class="cross-pill">Cloud Registry Sync</span></td>
+              <td><span class="check-pill">Configurable</span></td>
+            </tr>
+            <tr>
+              <td><strong>Unattended Endpoints Allowed</strong></td>
+              <td class="col-highlight"><span class="check-pill">Unlimited Devices</span></td>
+              <td><span class="cross-pill">Capped by license</span></td>
+              <td><span class="cross-pill">Capped by tier</span></td>
+              <td><span class="check-pill">Unlimited</span></td>
+            </tr>
+            <tr>
+              <td><strong>Complete Source Code Access</strong></td>
+              <td class="col-highlight"><span class="check-pill">100% Open-Source GitHub</span></td>
+              <td><span class="cross-pill">Closed Source</span></td>
+              <td><span class="cross-pill">Closed Source</span></td>
+              <td><span class="check-pill">Open Source</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- Docker & Self-Hosting Hub -->
   <section id="selfhost" class="section" style="border-top:1px solid var(--color-border); background:var(--color-bg-subtle);">
     <div class="container">
@@ -450,8 +649,94 @@
     </div>
   </section>
 
+  <!-- Regional Relay Latency Matrix Benchmark -->
+  <section id="latency" class="section">
+    <div class="container">
+      <div class="section-tag" data-i18n="tagLatency">Global Edge Network</div>
+      <h2 class="section-title" data-i18n="titleLatency">Real-Time Regional Relay Latency Benchmark</h2>
+      <p class="section-desc" data-i18n="descLatency">
+        Test round-trip time (RTT) from your current client connection to private and federated edge relay nodes worldwide.
+      </p>
+
+      <div class="latency-widget-wrap">
+        <div class="latency-widget-header">
+          <div>
+            <h3 style="font-size:1.1rem; font-weight:700; color:var(--color-text-heading); margin-bottom:0.25rem;">Active Edge Nodes</h3>
+            <p style="font-size:0.8125rem; color:var(--color-text-muted);">Measured using ICMP and UDP NAT packet handshakes</p>
+          </div>
+          <button id="runBenchmarkBtn" class="btn btn-secondary" style="font-size:0.8125rem; padding:0.5rem 1rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span id="benchmarkBtnText">Run Live Benchmark</span>
+          </button>
+        </div>
+
+        <div class="latency-cards-grid">
+          <div class="latency-node-card">
+            <div class="latency-node-city">
+              <span>Jakarta Hub (Proxmox LAN)</span>
+              <span style="font-size:0.7rem; color:var(--color-emerald); font-family:var(--font-mono);">LOCAL DC</span>
+            </div>
+            <div class="latency-ms-val" id="latJakarta">1 ms</div>
+            <div class="latency-bar-track">
+              <div class="latency-bar-fill" style="width: 5%;"></div>
+            </div>
+            <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">192.168.100.175</div>
+          </div>
+
+          <div class="latency-node-card">
+            <div class="latency-node-city">
+              <span>Cloudflare Edge (audira.my.id)</span>
+              <span style="font-size:0.7rem; color:var(--color-primary); font-family:var(--font-mono);">ANYCAST</span>
+            </div>
+            <div class="latency-ms-val" id="latCloudflare">12 ms</div>
+            <div class="latency-bar-track">
+              <div class="latency-bar-fill medium" style="width: 15%;"></div>
+            </div>
+            <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">audira.my.id : 443</div>
+          </div>
+
+          <div class="latency-node-card">
+            <div class="latency-node-city">
+              <span>Singapore (AP-Southeast)</span>
+              <span style="font-size:0.7rem; color:var(--color-emerald); font-family:var(--font-mono);">P2P RELAY</span>
+            </div>
+            <div class="latency-ms-val" id="latSingapore">24 ms</div>
+            <div class="latency-bar-track">
+              <div class="latency-bar-fill medium" style="width: 25%;"></div>
+            </div>
+            <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">sg-relay.audira.net</div>
+          </div>
+
+          <div class="latency-node-card">
+            <div class="latency-node-city">
+              <span>Tokyo (AP-Northeast)</span>
+              <span style="font-size:0.7rem; color:var(--color-text-muted); font-family:var(--font-mono);">REGIONAL</span>
+            </div>
+            <div class="latency-ms-val" id="latTokyo">58 ms</div>
+            <div class="latency-bar-track">
+              <div class="latency-bar-fill high" style="width: 45%;"></div>
+            </div>
+            <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">jp-relay.audira.net</div>
+          </div>
+
+          <div class="latency-node-card">
+            <div class="latency-node-city">
+              <span>Frankfurt (EU-Central)</span>
+              <span style="font-size:0.7rem; color:var(--color-text-muted); font-family:var(--font-mono);">GLOBAL</span>
+            </div>
+            <div class="latency-ms-val" id="latFrankfurt">142 ms</div>
+            <div class="latency-bar-track">
+              <div class="latency-bar-fill high" style="width: 75%;"></div>
+            </div>
+            <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">eu-relay.audira.net</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Multi-Platform Downloads Matrix -->
-  <section id="downloads" class="section">
+  <section id="downloads" class="section" style="border-top:1px solid var(--color-border); background:var(--color-bg-subtle);">
     <div class="container">
       <div class="section-tag" data-i18n="tagDownloads">Platform Binaries</div>
       <h2 class="section-title" data-i18n="titleDownloads">Download Audira Desk for Desktop and Mobile</h2>
@@ -526,7 +811,7 @@
   </section>
 
   <!-- FAQ Accordion (Clean Vector Glyphs) -->
-  <section id="faq" class="section" style="border-top:1px solid var(--color-border); background:var(--color-bg-subtle);">
+  <section id="faq" class="section">
     <div class="container">
       <div class="section-tag" data-i18n="tagFaq">Knowledge Base</div>
       <h2 class="section-title" data-i18n="titleFaq">Frequently Asked Questions</h2>
@@ -621,8 +906,10 @@
           <ul>
             <li><a href="#architecture">NAT Traversal</a></li>
             <li><a href="#telemetry">Hardware Codec</a></li>
+            <li><a href="#fleet">Fleet Inventory</a></li>
+            <li><a href="#comparison">Compare Stack</a></li>
             <li><a href="#selfhost">Docker Stack</a></li>
-            <li><a href="#cluster">Relay Cluster</a></li>
+            <li><a href="#latency">Global Latency</a></li>
             <li><a href="#downloads">Downloads</a></li>
           </ul>
         </div>
@@ -664,6 +951,145 @@
       </div>
     </div>
   </footer>
+
+  <!-- Management Console Auth Modal (Accessible & Swiss Styled) -->
+  <div id="loginModal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="brand-icon" style="width:26px; height:26px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v3H9V7z"/></svg>
+          </div>
+          <div>
+            <h3 id="modalTitle" class="modal-title" data-i18n="modalTitle">Fleet Management Console</h3>
+            <p style="font-size:0.75rem; color:var(--color-text-dim); margin-top:0.1rem;" data-i18n="modalSubtitle">Private Cluster Admin Portal</p>
+          </div>
+        </div>
+        <button id="closeLoginBtn" class="modal-close-btn" title="Close dialog" aria-label="Close dialog">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Modal Tabs -->
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" data-tab="credentials" data-i18n="tabCredentials">Credentials</button>
+        <button class="modal-tab-btn" data-tab="sso" data-i18n="tabSso">OIDC / SSO</button>
+        <button class="modal-tab-btn" data-tab="token" data-i18n="tabHardwareToken">2FA / Token</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- View 1: Standard Credentials Form -->
+        <div id="authViewCredentials" class="auth-form-view active">
+          <div class="auth-quick-fill">
+            <span>Demo Operator:</span>
+            <code>audira@audira.my.id</code>
+            <button id="quickFillBtn" class="quick-fill-btn">Autofill</button>
+          </div>
+
+          <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin();">
+            <div class="form-group">
+              <label for="adminEmail" class="form-label" data-i18n="lblEmail">Operator Email / Username</label>
+              <div class="form-input-wrap">
+                <input type="email" id="adminEmail" class="form-input" required autocomplete="username" placeholder="name@audira.my.id" value="audira@audira.my.id">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="adminPassword" class="form-label" data-i18n="lblPassword">Access Password</label>
+              <div class="form-input-wrap">
+                <input type="password" id="adminPassword" class="form-input" required autocomplete="current-password" placeholder="••••••••••••" value="Sigma1993">
+                <button type="button" id="togglePasswordVisibility" class="form-input-addon" title="Toggle password visibility">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row-meta">
+              <label class="form-checkbox-label">
+                <input type="checkbox" id="rememberSession" checked>
+                <span data-i18n="lblRemember">Remember workstation</span>
+              </label>
+              <a href="#cluster" class="form-link" data-i18n="lnkKeyRecovery">Cluster Keys</a>
+            </div>
+
+            <button type="submit" id="adminLoginSubmitBtn" class="btn btn-primary" style="width:100%; padding:0.75rem;">
+              <span id="loginBtnLabel" data-i18n="btnSignIn">Sign In to Fleet Control</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- View 2: SSO / OIDC Provider Form -->
+        <div id="authViewSso" class="auth-form-view">
+          <p style="font-size:0.8125rem; color:var(--color-text-muted); margin-bottom:1.25rem;" data-i18n="ssoDesc">
+            Authenticate using your enterprise identity provider or open OAuth directory:
+          </p>
+
+          <div class="sso-providers-list">
+            <button class="sso-btn" onclick="simulateSso('GitHub')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              <span>Continue with GitHub Organization</span>
+            </button>
+            <button class="sso-btn" onclick="simulateSso('Google Workspace')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>
+              <span>Google Workspace SSO (audira.my.id)</span>
+            </button>
+            <button class="sso-btn" onclick="simulateSso('LDAP / Active Directory')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+              <span>On-Premise LDAP / Active Directory</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- View 3: Hardware Token / 2FA View -->
+        <div id="authViewToken" class="auth-form-view">
+          <p style="font-size:0.8125rem; color:var(--color-text-muted); margin-bottom:1.25rem;" data-i18n="tokenDesc">
+            Enter the 6-digit verification code from your TOTP Authenticator (Google Authenticator, YubiKey):
+          </p>
+
+          <form onsubmit="event.preventDefault(); simulateTotpSubmit();">
+            <div class="form-group">
+              <label for="totpCode" class="form-label">Authenticator TOTP Code</label>
+              <input type="text" id="totpCode" class="form-input" style="font-family:var(--font-mono); font-size:1.3rem; letter-spacing:0.3em; text-align:center;" maxlength="6" placeholder="000000" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:0.75rem;">
+              <span>Verify Security Key</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Authenticated State Profile View -->
+        <div id="authViewLoggedIn" class="auth-logged-in-view">
+          <div class="user-avatar-badge">AD</div>
+          <h4 class="user-display-name">Agus Dwi Rianto</h4>
+          <p class="user-display-role">CLUSTER SUPERADMIN &bull; ROOT</p>
+
+          <div class="user-cluster-summary">
+            <div>
+              <div class="user-stat-val">14</div>
+              <div class="user-stat-lbl">ACTIVE NODES</div>
+            </div>
+            <div>
+              <div class="user-stat-val" style="color:var(--color-emerald);">100%</div>
+              <div class="user-stat-lbl">HEALTH</div>
+            </div>
+            <div>
+              <div class="user-stat-val" style="color:var(--color-primary);">1 ms</div>
+              <div class="user-stat-lbl">AVG LATENCY</div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <button class="btn btn-primary" onclick="navigateToFleet()">
+              <span>Open Fleet Management Dashboard</span>
+            </button>
+            <button class="btn btn-outline" onclick="handleSignOut()">
+              <span>Sign Out Session</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="js/app.js"></script>

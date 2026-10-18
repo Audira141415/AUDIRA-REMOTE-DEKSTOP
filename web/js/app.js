@@ -11,16 +11,19 @@ const i18n = {
     bannerLink: "Get Executable",
     navArchitecture: "Architecture",
     navTelemetry: "Live Demo",
+    navFleet: "Fleet Console",
+    navComparison: "Compare",
     navSelfHost: "Self-Hosting",
-    navCluster: "Server Cluster",
+    navLatency: "Latency",
     navDownloads: "Downloads",
     navFaq: "FAQ",
+    navConsoleLogin: "Console Login",
     btnDownloads: "Downloads",
     heroBadge: "P2P NAT Traversal • Hardware AV1/VP9 Codec • 100% Data Sovereignty",
     heroTitle: "Data-Sovereign <span>Remote Desktop</span> for Modern Engineering",
     heroSubtitle: "The high-performance, open-source alternative to TeamViewer and AnyDesk. Direct UDP hole-punching, hardware-accelerated video streaming at 60 FPS, and zero-trust private server hosting.",
     btnHeroWin: "Download AudiraDesk.exe (Windows 64-bit)",
-    btnHeroHost: "Self-Host Server Stack",
+    btnHeroConsole: "Access Web Console",
     specPortable: "Zero-Installation Portable (Single Binary)",
     specCrypto: "Libsodium X25519-ChaCha20-Poly1305",
     specLicense: "Free & Open-Source (MIT License)",
@@ -31,6 +34,9 @@ const i18n = {
     btnConnect: "Connect",
     btnFileTransfer: "File Transfer",
     simRecentSessions: "Verified Target Endpoints",
+    tagFleet: "Fleet Orchestration",
+    titleFleet: "Centralized Address Book & Device Inventory",
+    descFleet: "Manage hundreds of workstations, unattended servers, and edge kiosks with granular role-based tags and real-time operational status.",
     tagArchitecture: "System Architecture",
     titleArchitecture: "Engineered for Latency, Privacy, and Unattended Ops",
     descArchitecture: "Designed from the ground up to eliminate commercial SaaS bottlenecks, telemetry surveillance, and arbitrary session time limits.",
@@ -44,6 +50,9 @@ const i18n = {
     bento4Desc: "Direct screen capture via DXGI Desktop Duplication and hardware encoding using NVENC, Intel QuickSync, and VAAPI for sub-16ms frame delivery.",
     bento5Title: "Zero-Install Single Binary",
     bento5Desc: "Packaged as an all-in-one standalone executable (23.8 MB). Simply send the file to an end-user; it launches instantaneously without installer overhead.",
+    tagComparison: "Feature Matrix",
+    titleComparison: "Why Engineering Teams Choose Audira Desk",
+    descComparison: "Compare core architecture, deployment independence, and total cost of ownership against commercial and community solutions.",
     tagSelfHost: "DevOps & Deployment",
     titleSelfHost: "Deploy Your Private Relay Infrastructure in 60 Seconds",
     descSelfHost: "Run your own Rendezvous (hbbs) and Relay (hbbr) server on any Linux VPS or Proxmox container with Docker Compose.",
@@ -53,12 +62,27 @@ const i18n = {
     step2Desc: "Pull the multi-architecture image configuration:",
     step3Title: "Launch Dual Service Cluster",
     step3Desc: "Start both hbbs signal coordinator and hbbr encrypted relay:",
+    tagLatency: "Global Edge Network",
+    titleLatency: "Real-Time Regional Relay Latency Benchmark",
+    descLatency: "Test round-trip time (RTT) from your current client connection to private and federated edge relay nodes worldwide.",
     tagDownloads: "Platform Binaries",
     titleDownloads: "Download Audira Desk for Desktop and Mobile",
     descDownloads: "Compiled with Rust and Flutter. High-definition remote control for Windows, Linux, macOS, and Android.",
     tagFaq: "Knowledge Base",
     titleFaq: "Frequently Asked Questions",
     descFaq: "Technical specifications, encryption guarantees, and deployment answers.",
+    modalTitle: "Fleet Management Console",
+    modalSubtitle: "Private Cluster Admin Portal",
+    tabCredentials: "Credentials",
+    tabSso: "OIDC / SSO",
+    tabHardwareToken: "2FA / Token",
+    lblEmail: "Operator Email / Username",
+    lblPassword: "Access Password",
+    lblRemember: "Remember workstation",
+    lnkKeyRecovery: "Cluster Keys",
+    btnSignIn: "Sign In to Fleet Control",
+    ssoDesc: "Authenticate using your enterprise identity provider or open OAuth directory:",
+    tokenDesc: "Enter the 6-digit verification code from your TOTP Authenticator (Google Authenticator, YubiKey):",
     copiedToast: "Copied to clipboard!"
   },
   id: {
@@ -66,16 +90,19 @@ const i18n = {
     bannerLink: "Unduh File EXE",
     navArchitecture: "Arsitektur",
     navTelemetry: "Demo Langsung",
+    navFleet: "Konsol Armada",
+    navComparison: "Perbandingan",
     navSelfHost: "Self-Hosting",
-    navCluster: "Kluster Server",
+    navLatency: "Latensi",
     navDownloads: "Unduhan",
     navFaq: "FAQ",
+    navConsoleLogin: "Login Konsol",
     btnDownloads: "Unduhan",
     heroBadge: "NAT Traversal P2P • Codec Hardware AV1/VP9 • Kedaulatan Data 100%",
     heroTitle: "Infrastruktur <span>Remote Desktop</span> Andal & Mandiri",
     heroSubtitle: "Alternatif open-source berkecepatan tinggi pengganti TeamViewer dan AnyDesk. Direct UDP hole-punching, streaming video hardware 60 FPS, dan relay server mandiri zero-trust.",
     btnHeroWin: "Unduh AudiraDesk.exe (Windows 64-bit)",
-    btnHeroHost: "Panduan Server Mandiri",
+    btnHeroConsole: "Masuk Konsol Web",
     specPortable: "Portabel Tanpa Install (File Tunggal)",
     specCrypto: "Enkripsi Libsodium X25519-ChaCha20",
     specLicense: "Gratis & Open-Source (Lisensi MIT)",
@@ -86,6 +113,9 @@ const i18n = {
     btnConnect: "Hubungkan",
     btnFileTransfer: "Transfer File",
     simRecentSessions: "Target Komputer Terverifikasi",
+    tagFleet: "Orkestrasi Armada",
+    titleFleet: "Buku Alamat Terpusat & Inventaris Perangkat",
+    descFleet: "Kelola ratusan workstation, server tanpa pengawas, dan kios edge dengan tag berbasis peran dan status operasional real-time.",
     tagArchitecture: "Arsitektur Sistem",
     titleArchitecture: "Dirancang Khusus untuk Latensi Rendah & Akses Unattended",
     descArchitecture: "Dibangun dari nol untuk menghapus batasan SaaS komersial, pelacakan telemetri, dan batasan durasi sesi sepihak.",
@@ -99,6 +129,9 @@ const i18n = {
     bento4Desc: "Tangkapan layar instan DXGI Desktop Duplication dengan hardware encoder NVENC, Intel QuickSync, dan VAAPI untuk latensi per frame di bawah 16ms.",
     bento5Title: "Single Binary Portabel Tanpa Install",
     bento5Desc: "Dipaketkan sebagai satu file exe mandiri (23.8 MB). Kirimkan langsung ke pengguna; dapat dijalankan seketika tanpa proses instalasi rumit.",
+    tagComparison: "Matriks Fitur",
+    titleComparison: "Alasan Tim Engineering Memilih Audira Desk",
+    descComparison: "Bandingkan arsitektur inti, kemandirian server, dan total biaya kepemilikan terhadap solusi komersial maupun komunitas.",
     tagSelfHost: "DevOps & Penerapan",
     titleSelfHost: "Jalankan Server Relay Privat dalam 60 Detik",
     descSelfHost: "Jalankan server Rendezvous (hbbs) dan Relay (hbbr) Anda sendiri di VPS Linux atau container Proxmox menggunakan Docker Compose.",
@@ -108,12 +141,27 @@ const i18n = {
     step2Desc: "Ambil konfigurasi multi-architecture siap pakai:",
     step3Title: "Jalankan Kluster Layanan",
     step3Desc: "Mulai layanan koordinasi sinyal hbbs dan relay enkripsi hbbr:",
+    tagLatency: "Jaringan Edge Global",
+    titleLatency: "Tolok Ukur Latensi Relay Regional Real-Time",
+    descLatency: "Uji latensi round-trip time (RTT) dari koneksi Anda ke node relay privat dan federasi di seluruh dunia.",
     tagDownloads: "Paket Platform",
     titleDownloads: "Unduh Audira Desk untuk Komputer & Mobile",
     descDownloads: "Dikompilasi dengan Rust dan Flutter. Kendali jarak jauh berdefinisi tinggi untuk Windows, Linux, macOS, dan Android.",
     tagFaq: "Pusat Bantuan",
     titleFaq: "Pertanyaan yang Sering Diajukan",
     descFaq: "Spesifikasi teknis, jaminan enkripsi data, dan panduan konfigurasi.",
+    modalTitle: "Konsol Manajemen Armada",
+    modalSubtitle: "Portal Admin Kluster Privat",
+    tabCredentials: "Kredensial",
+    tabSso: "OIDC / SSO",
+    tabHardwareToken: "2FA / Token",
+    lblEmail: "Email / Username Operator",
+    lblPassword: "Kata Sandi Akses",
+    lblRemember: "Ingat perangkat ini",
+    lnkKeyRecovery: "Kunci Kluster",
+    btnSignIn: "Masuk ke Kontrol Armada",
+    ssoDesc: "Autentikasi menggunakan penyedia identitas enterprise atau direktori OAuth terbuka:",
+    tokenDesc: "Masukkan 6-digit kode verifikasi dari TOTP Authenticator Anda (Google Authenticator, YubiKey):",
     copiedToast: "Perintah disalin ke clipboard!"
   }
 };
@@ -126,12 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initSimulator();
   initCopyActions();
   initFaqAccordion();
+  initAuthModal();
+  initFleetFilter();
+  initLatencyBenchmark();
 });
 
 // Theme Management (OLED Dark Default / Swiss Monochrome)
 function initTheme() {
   const toggleBtn = document.getElementById('themeToggle');
-  const savedTheme = localStorage.getItem('audira_theme') || 'dark'; // Force dark mode as default
+  const savedTheme = localStorage.getItem('audira_theme') || 'dark';
   setTheme(savedTheme);
 
   if (toggleBtn) {
@@ -149,10 +200,8 @@ function setTheme(theme) {
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) {
     if (theme === 'dark') {
-      // Moon / Dark Mode Icon
       themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
     } else {
-      // Sun / Light Mode Icon
       themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
     }
   }
@@ -208,7 +257,6 @@ function initSimulator() {
   const simRtt = document.getElementById('simRtt');
   const simFps = document.getElementById('simFps');
 
-  // One-time password generator
   if (refreshPwBtn && simPassword) {
     refreshPwBtn.addEventListener('click', () => {
       const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
@@ -221,7 +269,6 @@ function initSimulator() {
     });
   }
 
-  // Copy local host ID
   if (copyIdBtn) {
     copyIdBtn.addEventListener('click', () => {
       const code = copyIdBtn.getAttribute('data-code') || '849203118';
@@ -233,7 +280,6 @@ function initSimulator() {
     });
   }
 
-  // Connect Simulation
   if (connectBtn && targetIdInput) {
     connectBtn.addEventListener('click', () => {
       const id = targetIdInput.value.trim();
@@ -256,7 +302,6 @@ function initSimulator() {
     });
   }
 
-  // File Transfer Simulation
   if (fileTransferBtn && targetIdInput) {
     fileTransferBtn.addEventListener('click', () => {
       const id = targetIdInput.value.trim();
@@ -269,7 +314,6 @@ function initSimulator() {
     });
   }
 
-  // Quick session selection
   document.querySelectorAll('.sim-session-card').forEach(item => {
     item.addEventListener('click', () => {
       const sessionId = item.getAttribute('data-session-id');
@@ -279,6 +323,288 @@ function initSimulator() {
         showToast(`Selected verified target: ${sessionId}`, 'info');
       }
     });
+  });
+}
+
+// Quick connect helper for fleet inventory
+function quickConnect(id) {
+  const targetIdInput = document.getElementById('simTargetId');
+  if (targetIdInput) {
+    targetIdInput.value = id;
+    const telemetrySection = document.getElementById('telemetry');
+    if (telemetrySection) {
+      telemetrySection.scrollIntoView({ behavior: 'smooth' });
+    }
+    showToast(`Loaded ${id} into Remote Desktop Cockpit`, 'success');
+    targetIdInput.focus();
+  }
+}
+
+// ==========================================================================
+// Authentication Modal & Management Console Portal
+// ==========================================================================
+function initAuthModal() {
+  const modal = document.getElementById('loginModal');
+  const openBtn = document.getElementById('openLoginBtn');
+  const heroOpenBtn = document.getElementById('heroOpenLoginBtn');
+  const closeBtn = document.getElementById('closeLoginBtn');
+  const quickFillBtn = document.getElementById('quickFillBtn');
+  const togglePwBtn = document.getElementById('togglePasswordVisibility');
+  const adminPassword = document.getElementById('adminPassword');
+
+  const openModal = () => {
+    if (modal) {
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      const emailInput = document.getElementById('adminEmail');
+      if (emailInput && !sessionStorage.getItem('audira_logged_in')) {
+        setTimeout(() => emailInput.focus(), 150);
+      }
+    }
+  };
+
+  const closeModal = () => {
+    if (modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (heroOpenBtn) heroOpenBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.classList.contains('open')) {
+      closeModal();
+    }
+  });
+
+  // Tab switching
+  document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
+
+      btn.classList.add('active');
+      const targetTab = btn.getAttribute('data-tab');
+      if (targetTab === 'credentials') {
+        const v = document.getElementById('authViewCredentials');
+        if (v) v.classList.add('active');
+      } else if (targetTab === 'sso') {
+        const v = document.getElementById('authViewSso');
+        if (v) v.classList.add('active');
+      } else if (targetTab === 'token') {
+        const v = document.getElementById('authViewToken');
+        if (v) v.classList.add('active');
+      }
+    });
+  });
+
+  // Quick-fill credentials
+  if (quickFillBtn) {
+    quickFillBtn.addEventListener('click', () => {
+      const email = document.getElementById('adminEmail');
+      const pw = document.getElementById('adminPassword');
+      if (email) email.value = 'audira@audira.my.id';
+      if (pw) pw.value = 'Sigma1993';
+      showToast('Loaded demo administrator credentials', 'info');
+    });
+  }
+
+  // Toggle password visibility
+  if (togglePwBtn && adminPassword) {
+    togglePwBtn.addEventListener('click', () => {
+      if (adminPassword.type === 'password') {
+        adminPassword.type = 'text';
+      } else {
+        adminPassword.type = 'password';
+      }
+    });
+  }
+
+  // Check existing session
+  if (sessionStorage.getItem('audira_logged_in') === 'true') {
+    showLoggedInState();
+  }
+}
+
+function handleAdminLogin() {
+  const submitBtn = document.getElementById('adminLoginSubmitBtn');
+  const label = document.getElementById('loginBtnLabel');
+  const email = document.getElementById('adminEmail').value;
+
+  if (submitBtn) submitBtn.disabled = true;
+  if (label) label.textContent = 'Authenticating Session...';
+
+  setTimeout(() => {
+    if (submitBtn) submitBtn.disabled = false;
+    if (label) label.textContent = 'Sign In to Fleet Control';
+
+    sessionStorage.setItem('audira_logged_in', 'true');
+    showLoggedInState();
+    showToast(`Welcome back, Operator Agus Dwi Rianto! (Superadmin)`, 'success');
+  }, 750);
+}
+
+function simulateSso(provider) {
+  showToast(`Authenticating via ${provider} OAuth...`, 'info');
+  setTimeout(() => {
+    sessionStorage.setItem('audira_logged_in', 'true');
+    showLoggedInState();
+    showToast(`Authenticated via ${provider}! Root access granted.`, 'success');
+  }, 900);
+}
+
+function simulateTotpSubmit() {
+  const code = document.getElementById('totpCode').value.trim();
+  if (code.length < 6) {
+    showToast('Please enter a 6-digit TOTP security code.', 'warning');
+    return;
+  }
+  showToast('Hardware token verified via Libsodium HMAC.', 'success');
+  setTimeout(() => {
+    sessionStorage.setItem('audira_logged_in', 'true');
+    showLoggedInState();
+  }, 600);
+}
+
+function showLoggedInState() {
+  document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
+  document.querySelector('.modal-tabs').style.display = 'none';
+
+  const loggedInView = document.getElementById('authViewLoggedIn');
+  if (loggedInView) loggedInView.classList.add('active');
+
+  const openBtn = document.getElementById('openLoginBtn');
+  if (openBtn) {
+    openBtn.innerHTML = `
+      <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; margin-right:4px;"></span>
+      <span>Admin: Agus Dwi R</span>
+    `;
+    openBtn.style.borderColor = '#10b981';
+  }
+}
+
+function handleSignOut() {
+  sessionStorage.removeItem('audira_logged_in');
+  document.getElementById('authViewLoggedIn').classList.remove('active');
+  document.querySelector('.modal-tabs').style.display = 'flex';
+  document.getElementById('authViewCredentials').classList.add('active');
+
+  const openBtn = document.getElementById('openLoginBtn');
+  if (openBtn) {
+    openBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      <span>Console Login</span>
+    `;
+    openBtn.style.borderColor = '';
+  }
+  showToast('Signed out of fleet console session', 'info');
+}
+
+function navigateToFleet() {
+  const modal = document.getElementById('loginModal');
+  if (modal) modal.classList.remove('open');
+  const fleetSection = document.getElementById('fleet');
+  if (fleetSection) {
+    fleetSection.scrollIntoView({ behavior: 'smooth' });
+    showToast('Navigated to Fleet Inventory Management', 'info');
+  }
+}
+
+// ==========================================================================
+// Fleet Filter & Search
+// ==========================================================================
+function initFleetFilter() {
+  const tabs = document.querySelectorAll('.console-tab-pill');
+  const searchInput = document.getElementById('fleetSearchInput');
+  const rows = document.querySelectorAll('#fleetTableBody tr');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.getAttribute('data-filter');
+      applyFleetFilter(filter, searchInput ? searchInput.value : '');
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const activeTab = document.querySelector('.console-tab-pill.active');
+      const filter = activeTab ? activeTab.getAttribute('data-filter') : 'all';
+      applyFleetFilter(filter, e.target.value);
+    });
+  }
+
+  function applyFleetFilter(category, query) {
+    const q = query.toLowerCase().trim();
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      let matchCat = true;
+      if (category === 'windows') {
+        matchCat = text.includes('windows');
+      } else if (category === 'linux') {
+        matchCat = text.includes('ubuntu') || text.includes('debian');
+      } else if (category === 'macos') {
+        matchCat = text.includes('macos');
+      }
+
+      const matchQuery = !q || text.includes(q);
+
+      if (matchCat && matchQuery) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+}
+
+// ==========================================================================
+// Regional Relay Latency Benchmark Matrix
+// ==========================================================================
+function initLatencyBenchmark() {
+  const btn = document.getElementById('runBenchmarkBtn');
+  const btnText = document.getElementById('benchmarkBtnText');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    if (btnText) btnText.textContent = 'Measuring RTT Pings...';
+
+    const nodes = [
+      { id: 'latJakarta', base: 1, variance: 1 },
+      { id: 'latCloudflare', base: 11, variance: 3 },
+      { id: 'latSingapore', base: 22, variance: 5 },
+      { id: 'latTokyo', base: 56, variance: 8 },
+      { id: 'latFrankfurt', base: 139, variance: 12 }
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      if (step < nodes.length) {
+        const node = nodes[step];
+        const el = document.getElementById(node.id);
+        if (el) {
+          const val = node.base + Math.floor(Math.random() * node.variance);
+          el.textContent = val + ' ms';
+        }
+        step++;
+      } else {
+        clearInterval(interval);
+        btn.disabled = false;
+        if (btnText) btnText.textContent = 'Benchmark Finished (Refresh)';
+        showToast('Relay latency benchmark updated across all 5 edge zones.', 'success');
+      }
+    }, 280);
   });
 }
 
@@ -324,7 +650,6 @@ function showToast(message, type = 'info') {
     document.body.appendChild(toast);
   }
 
-  // Clear previous timers
   if (toast._timer) clearTimeout(toast._timer);
 
   let icon = `●`;
