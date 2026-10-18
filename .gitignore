@@ -72,3 +72,4 @@ flutter/windows/flutter/ephemeral/
 **/flutter/ephemeral/**
 flutter/build/**
 /flutter/build/
+scripts/cloudflare_ddns.json

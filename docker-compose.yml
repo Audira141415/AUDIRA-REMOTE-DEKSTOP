@@ -2,7 +2,7 @@ services:
   hbbs:
     container_name: audira-hbbs
     image: rustdesk/rustdesk-server:latest
-    command: hbbs -r 192.168.100.175:21117 -k _
+    command: hbbs -r desk.audira.my.id:21117 -k _
     volumes:
       - ./data:/root
     network_mode: "host"
