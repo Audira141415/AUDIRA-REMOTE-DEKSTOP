@@ -167,11 +167,19 @@ pub(crate) fn is_allowed_windows_session_scoped_peer(
     client_session_id: Option<u32>,
     expected_session_id: Option<u32>,
 ) -> bool {
-    client_is_system
-        || matches!(
-            (client_session_id, expected_session_id),
-            (Some(client), Some(expected)) if client == expected
-        )
+    if client_is_system {
+        return true;
+    }
+    if let (Some(client), Some(expected)) = (client_session_id, expected_session_id) {
+        if client == expected {
+            return true;
+        }
+        // Allow interactive user sessions when server runs as SYSTEM service in Session 0
+        if expected == 0 && client > 0 {
+            return true;
+        }
+    }
+    false
 }
 
 #[cfg(windows)]

@@ -1,6 +1,12 @@
 @echo off
-title AUDIRA DESK - Update Service & Program Files
-echo Mengarahkan ke PowerShell Administrator...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"\"%~dp0scripts\update_installed_service.ps1\"\"' -Verb RunAs"
-echo Selesai.
-timeout /t 3 >nul
+title Audira Desk - Update Installed Service
+cd /d "%~dp0"
+echo ==============================================================================
+echo       Memperbarui Program Files & Windows Service Audira Desk...
+echo ==============================================================================
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\update_installed_service.ps1"
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Update exited with error code %errorlevel%
+    pause
+)

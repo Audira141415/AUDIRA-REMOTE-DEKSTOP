@@ -44,13 +44,11 @@ if ($runningProcesses) {
 
 # 2. Periksa keberadaan binary executable Audira Desk yang sudah terkompilasi
 $potentialBinaries = @(
-    "C:\Program Files\Audira Desk\AudiraDesk.exe",
-    (Join-Path $rootDir "AudiraDesk.exe"),
     (Join-Path $rootDir "dist\AudiraDesk-v1.5.0-x86_64.exe"),
-    (Join-Path $rootDir "dist\AUDIRA-v1.5.0-x86_64.exe"),
-    (Join-Path $rootDir "AUDIRA.exe"),
-    (Join-Path $rootDir "audira.exe"),
-    (Join-Path $rootDir "rustdesk.exe")
+    (Join-Path $rootDir "AudiraDesk.exe"),
+    (Join-Path $rootDir "flutter\build\windows\x64\runner\Release\audira.exe"),
+    "C:\Program Files\Audira Desk\AudiraDesk.exe",
+    (Join-Path $rootDir "audira.exe")
 )
 
 $foundBinary = $null

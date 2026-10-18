@@ -470,19 +470,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         return buildInstallCard(
             "Status", "Your installation is lower version.", "Click to upgrade",
             () async {
-          try {
-            final candidates = [
-              File(r'F:\AUDIRA-REMOTE-DEKSTOP\web\index.html'),
-              File('${Directory.current.path}/web/index.html'),
-            ];
-            for (final f in candidates) {
-              if (f.existsSync()) {
-                await launchUrl(Uri.file(f.path));
-                return;
-              }
-            }
-          } catch (_) {}
-          await launchUrl(Uri.parse('https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP'));
+          await rustDeskWinManager.closeAllSubWindows();
+          bind.mainGotoInstall();
         });
       }
     } else if (isMacOS) {
