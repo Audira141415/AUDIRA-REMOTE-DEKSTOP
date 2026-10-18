@@ -135,6 +135,31 @@ fn windows_portable_service_ipc_allows_logon_helper_executable(
     }
 }
 
+#[cfg(target_os = "windows")]
+#[inline]
+fn windows_service_ipc_allows_gui_and_service_binaries(
+    peer_exe: &Path,
+    current_exe: &Path,
+    _postfix: &str,
+) -> bool {
+    let peer_stem = peer_exe
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let current_stem = current_exe
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+
+    let is_valid_audira_name = |stem: &str| {
+        stem.contains("audira") || stem.contains("rustdesk")
+    };
+
+    is_valid_audira_name(&peer_stem) && is_valid_audira_name(&current_stem)
+}
+
 #[cfg(windows)]
 #[inline]
 pub(crate) fn is_allowed_windows_session_scoped_peer(
@@ -481,6 +506,10 @@ fn ensure_peer_executable_matches_current_by_pid(peer_pid: u32, postfix: &str) -
     }
     #[cfg(target_os = "windows")]
     if windows_portable_service_ipc_allows_logon_helper_executable(&peer_exe, postfix) {
+        return Ok(());
+    }
+    #[cfg(target_os = "windows")]
+    if windows_service_ipc_allows_gui_and_service_binaries(&peer_exe, &current_exe, postfix) {
         return Ok(());
     }
     bail!(

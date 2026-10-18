@@ -9,6 +9,7 @@ Write-Host ""
 
 $targetProcesses = @(
     "AudiraDesk",
+    "Audira Desk",
     "audira",
     "rustdesk",
     "RustDesk",
@@ -46,11 +47,21 @@ foreach ($port in $ports) {
     }
 }
 
+# Hentikan Windows Service jika aktif
+$services = @("Audira Desk", "RustDesk", "rustdesk")
+foreach ($svc in $services) {
+    $s = Get-Service -Name $svc -ErrorAction SilentlyContinue
+    if ($s -and $s.Status -eq "Running") {
+        Write-Host "  [-] Menghentikan service Windows: $svc..." -ForegroundColor Yellow
+        Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Start-Sleep -Seconds 1
 
 Write-Host ""
 Write-Host "[VERIFIKASI] Status Proses:" -ForegroundColor Cyan
-$stillRunning = Get-Process -Name "audira", "rustdesk", "RustDesk" -ErrorAction SilentlyContinue
+$stillRunning = Get-Process -Name "audira", "AudiraDesk", "Audira Desk", "rustdesk", "RustDesk" -ErrorAction SilentlyContinue
 if ($stillRunning) {
     Write-Host "  [!] Masih ada proses yang berjalan: PID $($stillRunning.Id -join ', ')" -ForegroundColor Red
 } else {

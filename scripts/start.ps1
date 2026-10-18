@@ -118,8 +118,8 @@ if ([string]::IsNullOrWhiteSpace($choice)) {
 
 switch ($choice) {
     "1" {
-        $targetExe = Join-Path $rootDir "rustdesk.exe"
-        $downloadUrl = "https://github.com/rustdesk/rustdesk/releases/download/1.5.0/rustdesk-1.5.0-x86_64.exe"
+        $targetExe = Join-Path $rootDir "AudiraDesk.exe"
+        $downloadUrl = "http://192.168.100.175:5050/dist/AudiraDesk-v1.5.0-x86_64.exe"
         Write-Host "[DOWNLOAD] Mengunduh binary resmi AUDIRA Remote Desktop v1.5.0..." -ForegroundColor Cyan
         Write-Host "Sumber: $downloadUrl" -ForegroundColor Gray
         try {
@@ -131,9 +131,18 @@ switch ($choice) {
             Start-Process -FilePath $targetExe
             exit 0
         } catch {
-            Write-Host "[ERROR] Gagal mengunduh binary: $_" -ForegroundColor Red
-            Read-Host "Tekan Enter untuk keluar..."
-            exit 1
+            Write-Host "[WARN] Gagal dari server lokal, mencoba unduh dari GitHub Releases..." -ForegroundColor Yellow
+            $fallbackUrl = "https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases/download/v1.5.0/AudiraDesk-v1.5.0-x86_64.exe"
+            try {
+                $webClient.DownloadFile($fallbackUrl, $targetExe)
+                Write-Host "[SUCCESS] Berhasil mengunduh $targetExe dari GitHub!" -ForegroundColor Green
+                Start-Process -FilePath $targetExe
+                exit 0
+            } catch {
+                Write-Host "[ERROR] Gagal mengunduh binary: $_" -ForegroundColor Red
+                Read-Host "Tekan Enter untuk keluar..."
+                exit 1
+            }
         }
     }
     "2" {
