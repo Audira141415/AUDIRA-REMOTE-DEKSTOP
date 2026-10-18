@@ -1,5 +1,8 @@
 # AUDIRA Remote Desktop - Production Standalone Single-File Packager
 # Menghasilkan file tunggal AudiraDesk.exe murni (seperti AnyDesk) tanpa dependensi luar
+param (
+    [switch]$Rebuild
+)
 $ErrorActionPreference = "Stop"
 
 Write-Host "==============================================================================" -ForegroundColor Cyan
@@ -17,7 +20,7 @@ $standaloneExe = Join-Path $distDir "AudiraDesk-v1.5.0-x86_64.exe"
 $rootExe = Join-Path $rootDir "AudiraDesk.exe"
 
 # 1. Periksa apakah binary produksi sudah terkompilasi
-if (Test-Path $standaloneExe) {
+if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
     $fSize = [math]::Round((Get-Item $standaloneExe).Length / 1MB, 2)
     Write-Host "[OK] Binary produksi standalone sudah tersedia:" -ForegroundColor Green
     Write-Host "     * File   : $standaloneExe" -ForegroundColor White
@@ -26,14 +29,22 @@ if (Test-Path $standaloneExe) {
 } else {
     Write-Host "[BUILD] Membangun binary produksi standalone via libs/portable..." -ForegroundColor Yellow
     
-    # Siapkan staging payload jika belum ada
+    # Ambil payload dari flutter release build
+    $runnerReleaseDir = Join-Path $rootDir "flutter\build\windows\x64\runner\Release"
     $payloadDir = Join-Path $distDir "audira_payload"
-    if (-not (Test-Path $payloadDir)) {
-        New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
-        Copy-Item -Path "$env:LOCALAPPDATA\rustdesk\*" -Destination $payloadDir -Recurse -Force
-        if (Test-Path "$payloadDir\rustdesk.exe") {
-            Rename-Item -Path "$payloadDir\rustdesk.exe" -NewName "AudiraDesk.exe" -Force
-        }
+    if (Test-Path $payloadDir) { Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue }
+    New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
+    
+    if (Test-Path $runnerReleaseDir) {
+        Copy-Item -Path "$runnerReleaseDir\*" -Destination $payloadDir -Recurse -Force
+    } else {
+        Write-Host "[WARN] Runner release belum terkompilasi di $runnerReleaseDir, menggunakan cache appdata..." -ForegroundColor Yellow
+        Copy-Item -Path "$env:LOCALAPPDATA\audiradesk\*" -Destination $payloadDir -Recurse -Force
+    }
+    
+    if (Test-Path "$payloadDir\audira.exe") {
+        Copy-Item -Path "$payloadDir\audira.exe" -Destination "$payloadDir\AudiraDesk.exe" -Force
+        Copy-Item -Path "$payloadDir\audira.exe" -Destination "$payloadDir\Audira Desk.exe" -Force
     }
     
     python (Join-Path $rootDir "libs\portable\generate.py") -f $payloadDir -o (Join-Path $rootDir "libs\portable") -e "AudiraDesk.exe"

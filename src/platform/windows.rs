@@ -1464,7 +1464,7 @@ fn get_install_info_with_subkey(subkey: String) -> (String, String, String, Stri
 }
 
 pub fn copy_raw_cmd(src_raw: &str, _raw: &str, _path: &str) -> ResultType<String> {
-    let parent = PathBuf::from(src_raw)
+    let parent = Path::new(src_raw)
         .parent()
         .ok_or(anyhow!("Can't get parent directory of {src_raw}"))?;
     if parent.join("Cargo.toml").exists() || parent.join("target").exists() {
@@ -1492,6 +1492,15 @@ pub fn copy_exe_cmd(src_exe: &str, exe: &str, path: &str) -> ResultType<String> 
     Ok(format!(
         "
         {main_exe}
+        if exist \"{path}\\AudiraDesk.exe\" (
+            copy /Y \"{path}\\AudiraDesk.exe\" \"{exe}\"
+        )
+        if exist \"{path}\\audira.exe\" (
+            copy /Y \"{path}\\audira.exe\" \"{exe}\"
+        )
+        if exist \"{exe}\" (
+            copy /Y \"{exe}\" \"{path}\\AudiraDesk.exe\"
+        )
         copy /Y \"{ORIGIN_PROCESS_EXE}\" \"{path}\\{broker_exe}\"
         ",
         ORIGIN_PROCESS_EXE = win_topmost_window::ORIGIN_PROCESS_EXE,
@@ -3978,7 +3987,7 @@ fn run_after_run_cmds(silent: bool) {
     if !silent {
         log::debug!("Spawn new window");
         allow_err!(std::process::Command::new("cmd")
-            .args(&["/c", "timeout", "/t", "2", "&", &format!("{exe}")])
+            .args(&["/c", &format!("timeout /t 2 >nul & start \"\" \"{}\"", exe)])
             .creation_flags(winapi::um::winbase::CREATE_NO_WINDOW)
             .spawn());
     }

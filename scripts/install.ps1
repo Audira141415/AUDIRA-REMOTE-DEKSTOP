@@ -33,7 +33,7 @@ if (-not $isAdmin) {
         Write-Host "[ERROR] Gagal meminta elevasi otomatis: $_" -ForegroundColor Red
         Write-Host "Silakan klik kanan pada 'install.bat' dan pilih 'Run as administrator'." -ForegroundColor Yellow
         Write-Host ""
-        Read-Host "Tekan Enter untuk keluar..."
+        if (-not $Silent) { Read-Host "Tekan Enter untuk keluar..." }
         exit 1
     }
 }

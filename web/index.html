@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audira Desk - The Open-Source Remote Desktop Software</title>
+  <meta name="description" content="Audira Desk is a fast, secure, open-source remote desktop alternative to TeamViewer and AnyDesk with self-hosting capabilities, end-to-end encryption, and zero installation needed.">
+  
+  <!-- Google Fonts Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z'/><circle cx='8' cy='12' r='2'/><path d='M16 10h-4v4h4v-4z'/></svg>">
+</head>
+<body>
+
+  <!-- Top Announcement Banner -->
+  <aside class="top-banner">
+    <div class="top-banner-inner container">
+      <span class="top-banner-badge">NEW RELEASE</span>
+      <span data-i18n="bannerText">Official Release: Audira Desk v1.5.0 Standalone Single-EXE is now available!</span>
+      <a href="#downloads" class="top-banner-link">Download Now &rarr;</a>
+    </div>
+  </aside>
+
+  <!-- Sticky Header Navigation -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="#" class="brand-logo">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm3 3h4v4H7V9zm6 0h4v2h-4V9zm0 3h4v2h-4v-2zm-6 3h10v1H7v-1z"/>
+          </svg>
+        </div>
+        <span>Audira<span style="color:var(--color-primary)">Desk</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#features" class="nav-link" data-i18n="navFeatures">Features</a></li>
+          <li><a href="#self-host" class="nav-link" data-i18n="navSelfHost">Self-Hosting</a></li>
+          <li><a href="#scenarios" class="nav-link" data-i18n="navScenarios">Scenarios</a></li>
+          <li><a href="#downloads" class="nav-link" data-i18n="navDownload">Downloads</a></li>
+          <li><a href="#faq" class="nav-link" data-i18n="navFaq">FAQ</a></li>
+          <li>
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener" class="nav-link" style="display:flex;align-items:center;gap:0.4rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+              GitHub
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Language Switcher -->
+        <button id="langToggle" class="lang-toggle" title="Switch Language" aria-label="Switch Language">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span id="langLabel">EN</span>
+        </button>
+
+        <!-- Dark/Light Theme Switcher -->
+        <button id="themeToggle" class="theme-toggle" title="Toggle Theme" aria-label="Toggle Theme">
+          <span id="themeIcon">☀️</span>
+        </button>
+
+        <!-- CTA Download -->
+        <a href="#downloads" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span data-i18n="navDownload">Downloads</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-glow-bg"></div>
+    <div class="container hero-content">
+      <div class="hero-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"/></svg>
+        <span data-i18n="heroBadge">Fast • Open Source • Self-Hosted Alternative</span>
+      </div>
+
+      <h1 class="hero-title" data-i18n="heroTitle">
+        The Fast Open-Source <span>Remote Access & Support</span> Software
+      </h1>
+
+      <p class="hero-subtitle" data-i18n="heroSubtitle">
+        Switch from TeamViewer, AnyDesk, and RustDesk to Audira Desk for a secure, private, and lightning-fast remote desktop experience with your own self-hosted relay servers.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#downloads" class="btn btn-primary btn-lg" id="mainDownloadBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
+          <span data-i18n="btnDownloadWin">Download for Windows (v1.5.0)</span>
+        </a>
+        <a href="#self-host" class="btn btn-secondary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          <span data-i18n="btnSelfHost">Self-Hosting Guide</span>
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-i18n="metaNoInstall">Zero Install Needed (Single-File)</span>
+        </div>
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-i18n="metaEncrypted">End-to-End Encrypted (X25519)</span>
+        </div>
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-i18n="metaFree">Free & Open-Source (MIT)</span>
+        </div>
+      </div>
+
+      <!-- Interactive Remote Desktop Preview Simulator -->
+      <div class="preview-container">
+        <div class="app-mockup">
+          <!-- Titlebar -->
+          <div class="app-titlebar">
+            <div class="window-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="app-titlebar-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4z"/></svg>
+              Audira Desk v1.5.0 - Ready
+            </div>
+            <div style="font-size:0.75rem; color:var(--color-text-muted); font-family:var(--font-mono);">
+              relay.audira.net
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="app-body">
+            <!-- Sidebar: Your Desk -->
+            <div class="app-sidebar">
+              <div>
+                <h3 style="font-size:1.1rem; font-weight:800; color:var(--color-text-heading); margin-bottom:0.25rem;" data-i18n="yourDesk">Your Desktop</h3>
+                <p style="font-size:0.8rem; color:var(--color-text-muted);" data-i18n="deskDesc">Share your ID and password to allow remote control</p>
+              </div>
+
+              <div class="card-box">
+                <div class="card-box-label">Your ID</div>
+                <div class="id-display">
+                  <span>849 203 118</span>
+                  <button class="copy-btn" data-code="849203118" title="Copy ID">Copy</button>
+                </div>
+              </div>
+
+              <div class="card-box">
+                <div class="card-box-label">One-Time Password</div>
+                <div class="password-display">
+                  <span id="simPassword">x7k9p2</span>
+                  <button id="refreshPwBtn" class="copy-btn" title="Generate New Password">&#x21bb;</button>
+                </div>
+              </div>
+
+              <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span id="simStatus" data-i18n="ready">Ready for connection</span>
+              </div>
+            </div>
+
+            <!-- Main Area: Remote Control & Recent Sessions -->
+            <div class="app-main-area">
+              <div class="connect-panel">
+                <h3 style="font-size:1.15rem; font-weight:800; color:var(--color-text-heading);" data-i18n="controlDesk">Control Remote Desktop</h3>
+                <p style="font-size:0.85rem; color:var(--color-text-muted);" data-i18n="controlDesc">Enter the remote ID of the computer you want to connect to</p>
+
+                <div class="connect-input-group">
+                  <input type="text" id="simTargetId" class="connect-input" placeholder="Enter 9-digit Remote ID" data-i18n-placeholder="inputPlaceholder">
+                  <button id="simConnectBtn" class="btn btn-primary" data-i18n="btnConnect">Connect</button>
+                  <button class="btn btn-secondary" data-i18n="btnFileTransfer">File Transfer</button>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:0.85rem; font-weight:700; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem;" data-i18n="recentSessions">
+                  Recent Sessions
+                </div>
+
+                <div class="session-list">
+                  <div class="session-item" data-session-id="512 884 901">
+                    <div class="session-device">
+                      <div class="session-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
+                      </div>
+                      <div>
+                        <div class="session-name">Engineering-Workstation-Win11</div>
+                        <div class="session-id">512 884 901</div>
+                      </div>
+                    </div>
+                    <span style="font-size:0.8rem; color:var(--color-success); font-weight:600;">Online</span>
+                  </div>
+
+                  <div class="session-item" data-session-id="914 302 774">
+                    <div class="session-device">
+                      <div class="session-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                      </div>
+                      <div>
+                        <div class="session-name">Ubuntu-Compute-Server</div>
+                        <div class="session-id">914 302 774</div>
+                      </div>
+                    </div>
+                    <span style="font-size:0.8rem; color:var(--color-success); font-weight:600;">Online</span>
+                  </div>
+
+                  <div class="session-item" data-session-id="204 119 635">
+                    <div class="session-device">
+                      <div class="session-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.18c.63-.78 1.06-1.85.94-2.93-.91.04-2.02.61-2.67 1.38-.58.68-1.09 1.77-.95 2.83 1.02.08 2.05-.5 2.68-1.28z"/></svg>
+                      </div>
+                      <div>
+                        <div class="session-name">MacBook-Pro-Studio</div>
+                        <div class="session-id">204 119 635</div>
+                      </div>
+                    </div>
+                    <span style="font-size:0.8rem; color:var(--color-text-muted);">Last seen 2h ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid Section -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="whySelfHost">Why Self-Hosting?</span>
+        <h2 class="section-title">Built for Performance, Privacy, and Complete Control</h2>
+        <p class="section-desc" data-i18n="whySelfHostDesc">Stop paying expensive SaaS subscriptions with unpredictable latency, vendor lock-in, and privacy risks.</p>
+      </div>
+
+      <div class="feature-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat1Title">Full Data Sovereignty</h3>
+          <p class="feature-desc" data-i18n="feat1Desc">Keep your company's network and confidential screen data entirely inside your private cloud or on-premise infrastructure.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat2Title">Zero Latency & Hardware Codec</h3>
+          <p class="feature-desc" data-i18n="feat2Desc">Real-time AV1, VP9, and H.264/H.265 hardware video encoding and WASAPI loopback audio powered by Opus at 60 FPS.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h18"/></svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat3Title">Single-File Standalone Portable</h3>
+          <p class="feature-desc" data-i18n="feat3Desc">Runs instantly without installation like AnyDesk. No complex dependencies or administrative requirements for quick support.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat4Title">Cross-Platform Ecosystem</h3>
+          <p class="feature-desc" data-i18n="feat4Desc">Native clients for Windows 10/11, Linux (Debian/AppImage), macOS, Android, and direct browser-based HTML5 Web Client.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat5Title">Enterprise Security & UAC</h3>
+          <p class="feature-desc" data-i18n="feat5Desc">Privileged Windows background service enables seamless UAC prompt navigation and Secure Desktop elevation.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+          </div>
+          <h3 class="feature-title" data-i18n="feat6Title">Custom Relay & Rendezvous</h3>
+          <p class="feature-desc" data-i18n="feat6Desc">Deploy high-throughput rendezvous mediator and encrypted relay nodes (<code>audira-server</code> / <code>hbbs</code> / <code>hbbr</code>) in 60 seconds.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Docker Self-Hosting Guide Section -->
+  <section id="self-host" class="section" style="background-color: var(--color-bg-card-subtle);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Quick Start</span>
+        <h2 class="section-title">Host Your Own Rendezvous & Relay Server</h2>
+        <p class="section-desc">Keep 100% of your remote connection data within your private infrastructure with our official Docker container stack.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div>
+          <!-- Step 1 -->
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3 data-i18n="step1Title">Step 1: Install Docker & Docker Compose</h3>
+              <p>Prepare your Linux VPS (Ubuntu, Debian, CentOS) or Docker-enabled host:</p>
+              <div class="code-block">
+                <span>curl -fsSL https://get.docker.com | sh</span>
+                <button class="copy-btn" data-code="curl -fsSL https://get.docker.com | sh">Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3 data-i18n="step2Title">Step 2: Download compose.yml</h3>
+              <p>Fetch the ready-to-run cluster configuration containing <code>hbbs</code> and <code>hbbr</code>:</p>
+              <div class="code-block">
+                <span>curl -O https://raw.githubusercontent.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/main/docker-compose.yml</span>
+                <button class="copy-btn" data-code="curl -O https://raw.githubusercontent.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/main/docker-compose.yml">Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3 data-i18n="step3Title">Step 3: Run Cluster</h3>
+              <p>Launch both the Rendezvous Signal server and Encrypted Relay mediator:</p>
+              <div class="code-block">
+                <span>docker compose up -d</span>
+                <button class="copy-btn" data-code="docker compose up -d">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Preview Mockup -->
+        <div class="card-box" style="background:var(--color-code-bg); border-color:rgba(255,255,255,0.1); padding:1.5rem; font-family:var(--font-mono); font-size:0.85rem; color:#94a3b8; box-shadow:var(--shadow-xl);">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.75rem;">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+            <span style="color:#f8fafc; font-size:0.8rem; margin-left:auto;">bash - audira-server</span>
+          </div>
+          <div style="line-height:1.7;">
+            <p><span style="color:#10b981;">root@relay-node:~#</span> docker compose up -d</p>
+            <p style="color:#64748b;">[+] Running 2/2</p>
+            <p style="color:#38bdf8;"> ✔ Container audira-hbbs  Started</p>
+            <p style="color:#38bdf8;"> ✔ Container audira-hbbr  Started</p>
+            <br>
+            <p><span style="color:#10b981;">root@relay-node:~#</span> docker compose logs --tail=4</p>
+            <p style="color:#e2e8f0;">[INFO] hbbs listening on UDP: 21116, TCP: 21115, 21116, 21118</p>
+            <p style="color:#e2e8f0;">[INFO] Key pair generated: id_ed25519.pub</p>
+            <p style="color:#e2e8f0;">[INFO] hbbr listening on TCP: 21117, 21119</p>
+            <p style="color:#10b981;">[SUCCESS] Relay cluster online and ready for connections.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Usage Demographics & Statistics -->
+  <section id="scenarios" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Empowering Everyone</span>
+        <h2 class="section-title">Designed for Diverse Operational Scenarios</h2>
+        <p class="section-desc">From enterprise sysadmins to distributed remote engineering teams worldwide.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">37%</div>
+          <div class="stat-label">IT Support & Helpdesk</div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.5rem;">Instant client connection with zero setup needed.</p>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value">25%</div>
+          <div class="stat-label">SysAdmin & DevOps</div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.5rem;">Unattended headless server management & terminal.</p>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value">29%</div>
+          <div class="stat-label">Remote Work & WFH</div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.5rem;">Ultra-smooth 60 FPS video & audio streaming.</p>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value">9%</div>
+          <div class="stat-label">Industrial & IoT Devices</div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-top:0.5rem;">Lightweight footprint for edge kiosks and POS.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-Platform Downloads Matrix -->
+  <section id="downloads" class="section" style="background-color: var(--color-bg-card-subtle);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Get Started Today</span>
+        <h2 class="section-title">Download Audira Desk for All Your Devices</h2>
+        <p class="section-desc">Experience seamless high-definition remote control across every desktop and mobile platform.</p>
+      </div>
+
+      <div class="download-grid">
+        <!-- Windows (Featured) -->
+        <div class="download-card highlight">
+          <div class="download-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
+          </div>
+          <h3 class="download-title">Windows 10 / 11 / Server</h3>
+          <p class="download-desc">Standalone Portable Single-File EXE & MSI Installer. Includes elevated background service for UAC support.</p>
+          <a href="../dist/AudiraDesk-v1.5.0-x86_64.exe" class="btn btn-primary" style="width:100%;" download>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Download .exe (64-bit)
+          </a>
+          <span style="font-size:0.75rem; color:var(--color-text-muted);">Version 1.5.0 • Standalone Single-EXE</span>
+        </div>
+
+        <!-- Linux -->
+        <div class="download-card">
+          <div class="download-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          </div>
+          <h3 class="download-title">Linux (Ubuntu / Debian / Arch)</h3>
+          <p class="download-desc">Debian package, universal AppImage, and flatpak with full Wayland / X11 PipeWire display capture.</p>
+          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="btn btn-secondary" style="width:100%;">
+            Download .deb / AppImage
+          </a>
+          <span style="font-size:0.75rem; color:var(--color-text-muted);">Ubuntu 20.04+, Debian 11+, Fedora 36+</span>
+        </div>
+
+        <!-- macOS -->
+        <div class="download-card">
+          <div class="download-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.18c.63-.78 1.06-1.85.94-2.93-.91.04-2.02.61-2.67 1.38-.58.68-1.09 1.77-.95 2.83 1.02.08 2.05-.5 2.68-1.28z"/></svg>
+          </div>
+          <h3 class="download-title">macOS</h3>
+          <p class="download-desc">Universal DMG compatible with Apple Silicon (M1/M2/M3) and Intel Macs with ScreenCaptureKit.</p>
+          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="btn btn-secondary" style="width:100%;">
+            Download .dmg
+          </a>
+          <span style="font-size:0.75rem; color:var(--color-text-muted);">macOS 11.0 Big Sur or later</span>
+        </div>
+
+        <!-- Android -->
+        <div class="download-card">
+          <div class="download-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.414 13.8533 8.08 12 8.08s-3.5902.334-5.1367.87l-2.0223-3.503a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+          </div>
+          <h3 class="download-title">Android</h3>
+          <p class="download-desc">Remote control host or client for Android smartphones, tablets, and interactive TVs.</p>
+          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="btn btn-secondary" style="width:100%;">
+            Download .apk
+          </a>
+          <span style="font-size:0.75rem; color:var(--color-text-muted);">Android 6.0 Marshmallow+</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion Section -->
+  <section id="faq" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Frequently Asked Questions</span>
+        <h2 class="section-title">Everything You Need to Know</h2>
+        <p class="section-desc">Have questions? Here are the most common inquiries regarding Audira Desk deployment and security.</p>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-card">
+          <div class="faq-question">
+            <span>How does Audira Desk differ from TeamViewer and AnyDesk?</span>
+            <span class="faq-icon">&#x25BC;</span>
+          </div>
+          <div class="faq-answer">
+            Audira Desk is 100% free and open-source under the MIT license, created by Agus Dwi R (AUDIRA). Unlike commercial alternatives that enforce arbitrary session time limits or raise expensive commercial-use flags, Audira Desk allows you to deploy and self-host your own rendezvous signal server and encrypted relay cluster for total independence and zero monthly fees.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-question">
+            <span>Do I need to install it before giving or receiving remote support?</span>
+            <span class="faq-icon">&#x25BC;</span>
+          </div>
+          <div class="faq-answer">
+            No! Audira Desk is distributed as a single-file portable executable. Simply download <code>AudiraDesk.exe</code> and double-click to run it instantly without administrative privileges. If you need permanent unattended access or system-level UAC elevation, you can click "Install" at any time from within the application.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-question">
+            <span>How secure is my connection and screen data?</span>
+            <span class="faq-icon">&#x25BC;</span>
+          </div>
+          <div class="faq-answer">
+            Audira Desk uses cryptographic primitives powered by Libsodium: Curve25519 (X25519) key exchange and ChaCha20-Poly1305 symmetric authenticated encryption. All video streams, audio packets, clipboard buffers, and keystrokes are encrypted end-to-end. Even relay servers cannot inspect your remote desktop contents.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-question">
+            <span>Can I interact with Windows UAC (User Account Control) prompts remotely?</span>
+            <span class="faq-icon">&#x25BC;</span>
+          </div>
+          <div class="faq-answer">
+            Yes! When installed as a system service, Audira Desk runs an elevated background service (<code>Audira Desk</code> service) that has permissions to interact with Windows Secure Desktop and UAC elevation prompts without dropping the session.
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <div class="faq-question">
+            <span>How do I configure my own private relay server?</span>
+            <span class="faq-icon">&#x25BC;</span>
+          </div>
+          <div class="faq-answer">
+            Open Audira Desk &gt; Settings &gt; Network &gt; Unlock Network Settings. Fill in your server's IP or domain name in the "ID/Rendezvous Server" and "Relay Server" fields, paste your server's public key into the "Key" field, and click Apply. All sessions will immediately route through your private cloud.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo" style="margin-bottom:0.75rem;">
+            <div class="brand-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm3 3h4v4H7V9zm6 0h4v2h-4V9zm0 3h4v2h-4v-2zm-6 3h10v1H7v-1z"/>
+              </svg>
+            </div>
+            <span>Audira<span style="color:var(--color-primary)">Desk</span></span>
+          </div>
+          <p>
+            The open-source, self-hosted remote desktop software built for modern speed, enterprise security, and complete data independence.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#downloads">Downloads</a></li>
+            <li><a href="#self-host">Self-Hosting</a></li>
+            <li><a href="#scenarios">Scenarios</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener">GitHub Repository</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener">Release Notes</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/issues" target="_blank" rel="noopener">Issue Tracker</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Author</h4>
+          <ul>
+            <li><span style="color:var(--color-text-heading); font-weight:700;">Agus Dwi R (AUDIRA)</span></li>
+            <li><a href="https://github.com/Audira141415" target="_blank" rel="noopener">@Audira141415</a></li>
+            <li><span style="color:var(--color-text-muted); font-size:0.85rem;">All Rights Reserved &bull; MIT</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026 <strong>Audira Remote Desktop</strong> by Agus Dwi R (AUDIRA). Licensed under MIT.
+        </div>
+        <div style="display:flex; gap:1.5rem;">
+          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener">GitHub</a>
+          <a href="#downloads">Downloads</a>
+          <a href="#self-host">Docker Server</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>
