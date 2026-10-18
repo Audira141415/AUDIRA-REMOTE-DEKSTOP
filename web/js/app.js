@@ -512,11 +512,7 @@ function handleSignOut() {
 function navigateToFleet() {
   const modal = document.getElementById('loginModal');
   if (modal) modal.classList.remove('open');
-  const fleetSection = document.getElementById('fleet');
-  if (fleetSection) {
-    fleetSection.scrollIntoView({ behavior: 'smooth' });
-    showToast('Navigated to Fleet Inventory Management', 'info');
-  }
+  window.location.href = 'admin.html';
 }
 
 // ==========================================================================

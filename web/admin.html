@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audira Desk — Centralized Fleet & Security Control Panel</title>
+  <meta name="description" content="Centralized management console for Audira Remote Desktop. Monitor relay clusters, manage device fleet address books, and configure Telegram & Discord alert integrations.">
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Base Styles & Admin Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f0ff'><path d='M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v3H9V7z'/></svg>">
+</head>
+<body class="admin-body">
+
+  <!-- Top Navigation Bar -->
+  <header class="admin-topbar">
+    <div class="admin-brand">
+      <a href="index.html" class="brand-logo" title="Back to Public Portal" style="font-size:1.05rem;">
+        <div class="brand-icon" style="width:28px; height:28px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm3 3h4v4H7V9zm6 0h4v2h-4V9zm0 3h4v2h-4v-2zm-6 3h10v1H7v-1z"/>
+          </svg>
+        </div>
+        <span>AUDIRA<span class="brand-accent">DESK</span></span>
+        <span class="brand-sub">ADMIN</span>
+      </a>
+
+      <div class="admin-cluster-status">
+        <span class="pulse-dot"></span>
+        <span>audira-web-hub (192.168.100.175)</span>
+      </div>
+    </div>
+
+    <div class="admin-user-menu">
+      <div class="admin-user-badge">
+        <div class="admin-avatar">AD</div>
+        <span>Agus Dwi Rianto</span>
+        <span class="nav-badge-pill" style="margin-left:0.25rem;">ROOT</span>
+      </div>
+
+      <a href="index.html" class="btn btn-outline btn-sm" title="Exit to Landing Page">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+        <span>Exit Console</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Shell Layout -->
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div>
+        <div class="admin-nav-heading">Orchestration</div>
+        <div class="admin-nav-group">
+          <div class="admin-nav-item active" data-view="viewOverview">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Overview &amp; Metrics</span>
+          </div>
+          <div class="admin-nav-item" data-view="viewFleet">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>Device Fleet</span>
+            <span class="nav-badge-pill">14</span>
+          </div>
+          <div class="admin-nav-item" data-view="viewSessions">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Session Audit Logs</span>
+          </div>
+        </div>
+
+        <div class="admin-nav-heading">Security &amp; Alerts</div>
+        <div class="admin-nav-group">
+          <div class="admin-nav-item" data-view="viewIntegrations">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span>Telegram &amp; Discord</span>
+            <span class="nav-badge-pill" style="background:rgba(16,185,129,0.15); color:var(--color-emerald); border-color:rgba(16,185,129,0.3);">ALERTS</span>
+          </div>
+          <div class="admin-nav-item" data-view="viewSecurity">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Access Control (ACL)</span>
+          </div>
+          <div class="admin-nav-item" data-view="viewCluster">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            <span>Relay Cluster Config</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-sidebar-footer">
+        <div>AUDIRA DESK CORE v1.5.0</div>
+        <div style="color:var(--color-primary); margin-top:0.25rem;">audira.my.id &bull; MIT</div>
+      </div>
+    </aside>
+
+    <!-- Workspace Viewports -->
+    <main class="admin-workspace">
+      
+      <!-- ====================================================================
+           VIEW 1: OVERVIEW & METRICS
+           ==================================================================== -->
+      <section id="viewOverview" class="view-section active">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Cluster Operations &amp; Real-Time Telemetry</h1>
+            <p class="admin-page-subtitle">Health and throughput telemetry from rendezvous mediator (hbbs) and encrypted relay (hbbr)</p>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="refreshMetrics()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span>Refresh Metrics</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards -->
+        <div class="admin-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Active Remote Sessions</span>
+              <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpiActiveSessions">3</div>
+            <div class="kpi-meta">
+              <span>● 2 Direct UDP P2P &bull; 1 Encrypted Relay</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Fleet Endpoints</span>
+              <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value">14</div>
+            <div class="kpi-meta">
+              <span>● 12 Online &bull; 2 Standby</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Relay Throughput</span>
+              <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" id="kpiThroughput">24.6 MB/s</div>
+            <div class="kpi-meta neutral">
+              <span>AV1 60 FPS Streams Active</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Security &amp; E2EE</span>
+              <div class="kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+            </div>
+            <div class="kpi-value" style="color:var(--color-emerald);">100%</div>
+            <div class="kpi-meta">
+              <span>Libsodium X25519 Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Active Sessions Table -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-card-title">
+              <span class="pulse-dot"></span>
+              <span>Live Established Sessions (Active Pipelines)</span>
+            </div>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--color-text-dim);">Auto-refreshing every 3s</span>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>OPERATOR / CLIENT A</th>
+                  <th>REMOTE TARGET / CLIENT B</th>
+                  <th>PROTOCOL ROUTE</th>
+                  <th>LATENCY</th>
+                  <th>CODEC &amp; FPS</th>
+                  <th>DURATION</th>
+                  <th>BANDWIDTH</th>
+                  <th>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="activeSessionsTable">
+                <tr>
+                  <td>
+                    <div style="font-weight:700; color:var(--color-text-heading);">Agus Dwi R (admin)</div>
+                    <div class="admin-code-cell">192.168.100.10:52410</div>
+                  </td>
+                  <td>
+                    <div style="font-weight:700; color:var(--color-text-heading);">eng-cad-workstation-11</div>
+                    <div class="admin-code-cell">512 884 901</div>
+                  </td>
+                  <td><span class="status-pill online">Direct UDP P2P</span></td>
+                  <td style="font-family:var(--font-mono); color:var(--color-emerald); font-weight:700;">11 ms</td>
+                  <td>AV1 NVENC &bull; 60 FPS</td>
+                  <td style="font-family:var(--font-mono);">00:42:15</td>
+                  <td style="font-family:var(--font-mono);">382 MB</td>
+                  <td>
+                    <button class="btn btn-outline btn-sm" style="color:var(--color-rose); border-color:rgba(244,63,94,0.3);" onclick="terminateSession('512 884 901')">Disconnect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="font-weight:700; color:var(--color-text-heading);">DevOps Engineer #2</div>
+                    <div class="admin-code-cell">114.124.88.21:49182</div>
+                  </td>
+                  <td>
+                    <div style="font-weight:700; color:var(--color-text-heading);">audira-proxmox-dc01</div>
+                    <div class="admin-code-cell">914 302 774</div>
+                  </td>
+                  <td><span class="status-pill online">Direct UDP P2P</span></td>
+                  <td style="font-family:var(--font-mono); color:var(--color-emerald); font-weight:700;">8 ms</td>
+                  <td>VP9 HW &bull; 60 FPS</td>
+                  <td style="font-family:var(--font-mono);">01:14:02</td>
+                  <td style="font-family:var(--font-mono);">1.12 GB</td>
+                  <td>
+                    <button class="btn btn-outline btn-sm" style="color:var(--color-rose); border-color:rgba(244,63,94,0.3);" onclick="terminateSession('914 302 774')">Disconnect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="font-weight:700; color:var(--color-text-heading);">Support Helpdesk</div>
+                    <div class="admin-code-cell">182.253.19.4:58219</div>
+                  </td>
+                  <td>
+                    <div style="font-weight:700; color:var(--color-text-heading);">macbook-studio-m2</div>
+                    <div class="admin-code-cell">773 409 182</div>
+                  </td>
+                  <td><span class="status-pill standby">Encrypted hbbr Relay</span></td>
+                  <td style="font-family:var(--font-mono); color:var(--color-primary); font-weight:700;">32 ms</td>
+                  <td>H.264 VideoToolbox</td>
+                  <td style="font-family:var(--font-mono);">00:08:44</td>
+                  <td style="font-family:var(--font-mono);">94 MB</td>
+                  <td>
+                    <button class="btn btn-outline btn-sm" style="color:var(--color-rose); border-color:rgba(244,63,94,0.3);" onclick="terminateSession('773 409 182')">Disconnect</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 2: DEVICE FLEET (ADDRESS BOOK)
+           ==================================================================== -->
+      <section id="viewFleet" class="view-section">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Device Fleet &amp; Address Book Management</h1>
+            <p class="admin-page-subtitle">Centrally managed endpoints with unattended access, remote terminal, and permission tags</p>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-primary btn-sm" onclick="showAddDeviceModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Enroll New Endpoint</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <div class="admin-toolbar">
+              <input type="text" id="fleetSearchAdmin" class="form-input" style="padding:0.4rem 0.75rem; width:260px;" placeholder="Search by name, ID, or IP...">
+              <select id="fleetGroupFilter" class="form-input" style="padding:0.4rem 0.75rem; width:160px;">
+                <option value="all">All Groups</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Production">Production Servers</option>
+                <option value="Security">Security Bastion</option>
+                <option value="Creative">Creative Lab</option>
+              </select>
+            </div>
+            <div style="font-size:0.75rem; color:var(--color-text-dim); font-family:var(--font-mono);">
+              Showing 14 Registered Devices
+            </div>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="adminFleetTable">
+              <thead>
+                <tr>
+                  <th>HOSTNAME / ALIAS</th>
+                  <th>REMOTE ID</th>
+                  <th>OPERATING SYSTEM</th>
+                  <th>LAN / PUBLIC IP</th>
+                  <th>GROUP TAG</th>
+                  <th>STATUS</th>
+                  <th>UAC ELEVATION</th>
+                  <th>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>eng-cad-workstation-11</strong></td>
+                  <td class="admin-code-cell">512 884 901</td>
+                  <td>Windows 11 Pro 64-bit</td>
+                  <td class="admin-code-cell">192.168.100.45</td>
+                  <td><span class="mgmt-tag-pill">Engineering</span></td>
+                  <td><span class="status-pill online">ONLINE (11ms)</span></td>
+                  <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
+                  <td>
+                    <button class="mgmt-action-btn" onclick="launchSession('512 884 901')">Connect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>audira-proxmox-dc01</strong></td>
+                  <td class="admin-code-cell">914 302 774</td>
+                  <td>Ubuntu 24.04 LTS (Proxmox)</td>
+                  <td class="admin-code-cell">192.168.100.175</td>
+                  <td><span class="mgmt-tag-pill">Production</span></td>
+                  <td><span class="status-pill online">ONLINE (2ms LAN)</span></td>
+                  <td><span style="color:var(--color-emerald); font-weight:700;">Root Service</span></td>
+                  <td>
+                    <button class="mgmt-action-btn" onclick="launchSession('914 302 774')">Connect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>devops-bastion-gateway</strong></td>
+                  <td class="admin-code-cell">204 119 635</td>
+                  <td>Debian 12 Bookworm</td>
+                  <td class="admin-code-cell">192.168.100.2</td>
+                  <td><span class="mgmt-tag-pill">Security</span></td>
+                  <td><span class="status-pill online">ONLINE (8ms)</span></td>
+                  <td><span style="color:var(--color-emerald); font-weight:700;">Root Service</span></td>
+                  <td>
+                    <button class="mgmt-action-btn" onclick="launchSession('204 119 635')">Connect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>macbook-studio-m2</strong></td>
+                  <td class="admin-code-cell">773 409 182</td>
+                  <td>macOS 14 Sonoma (Apple M2)</td>
+                  <td class="admin-code-cell">192.168.100.82</td>
+                  <td><span class="mgmt-tag-pill">Creative</span></td>
+                  <td><span class="status-pill standby">STANDBY (34ms)</span></td>
+                  <td><span style="color:var(--color-text-muted);">Standard</span></td>
+                  <td>
+                    <button class="mgmt-action-btn" onclick="launchSession('773 409 182')">Connect</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>reception-kiosk-surface</strong></td>
+                  <td class="admin-code-cell">449 102 837</td>
+                  <td>Windows 11 IoT Enterprise</td>
+                  <td class="admin-code-cell">192.168.100.110</td>
+                  <td><span class="mgmt-tag-pill">Kiosk</span></td>
+                  <td><span class="status-pill offline">OFFLINE</span></td>
+                  <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
+                  <td>
+                    <button class="btn btn-outline btn-sm" onclick="showToast('Device is offline. Wake-on-LAN packet dispatched.', 'info')">Wake-on-LAN</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 3: SESSION AUDIT LOGS
+           ==================================================================== -->
+      <section id="viewSessions" class="view-section">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Session Audit Trail &amp; Compliance Logs</h1>
+            <p class="admin-page-subtitle">Cryptographically verified logs of all initiated and completed remote connections</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="exportLogsCsv()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <span>Export CSV</span>
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>TIMESTAMP (WIB)</th>
+                  <th>OPERATOR ACCOUNT</th>
+                  <th>TARGET HOST &amp; ID</th>
+                  <th>CONNECTION TYPE</th>
+                  <th>DURATION</th>
+                  <th>TRAFFIC</th>
+                  <th>DISCONNECT REASON</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="admin-code-cell">2026-10-18 15:10:04</td>
+                  <td><strong>Agus Dwi Rianto</strong> (Root)</td>
+                  <td>audira-proxmox-dc01 (914 302 774)</td>
+                  <td><span class="status-pill online">Direct P2P UDP</span></td>
+                  <td style="font-family:var(--font-mono);">00:48:22</td>
+                  <td style="font-family:var(--font-mono);">410 MB</td>
+                  <td>Normal Closure by Operator</td>
+                </tr>
+                <tr>
+                  <td class="admin-code-cell">2026-10-18 14:02:19</td>
+                  <td><strong>Operator IT Helpdesk</strong></td>
+                  <td>eng-cad-workstation-11 (512 884 901)</td>
+                  <td><span class="status-pill online">Direct P2P UDP</span></td>
+                  <td style="font-family:var(--font-mono);">00:15:30</td>
+                  <td style="font-family:var(--font-mono);">128 MB</td>
+                  <td>Normal Closure by Client</td>
+                </tr>
+                <tr>
+                  <td class="admin-code-cell">2026-10-18 11:35:48</td>
+                  <td><strong>Security Bastion Automation</strong></td>
+                  <td>devops-bastion-gateway (204 119 635)</td>
+                  <td><span class="status-pill standby">Relay Tunnel</span></td>
+                  <td style="font-family:var(--font-mono);">00:03:12</td>
+                  <td style="font-family:var(--font-mono);">18 MB</td>
+                  <td>Automated Routine Healthcheck</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 4: INTEGRATIONS (TELEGRAM & DISCORD WEBHOOKS)
+           ==================================================================== -->
+      <section id="viewIntegrations" class="view-section">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Real-Time Notification &amp; Webhook Integrations</h1>
+            <p class="admin-page-subtitle">Instant security alerts, session notifications, and node down heartbeats to Telegram and Discord</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveAllWebhooks()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>Save All Integrations</span>
+          </button>
+        </div>
+
+        <div class="integrations-grid">
+          
+          <!-- Telegram Bot Integration -->
+          <div class="integration-card">
+            <div class="integration-header">
+              <div class="integration-brand-icon icon-tg">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+              </div>
+              <div>
+                <h3 class="integration-title">Telegram Sentinel Bot</h3>
+                <p class="integration-desc">Push alerts directly to your Telegram personal chat or administrator group</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="tgBotToken" class="form-label">Telegram Bot Token (HTTP API)</label>
+              <input type="text" id="tgBotToken" class="form-input" placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ">
+              <div style="font-size:0.6875rem; color:var(--color-text-dim); margin-top:0.25rem;">Create a bot via @BotFather to get your token</div>
+            </div>
+
+            <div class="form-group">
+              <label for="tgChatId" class="form-label">Target Chat ID / Channel ID</label>
+              <input type="text" id="tgChatId" class="form-input" placeholder="e.g. -100192837465 or 987654321">
+            </div>
+
+            <div>
+              <label class="form-label">Notification Trigger Events</label>
+              <div class="event-triggers-wrap">
+                <label class="event-check-row">
+                  <input type="checkbox" id="tgEvtSession" checked>
+                  <span>New Remote Session Established</span>
+                </label>
+                <label class="event-check-row">
+                  <input type="checkbox" id="tgEvtNodeDown" checked>
+                  <span>Node Offline / Heartbeat Timeout</span>
+                </label>
+                <label class="event-check-row">
+                  <input type="checkbox" id="tgEvtUac" checked>
+                  <span>Windows UAC Elevation Prompt Opened</span>
+                </label>
+                <label class="event-check-row">
+                  <input type="checkbox" id="tgEvtAuthFail" checked>
+                  <span>Failed Authentication / Brute-force Attempt</span>
+                </label>
+              </div>
+            </div>
+
+            <button class="btn btn-secondary btn-sm" onclick="sendTestTelegramAlert()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <span>Dispatch Test Telegram Message</span>
+            </button>
+
+            <!-- Telegram Live Message Preview -->
+            <div class="message-preview-container">
+              <div class="preview-label">
+                <span>TELEGRAM MESSAGE PREVIEW</span>
+                <span>SENTINEL BOT</span>
+              </div>
+              <div class="tg-bubble" id="tgPreviewBubble">
+                <div class="tg-bot-name">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                  <span>Audira Sentinel Bot</span>
+                </div>
+                <div>
+                  <strong>🚨 [AUDIRA ALERT] Sesi Baru Terhubung</strong><br>
+                  • <b>Target Host:</b> eng-cad-workstation-11 (512 884 901)<br>
+                  • <b>Operator:</b> Agus Dwi Rianto (Superadmin)<br>
+                  • <b>Protocol:</b> Direct UDP Hole-Punch (11 ms)<br>
+                  • <b>Timestamp:</b> 16:00:22 WIB
+                </div>
+                <div class="tg-time">16:00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Discord Webhook Integration -->
+          <div class="integration-card">
+            <div class="integration-header">
+              <div class="integration-brand-icon icon-discord">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+              </div>
+              <div>
+                <h3 class="integration-title">Discord Webhook Channel</h3>
+                <p class="integration-desc">Send structured rich embed cards into your server's security or NOC channel</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="discordWebhookUrl" class="form-label">Discord Webhook URL</label>
+              <input type="url" id="discordWebhookUrl" class="form-input" placeholder="https://discord.com/api/webhooks/123456789/token...">
+              <div style="font-size:0.6875rem; color:var(--color-text-dim); margin-top:0.25rem;">Server Settings &gt; Integrations &gt; Webhooks &gt; New Webhook</div>
+            </div>
+
+            <div class="form-group">
+              <label for="discordChannelName" class="form-label">Channel Tag</label>
+              <input type="text" id="discordChannelName" class="form-input" value="#audira-security-alerts">
+            </div>
+
+            <div>
+              <label class="form-label">Notification Trigger Events</label>
+              <div class="event-triggers-wrap">
+                <label class="event-check-row">
+                  <input type="checkbox" id="dcEvtSession" checked>
+                  <span>Session Connect Rich Embed</span>
+                </label>
+                <label class="event-check-row">
+                  <input type="checkbox" id="dcEvtNodeDown" checked>
+                  <span>Relay &amp; Node Offline Status Alert</span>
+                </label>
+                <label class="event-check-row">
+                  <input type="checkbox" id="dcEvtSecurity" checked>
+                  <span>UAC Elevation &amp; Security Warning</span>
+                </label>
+              </div>
+            </div>
+
+            <button class="btn btn-secondary btn-sm" onclick="sendTestDiscordAlert()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <span>Dispatch Test Discord Embed</span>
+            </button>
+
+            <!-- Discord Live Embed Preview -->
+            <div class="message-preview-container">
+              <div class="preview-label">
+                <span>DISCORD EMBED PREVIEW</span>
+                <span>#audira-security-alerts</span>
+              </div>
+              <div class="discord-message">
+                <div class="discord-author">
+                  <div class="discord-avatar">AS</div>
+                  <span class="discord-username">Audira Sentinel</span>
+                  <span class="discord-bot-badge">BOT</span>
+                </div>
+                <div class="discord-embed-card" id="dcEmbedCard">
+                  <div class="discord-embed-title" id="dcEmbedTitle">🛡️ Remote Desktop Session Initiated</div>
+                  <div style="font-size:0.75rem; color:#b5bac1;" id="dcEmbedDesc">
+                    Secure session established with end-to-end Libsodium encryption.
+                  </div>
+                  <div class="discord-field-grid">
+                    <div>
+                      <div class="discord-field-title">TARGET NODE</div>
+                      <div class="discord-field-val">eng-cad-workstation-11</div>
+                    </div>
+                    <div>
+                      <div class="discord-field-title">REMOTE ID</div>
+                      <div class="discord-field-val">512 884 901</div>
+                    </div>
+                    <div>
+                      <div class="discord-field-title">PROTOCOL</div>
+                      <div class="discord-field-val" style="color:#23a55a;">UDP Direct P2P (11ms)</div>
+                    </div>
+                    <div>
+                      <div class="discord-field-title">OPERATOR</div>
+                      <div class="discord-field-val">Agus Dwi Rianto (admin)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 5: ACCESS CONTROL & SECURITY (ACL)
+           ==================================================================== -->
+      <section id="viewSecurity" class="view-section">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Access Control List &amp; Hardening Policy</h1>
+            <p class="admin-page-subtitle">Zero-trust whitelisting, IP filtering, and elevated service permissions</p>
+          </div>
+        </div>
+
+        <div class="admin-card" style="padding:1.5rem;">
+          <h3 style="font-size:1.05rem; font-weight:700; color:var(--color-text-heading); margin-bottom:1rem;">IP Whitelist &amp; Network Filtering</h3>
+          <p style="font-size:0.8125rem; color:var(--color-text-muted); margin-bottom:1rem;">
+            Only connections originating from the following CIDR blocks or specific IP addresses are permitted to access managed fleet endpoints:
+          </p>
+          <div class="form-group">
+            <textarea class="form-input" style="font-family:var(--font-mono); height:90px;" placeholder="192.168.100.0/24&#10;10.0.0.0/8&#10;114.124.88.21">192.168.100.0/24
+10.0.0.0/8
+127.0.0.1</textarea>
+          </div>
+
+          <div style="border-top:1px solid var(--color-admin-border-subtle); padding-top:1.25rem; margin-top:1.25rem;">
+            <h4 style="font-size:0.95rem; font-weight:700; color:var(--color-text-heading); margin-bottom:0.75rem;">Global Workstation Policy Flags</h4>
+            <div class="event-triggers-wrap">
+              <label class="event-check-row">
+                <input type="checkbox" checked>
+                <span>Allow Windows Secure Desktop (UAC Elevation) control</span>
+              </label>
+              <label class="event-check-row">
+                <input type="checkbox" checked>
+                <span>Enable Bidirectional Encrypted Clipboard Synchronization</span>
+              </label>
+              <label class="event-check-row">
+                <input type="checkbox" checked>
+                <span>Enable WASAPI Audio Loopback at 48kHz Opus</span>
+              </label>
+              <label class="event-check-row">
+                <input type="checkbox">
+                <span>Force prompt confirmation on target screen before accepting control</span>
+              </label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-sm" style="margin-top:1.25rem;" onclick="showToast('Security ACL rules updated and deployed to cluster.', 'success')">
+            <span>Apply Security Rules</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW 6: CLUSTER CONFIG & SERVER PARAMS
+           ==================================================================== -->
+      <section id="viewCluster" class="view-section">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Relay Cluster Parameters &amp; Host Key</h1>
+            <p class="admin-page-subtitle">Production cluster parameters deployed on Proxmox node audira-web-hub</p>
+          </div>
+        </div>
+
+        <div class="admin-card" style="padding:1.5rem;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+            <div class="form-group">
+              <label class="form-label">ID / Rendezvous Server IP (hbbs)</label>
+              <input type="text" class="form-input" value="192.168.100.175:21116" readonly style="font-family:var(--font-mono);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Relay Server IP (hbbr)</label>
+              <input type="text" class="form-input" value="192.168.100.175:21117" readonly style="font-family:var(--font-mono);">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cluster Host Public Key (Ed25519)</label>
+            <div class="form-input-wrap">
+              <input type="text" id="clusterKeyInput" class="form-input" value="SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8=" readonly style="font-family:var(--font-mono); color:var(--color-emerald);">
+              <button class="form-input-addon" onclick="copyClusterKey()" title="Copy key">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="background:var(--color-admin-surface); border:1px solid var(--color-admin-border); border-radius:var(--radius-sm); padding:1rem; margin-top:1rem;">
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--color-primary); margin-bottom:0.5rem;">SERVER DAEMON COMMAND:</div>
+            <code style="font-size:0.8125rem; color:#94a3b8;">docker compose up -d (hbbs -r 192.168.100.175:21117 -k _ &amp;&amp; hbbr -k _)</code>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Feedback Component -->
+  <div id="toast"></div>
+
+  <!-- Admin Control Script -->
+  <script src="js/admin.js"></script>
+</body>
+</html>

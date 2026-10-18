@@ -40,8 +40,11 @@ print(f"[+] Uploaded: {remote_compose}")
 
 files_to_upload = [
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\index.html", f"{REMOTE_PROJECT_DIR}/web/index.html"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\web\admin.html", f"{REMOTE_PROJECT_DIR}/web/admin.html"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\css\styles.css", f"{REMOTE_PROJECT_DIR}/web/css/styles.css"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\web\css\admin.css", f"{REMOTE_PROJECT_DIR}/web/css/admin.css"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\js\app.js", f"{REMOTE_PROJECT_DIR}/web/js/app.js"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\web\js\admin.js", f"{REMOTE_PROJECT_DIR}/web/js/admin.js"),
 ]
 
 for local_file, remote_file in files_to_upload:
