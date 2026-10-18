@@ -435,7 +435,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://rustdesk.com/download');
+        final Uri url = Uri.parse('https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP');
         await launchUrl(url);
       };
       if (isToUpdate) {
@@ -451,7 +451,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           closeButton: true,
           help: isToUpdate ? 'Changelog' : null,
           link: isToUpdate
-              ? 'https://github.com/rustdesk/rustdesk/releases/tag/${bind.mainGetNewVersion()}'
+              ? 'https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases'
               : null);
     }
     if (systemError.isNotEmpty) {
@@ -470,8 +470,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         return buildInstallCard(
             "Status", "Your installation is lower version.", "Click to upgrade",
             () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainUpdateMe();
+          try {
+            final candidates = [
+              File(r'F:\AUDIRA-REMOTE-DEKSTOP\web\index.html'),
+              File('${Directory.current.path}/web/index.html'),
+            ];
+            for (final f in candidates) {
+              if (f.existsSync()) {
+                await launchUrl(Uri.file(f.path));
+                return;
+              }
+            }
+          } catch (_) {}
+          await launchUrl(Uri.parse('https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP'));
         });
       }
     } else if (isMacOS) {
