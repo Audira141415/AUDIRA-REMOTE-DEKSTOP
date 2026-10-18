@@ -11,6 +11,67 @@ import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:bot_toast/bot_toast.dart';
 
+/// Chrome / Native Browser style curved tab shape painter
+class ChromeTabPainter extends CustomPainter {
+  final Color color;
+  ChromeTabPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    const r = 8.0;
+    final path = Path();
+    // Start at bottom-left corner
+    path.moveTo(0, size.height);
+    // Concave curve at bottom-left
+    path.quadraticBezierTo(r, size.height, r, size.height - r);
+    // Vertical left edge
+    path.lineTo(r, r);
+    // Convex curve at top-left
+    path.quadraticBezierTo(r, 0, r * 2, 0);
+    // Flat top
+    path.lineTo(size.width - r * 2, 0);
+    // Convex curve at top-right
+    path.quadraticBezierTo(size.width - r, 0, size.width - r, r);
+    // Vertical right edge
+    path.lineTo(size.width - r, size.height - r);
+    // Concave curve at bottom-right
+    path.quadraticBezierTo(size.width - r, size.height, size.width, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(ChromeTabPainter oldDelegate) => oldDelegate.color != color;
+}
+
+/// Outlined Monitor Screen Icon [ ▭ ]
+class _MonitorTabIcon extends StatelessWidget {
+  final bool isSelected;
+  const _MonitorTabIcon({Key? key, required this.isSelected}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isSelected
+        ? (isDark ? Colors.white : const Color(0xFF1E293B))
+        : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155));
+    return Container(
+      width: 15,
+      height: 11,
+      margin: const EdgeInsets.only(right: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: color, width: 1.6),
+      ),
+    );
+  }
+}
+
 /// Top Bar Remote Header Tabs Widget (Host Badge + Displays Tabs + Add Button)
 class RemoteHeaderTabsWidget extends StatelessWidget {
   final String peerId;
@@ -22,18 +83,19 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
     required this.ffi,
   }) : super(key: key);
 
-  String _getDisplaySubtitle(Display d) {
-    if (d.name.isNotEmpty) {
+  String _getDisplaySubtitle(Display d, int index) {
+    if (d.name.isNotEmpty && !d.name.startsWith(r'\\.\DISPLAY')) {
       return d.name;
     }
+    // Friendly resolution & monitor labeling matching typical displays
     if (d.width == 1920 && d.height == 1080) {
-      return 'LG FULL HD';
+      return index == 1 ? 'LG FULL HD' : 'DELL SE2222H';
+    } else if (d.width == 1366 && d.height == 768) {
+      return 'DELL E2016H';
     } else if (d.width == 2560 && d.height == 1440) {
       return '2K QHD';
     } else if (d.width == 3840 && d.height == 2160) {
       return '4K UHD';
-    } else if (d.width == 1366 && d.height == 768) {
-      return 'DELL E2016H';
     } else if (d.width == 1600 && d.height == 900) {
       return 'HD+';
     } else if (d.width == 1920 && d.height == 1200) {
@@ -55,70 +117,76 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // 1. Audira Logo
         Padding(
-          padding: const EdgeInsets.only(left: 4, right: 6),
+          padding: const EdgeInsets.only(left: 6, right: 6, bottom: 8),
           child: loadIcon(16),
         ),
 
         // 2. Peer Hostname / Label
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 160),
-          child: Tooltip(
-            message: '$hostName ($peerId)',
-            child: Text(
-              hostName,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 7),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 160),
+            child: Tooltip(
+              message: '$hostName ($peerId)',
+              child: Text(
+                hostName,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
 
-        // 3. Security Shield Badge
-        Obx(() {
-          final connectionType = ConnectionTypeState.find(peerId);
-          final isSecure =
-              connectionType.secure.value == ConnectionType.strSecure;
-          final isDirect =
-              connectionType.direct.value == ConnectionType.strDirect;
-          final streamType = connectionType.stream_type.value;
-          final msgConn = getConnectionText(isSecure, isDirect, streamType);
-          final fingerprint = FingerprintState.find(peerId).value;
-          return Tooltip(
-            message:
-                '$msgConn\n${translate('Fingerprint')}: ${fingerprint.isEmpty ? 'N/A' : fingerprint}',
-            child: Container(
-              margin: const EdgeInsets.only(left: 5, right: 8),
-              padding: const EdgeInsets.all(2.5),
-              decoration: BoxDecoration(
-                color: isSecure
-                    ? const Color(0xFFFEF3C7)
-                    : const Color(0xFFFEE2E2),
-                borderRadius: BorderRadius.circular(4),
+        // 3. Security Shield Badge with Lightning Bolt [ ⚡ ]
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Obx(() {
+            final connectionType = ConnectionTypeState.find(peerId);
+            final isSecure =
+                connectionType.secure.value == ConnectionType.strSecure;
+            final isDirect =
+                connectionType.direct.value == ConnectionType.strDirect;
+            final streamType = connectionType.stream_type.value;
+            final msgConn = getConnectionText(isSecure, isDirect, streamType);
+            final fingerprint = FingerprintState.find(peerId).value;
+            return Tooltip(
+              message:
+                  '$msgConn\n${translate('Fingerprint')}: ${fingerprint.isEmpty ? 'N/A' : fingerprint}',
+              child: Container(
+                margin: const EdgeInsets.only(left: 6, right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1.5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  border: Border.all(color: const Color(0xFFF59E0B), width: 0.8),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Icon(
+                  Icons.bolt_rounded,
+                  size: 11,
+                  color: Color(0xFFD97706),
+                ),
               ),
-              child: Icon(
-                isSecure ? Icons.shield_rounded : Icons.gpp_maybe_rounded,
-                size: 13,
-                color: isSecure
-                    ? const Color(0xFFD97706)
-                    : const Color(0xFFDC2626),
-              ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
 
         // 4. Vertical Divider
-        Container(
-          width: 1,
-          height: 16,
-          margin: const EdgeInsets.only(left: 2, right: 6),
-          color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Container(
+            width: 1,
+            height: 15,
+            margin: const EdgeInsets.only(left: 2, right: 8),
+            color: isDark ? const Color(0xFF475569) : const Color(0xFFB0B7BE),
+          ),
         ),
 
         // 5. Individual Monitor Tabs
@@ -130,7 +198,7 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
 
           for (int i = 0; i < count; i++) {
             final Display? d = i < displays.length ? displays[i] : null;
-            final sub = d != null ? _getDisplaySubtitle(d) : '';
+            final sub = d != null ? _getDisplaySubtitle(d, i) : '';
             final label = sub.isNotEmpty
                 ? 'Monitor ${i + 1} ($sub)'
                 : 'Monitor ${i + 1}';
@@ -139,81 +207,66 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
                     (curDisplay == 0 || curDisplay == kAllDisplayValue));
 
             if (isSelected) {
-              // Active Tab: Curved top corners, bright background
+              // Active Tab: Chrome-style curved tab, pure white
               tabs.add(
-                Container(
-                  height: 31,
-                  margin: const EdgeInsets.only(right: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
+                CustomPaint(
+                  painter: ChromeTabPainter(
                     color: isDark ? const Color(0xFF334155) : Colors.white,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(8)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 3,
-                        offset: const Offset(0, -1),
-                      ),
-                    ],
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.crop_landscape_rounded,
-                        size: 14,
-                        color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  child: Container(
+                    height: 31,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _MonitorTabIcon(isSelected: true),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : const Color(0xFF1E293B),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
             } else {
               // Inactive Tab
               tabs.add(
-                InkWell(
-                  onTap: () {
-                    if (d != null) {
-                      openMonitorInTheSameTab(i, ffi, ffi.ffiModel.pi);
-                    }
-                  },
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(6)),
-                  child: Container(
-                    height: 31,
-                    padding: const EdgeInsets.symmetric(horizontal: 11),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.crop_landscape_rounded,
-                          size: 14,
-                          color: isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF475569),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 1),
+                  child: InkWell(
+                    onTap: () {
+                      if (d != null) {
+                        openMonitorInTheSameTab(i, ffi, ffi.ffiModel.pi);
+                      }
+                    },
+                    hoverColor: Colors.black.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      height: 30,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const _MonitorTabIcon(isSelected: false),
+                          Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal,
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF334155),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -223,13 +276,16 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
             // Divider between tabs if not adjacent to active tab
             if (i < count - 1 && !isSelected && curDisplay != (i + 1)) {
               tabs.add(
-                Container(
-                  width: 1,
-                  height: 12,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  color: isDark
-                      ? const Color(0xFF475569).withOpacity(0.5)
-                      : const Color(0xFFCBD5E1),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Container(
+                    width: 1,
+                    height: 14,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    color: isDark
+                        ? const Color(0xFF475569).withOpacity(0.5)
+                        : const Color(0xFFB0B7BE),
+                  ),
                 ),
               );
             }
@@ -237,35 +293,41 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
 
           // Divider before Add button
           tabs.add(
-            Container(
-              width: 1,
-              height: 14,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              color: isDark
-                  ? const Color(0xFF475569).withOpacity(0.5)
-                  : const Color(0xFFCBD5E1),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                width: 1,
+                height: 14,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                color: isDark
+                    ? const Color(0xFF475569).withOpacity(0.5)
+                    : const Color(0xFFB0B7BE),
+              ),
             ),
           );
 
           // Add Button (+)
           tabs.add(
-            Tooltip(
-              message: translate('New Connection'),
-              child: InkWell(
-                onTap: () {
-                  rustDeskWinManager.call(
-                      WindowType.Main, kWindowMainWindowOnTop, "");
-                },
-                borderRadius: BorderRadius.circular(4),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  child: Icon(
-                    Icons.add_rounded,
-                    size: 16,
-                    color: isDark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: Tooltip(
+                message: translate('New Connection'),
+                child: InkWell(
+                  onTap: () {
+                    rustDeskWinManager.call(
+                        WindowType.Main, kWindowMainWindowOnTop, "");
+                  },
+                  borderRadius: BorderRadius.circular(4),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    child: Icon(
+                      Icons.add,
+                      size: 17,
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF475569),
+                    ),
                   ),
                 ),
               ),
@@ -327,16 +389,11 @@ class _RemoteSessionHudWidgetState extends State<RemoteSessionHudWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      margin: const EdgeInsets.only(right: 6),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      margin: const EdgeInsets.only(right: 14),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Signal quality bars (Green 4 bars)
+          // Signal quality bars (4 green bars: 4, 7, 10, 13 px)
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -354,10 +411,10 @@ class _RemoteSessionHudWidgetState extends State<RemoteSessionHudWidget> {
           Text(
             _formatDuration(_secondsElapsed),
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontFamily: 'monospace',
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF475569),
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF334155),
             ),
           ),
         ],
@@ -392,50 +449,30 @@ class ControlCenterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTapDown: (details) {
         _showControlCenterMenu(context, details.globalPosition);
       },
-      borderRadius: BorderRadius.circular(5),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF334155)
-              : const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? const Color(0xFF475569)
-                : const Color(0xFFCBD5E1),
-            width: 0.8,
-          ),
-        ),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.tune_rounded,
-              size: 14,
-              color: Color(0xFF2563EB),
+              size: 16,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 6),
             Text(
               'Control Center',
               style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? const Color(0xFFF8FAFC)
-                    : const Color(0xFF1E293B),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
               ),
-            ),
-            const SizedBox(width: 2),
-            const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 14,
-              color: Color(0xFF64748B),
             ),
           ],
         ),

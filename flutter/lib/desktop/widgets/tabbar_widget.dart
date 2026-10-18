@@ -515,8 +515,15 @@ class _DesktopTabState extends State<DesktopTab>
         if (stateGlobal.showTabBar.isTrue &&
             !(kUseCompatibleUiMode && isHideSingleItem())) {
           final showBottomDivider = _showTabBarBottomDivider(tabType);
-          return SizedBox(
+          final isRemote = tabType == DesktopTabType.remoteScreen;
+          final barBg = isRemote
+              ? (Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E293B)
+                  : const Color(0xFFE2E6EA))
+              : null;
+          return Container(
             height: _kTabBarHeight,
+            color: barBg,
             child: Column(
               children: [
                 SizedBox(
@@ -525,8 +532,9 @@ class _DesktopTabState extends State<DesktopTab>
                   child: _buildBar(),
                 ),
                 if (showBottomDivider)
-                  const Divider(
+                  Divider(
                     height: 1,
+                    color: isRemote ? const Color(0xFFCBD5E1) : null,
                   ),
               ],
             ),
