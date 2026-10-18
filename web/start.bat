@@ -11,10 +11,11 @@ echo [*] Menjalankan server lokal di http://localhost:5050 ...
 echo [*] Membuka browser default secara otomatis...
 echo.
 
-start "" "http://localhost:5050"
+:: Membuka browser dengan jeda 1 detik agar server lokal siap melayani request
+start "" cmd /c "timeout /t 1 /nobreak >nul & start http://localhost:5050"
 
-python -m http.server 5050 --directory "%~dp0."
+python -m http.server 5050 --directory "%~dp0"
 if %errorlevel% neq 0 (
-    npx -y serve "%~dp0." -l 5050
+    npx -y serve "%~dp0" -l 5050
 )
 pause

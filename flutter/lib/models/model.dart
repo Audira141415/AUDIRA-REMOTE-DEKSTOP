@@ -4467,6 +4467,9 @@ class Display {
       other.runtimeType == runtimeType &&
       _innerEqual(other);
 
+  @override
+  int get hashCode => Object.hash(x, y, width, height, cursorEmbedded);
+
   bool _innerEqual(Display other) =>
       other.x == x &&
       other.y == y &&
