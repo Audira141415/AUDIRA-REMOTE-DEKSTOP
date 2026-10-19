@@ -20,7 +20,16 @@ $standaloneExe = Join-Path $distDir "AudiraDesk-v1.5.0-x86_64.exe"
 $rootExe = Join-Path $rootDir "AudiraDesk.exe"
 
 # 1. Periksa apakah binary produksi sudah terkompilasi
-if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
+$runnerReleaseDir = Join-Path $rootDir "flutter\build\windows\x64\runner\Release"
+$runnerExe = Join-Path $runnerReleaseDir "audira.exe"
+$needRebuild = $Rebuild -or (-not (Test-Path $standaloneExe))
+if (-not $needRebuild -and (Test-Path $runnerExe) -and (Test-Path $standaloneExe)) {
+    if ((Get-Item $runnerExe).LastWriteTime -gt (Get-Item $standaloneExe).LastWriteTime) {
+        $needRebuild = $true
+    }
+}
+
+if (-not $needRebuild) {
     $fSize = [math]::Round((Get-Item $standaloneExe).Length / 1MB, 2)
     Write-Host "[OK] Binary produksi standalone sudah tersedia:" -ForegroundColor Green
     Write-Host "     * File   : $standaloneExe" -ForegroundColor White
@@ -30,13 +39,16 @@ if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
     Write-Host "[BUILD] Membangun binary produksi standalone via libs/portable..." -ForegroundColor Yellow
     
     # Ambil payload dari flutter release build
-    $runnerReleaseDir = Join-Path $rootDir "flutter\build\windows\x64\runner\Release"
     $payloadDir = Join-Path $distDir "audira_payload"
     if (Test-Path $payloadDir) { Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue }
     New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
     
     if (Test-Path $runnerReleaseDir) {
         Copy-Item -Path "$runnerReleaseDir\*" -Destination $payloadDir -Recurse -Force
+        # Sinkronkan mentahan exe di root
+        if (Test-Path "$runnerReleaseDir\audira.exe") {
+            Copy-Item -Path "$runnerReleaseDir\audira.exe" -Destination (Join-Path $rootDir "audira.exe") -Force
+        }
     } else {
         Write-Host "[WARN] Runner release belum terkompilasi di $runnerReleaseDir, menggunakan cache appdata..." -ForegroundColor Yellow
         Copy-Item -Path "$env:LOCALAPPDATA\audiradesk\*" -Destination $payloadDir -Recurse -Force
@@ -57,6 +69,8 @@ if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
         Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force
         Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-setup.exe") -Force
         Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue
+        # Bersihkan cache ekstraksi localappdata agar langsung menggunakan versi baru
+        Remove-Item -Path "$env:LOCALAPPDATA\audiradesk" -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -77,7 +91,11 @@ if (Test-Path $standaloneExe) {
 # Sign the binaries with official certificate
 $signScript = Join-Path $rootDir "scripts\sign_binary.ps1"
 if (Test-Path $signScript) {
-    & $signScript
+    try {
+        & $signScript
+    } catch {
+        Write-Host "[WARN] Penandatanganan sertifikat dilewati: $_" -ForegroundColor Yellow
+    }
 }
 
 Write-Host "==============================================================================" -ForegroundColor Green

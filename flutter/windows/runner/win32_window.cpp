@@ -182,6 +182,15 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
     return false;
   }
 
+  HICON custom_icon = LoadCustomIcon();
+  if (custom_icon == nullptr) {
+    custom_icon = LoadIcon(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_APP_ICON));
+  }
+  if (custom_icon != nullptr) {
+    SendMessage(window, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(custom_icon));
+    SendMessage(window, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(custom_icon));
+  }
+
   if (!showOnTaskBar) {
     // hide from taskbar
     HRESULT hr;
