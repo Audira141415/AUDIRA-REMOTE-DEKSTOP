@@ -55,6 +55,7 @@ if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
         Copy-Item -Path $builtExe -Destination $rootExe -Force
         Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force
         Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force
+        Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-setup.exe") -Force
         Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
@@ -67,8 +68,10 @@ if (Test-Path $standaloneExe) {
     Copy-Item -Path $standaloneExe -Destination $rootExe -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-setup.exe") -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-v1.5.0-x86_64.exe") -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-install.exe") -Force -ErrorAction SilentlyContinue
 }
 
 # Sign the binaries with official certificate
