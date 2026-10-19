@@ -1176,12 +1176,12 @@ void showAbout(OverlayDialogManager dialogManager) {
         Text('Version: $version'),
         InkWell(
             onTap: () async {
-              const url = 'http://192.168.100.175:5050';
+              const url = 'http://desk.audira.my.id:5050';
               await launchUrl(Uri.parse(url));
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('http://192.168.100.175:5050',
+              child: Text('http://desk.audira.my.id:5050',
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   )),

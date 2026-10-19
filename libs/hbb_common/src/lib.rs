@@ -508,7 +508,7 @@ pub const VER_TYPE_RUSTDESK_CLIENT: &str = "rustdesk-client";
 pub const VER_TYPE_RUSTDESK_SERVER: &str = "rustdesk-server";
 
 pub fn version_check_request(typ: String) -> (VersionCheckRequest, String) {
-    const URL: &str = "http://192.168.100.175:5050/api/version";
+    const URL: &str = "http://desk.audira.my.id:5050/api/version";
 
     use sysinfo::System;
     let system = System::new();

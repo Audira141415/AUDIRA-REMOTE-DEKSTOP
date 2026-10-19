@@ -2554,7 +2554,7 @@ class _AboutState extends State<_About> {
                       .marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('http://192.168.100.175:5050');
+                    launchUrlString('http://desk.audira.my.id:5050');
                   },
                   child: Text(
                     translate('Privacy Statement'),
@@ -2562,7 +2562,7 @@ class _AboutState extends State<_About> {
                   ).marginSymmetric(vertical: 4.0)),
               InkWell(
                   onTap: () {
-                    launchUrlString('http://192.168.100.175:5050');
+                    launchUrlString('http://desk.audira.my.id:5050');
                   },
                   child: Text(
                     translate('Website'),

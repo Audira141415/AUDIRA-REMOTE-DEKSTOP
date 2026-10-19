@@ -6,7 +6,7 @@ config_dirs = [
     r'C:\ProgramData\Audira Desk\config'
 ]
 
-SERVER_IP = '192.168.100.175'
+SERVER_HOST = 'desk.audira.my.id'
 SERVER_PORT = '21116'
 PUB_KEY = 'SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8='
 
@@ -41,16 +41,16 @@ def fix_cfg2(file_path):
                 top_level[k] = v
     
     # Set required values
-    top_level['rendezvous_server'] = f"'{SERVER_IP}:{SERVER_PORT}'"
+    top_level['rendezvous_server'] = f"'{SERVER_HOST}:{SERVER_PORT}'"
     top_level.setdefault('nat_type', '1')
     top_level.setdefault('serial', '0')
     top_level.setdefault('unlock_pin', "''")
     top_level.setdefault('trusted_devices', "''")
     
-    options['custom-rendezvous-server'] = f"'{SERVER_IP}'"
+    options['custom-rendezvous-server'] = f"'{SERVER_HOST}'"
     options['key'] = f"'{PUB_KEY}'"
-    options['relay-server'] = f"'{SERVER_IP}'"
-    options['api-server'] = f"'http://{SERVER_IP}:5050'"
+    options['relay-server'] = f"'{SERVER_HOST}'"
+    options['api-server'] = f"'http://{SERVER_HOST}:21114'"
     options.setdefault('direct-server', "'Y'")
     options.setdefault('allow-lan', "'Y'")
     

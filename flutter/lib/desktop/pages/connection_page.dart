@@ -41,7 +41,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   double? get height => bind.isIncomingOnly() ? null : em * 3;
 
   void onUsePublicServerGuide() {
-    const url = "http://192.168.100.175:5050";
+    const url = "http://desk.audira.my.id:5050";
     canLaunchUrlString(url).then((can) {
       if (can) {
         launchUrlString(url);

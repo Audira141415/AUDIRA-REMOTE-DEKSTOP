@@ -187,9 +187,9 @@ class _InstallPageBodyState extends State<_InstallPageBody>
                           InkWell(
                             hoverColor: Colors.transparent,
                             onTap: () => launchUrlString(
-                                'http://192.168.100.175:5050'),
+                                'http://desk.audira.my.id:5050'),
                             child: Tooltip(
-                              message: 'http://192.168.100.175:5050',
+                              message: 'http://desk.audira.my.id:5050',
                               child: Row(children: [
                                 Icon(Icons.launch_outlined, size: 16)
                                     .marginOnly(right: 5),

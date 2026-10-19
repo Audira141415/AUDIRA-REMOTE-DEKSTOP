@@ -117,7 +117,7 @@ if ([string]::IsNullOrWhiteSpace($choice)) {
 switch ($choice) {
     "1" {
         $targetExe = Join-Path $rootDir "AudiraDesk.exe"
-        $downloadUrl = "http://192.168.100.175:5050/dist/AudiraDesk-v1.5.0-x86_64.exe"
+        $downloadUrl = "http://desk.audira.my.id:5050/dist/AudiraDesk-v1.5.0-x86_64.exe"
         Write-Host "[DOWNLOAD] Mengunduh binary resmi AUDIRA Remote Desktop v1.5.0..." -ForegroundColor Cyan
         Write-Host "Sumber: $downloadUrl" -ForegroundColor Gray
         try {

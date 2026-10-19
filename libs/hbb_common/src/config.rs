@@ -114,7 +114,7 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["192.168.100.175"];
+pub const RENDEZVOUS_SERVERS: &[&str] = &["desk.audira.my.id", "192.168.100.175"];
 pub const RS_PUB_KEY: &str = "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;

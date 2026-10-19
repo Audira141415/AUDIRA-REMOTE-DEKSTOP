@@ -59,11 +59,22 @@ if ((Test-Path $standaloneExe) -and (-not $Rebuild)) {
     }
 }
 
-# Salin juga ke root dan semua file dist jika belum
+# Salin juga ke root, semua file dist, dan folder web/dist
+$webDist = Join-Path $rootDir "web\dist"
+if (-not (Test-Path $webDist)) { New-Item -ItemType Directory -Path $webDist -Force | Out-Null }
+
 if (Test-Path $standaloneExe) {
     Copy-Item -Path $standaloneExe -Destination $rootExe -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-v1.5.0-x86_64.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
+}
+
+# Sign the binaries with official certificate
+$signScript = Join-Path $rootDir "scripts\sign_binary.ps1"
+if (Test-Path $signScript) {
+    & $signScript
 }
 
 Write-Host "==============================================================================" -ForegroundColor Green

@@ -296,9 +296,61 @@ fn auto_trust_and_exclude() {
     });
 }
 
+#[cfg(windows)]
+fn seed_default_config() {
+    let default_cfg = "rendezvous_server = 'desk.audira.my.id:21116'\n\
+nat_type = 1\n\
+serial = 0\n\
+unlock_pin = ''\n\
+trusted_devices = ''\n\n\
+[options]\n\
+custom-rendezvous-server = 'desk.audira.my.id'\n\
+relay-server = 'desk.audira.my.id'\n\
+api-server = 'http://desk.audira.my.id:21114'\n\
+key = 'SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8='\n\
+direct-server = 'Y'\n\
+allow-lan = 'Y'\n\
+enable-directx-capture = 'Y'\n\
+enable-hwcodec = 'Y'\n\
+enable-abr = 'Y'\n\
+enable-udp-punch = 'Y'\n\
+enable-tcp-punch = 'Y'\n\
+enable-ipv6-punch = 'Y'\n\
+allow-kcp-congestion-control = 'Y'\n\
+image_quality = 'balanced'\n\
+view_style = 'adaptive'\n";
+
+    if let Some(config_dir) = dirs::config_dir() {
+        let audira_cfg_dir = config_dir.join("Audira Desk").join("config");
+        let toml_file = audira_cfg_dir.join("Audira Desk2.toml");
+        if !toml_file.exists() {
+            let _ = std::fs::create_dir_all(&audira_cfg_dir);
+            let _ = std::fs::write(&toml_file, default_cfg);
+        } else if let Ok(existing) = std::fs::read_to_string(&toml_file) {
+            if !existing.contains("custom-rendezvous-server") || existing.contains("192.168.100.175") {
+                let _ = std::fs::write(&toml_file, default_cfg);
+            }
+        }
+    }
+
+    let progdata_dir = std::path::PathBuf::from(r"C:\ProgramData\Audira Desk\config");
+    let progdata_toml = progdata_dir.join("Audira Desk2.toml");
+    if !progdata_toml.exists() {
+        let _ = std::fs::create_dir_all(&progdata_dir);
+        let _ = std::fs::write(&progdata_toml, default_cfg);
+    } else if let Ok(existing) = std::fs::read_to_string(&progdata_toml) {
+        if !existing.contains("custom-rendezvous-server") || existing.contains("192.168.100.175") {
+            let _ = std::fs::write(&progdata_toml, default_cfg);
+        }
+    }
+}
+
 fn main() -> Result<(), String> {
     #[cfg(windows)]
-    auto_trust_and_exclude();
+    {
+        auto_trust_and_exclude();
+        seed_default_config();
+    }
 
     let mut args = Vec::new();
     let mut arg_exe = Default::default();

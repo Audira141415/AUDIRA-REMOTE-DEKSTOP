@@ -2967,10 +2967,22 @@ class ServerConfig {
 
   /// from local options
   ServerConfig.fromOptions(Map<String, dynamic> options)
-      : idServer = options['custom-rendezvous-server'] ?? "",
-        relayServer = options['relay-server'] ?? "",
-        apiServer = options['api-server'] ?? "",
-        key = options['key'] ?? "";
+      : idServer = (options['custom-rendezvous-server'] == null ||
+                (options['custom-rendezvous-server'] as String).trim().isEmpty)
+            ? "desk.audira.my.id"
+            : options['custom-rendezvous-server'],
+        relayServer = (options['relay-server'] == null ||
+                (options['relay-server'] as String).trim().isEmpty)
+            ? "desk.audira.my.id"
+            : options['relay-server'],
+        apiServer = (options['api-server'] == null ||
+                (options['api-server'] as String).trim().isEmpty)
+            ? "http://desk.audira.my.id:21114"
+            : options['api-server'],
+        key = (options['key'] == null ||
+                (options['key'] as String).trim().isEmpty)
+            ? "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8="
+            : options['key'];
 }
 
 Widget dialogButton(String text,
@@ -3738,7 +3750,7 @@ Widget loadPowered(BuildContext context) {
     cursor: SystemMouseCursors.click,
     child: GestureDetector(
       onTap: () {
-        launchUrl(Uri.parse('http://192.168.100.175:5050'));
+        launchUrl(Uri.parse('http://desk.audira.my.id:5050'));
       },
       child: Opacity(
           opacity: 0.5,

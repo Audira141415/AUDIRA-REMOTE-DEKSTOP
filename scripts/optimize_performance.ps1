@@ -30,6 +30,10 @@ $optimizations = @{
     "view_style"                   = "adaptive"# Skala layar adaptif tanpa scrollbar
     "direct-access-port"           = "21118"   # Port LAN Direct IP
     "enable-direct-server"         = "Y"       # Mengaktifkan Direct IP access untuk koneksi LAN/VPN tanpa internet
+    "custom-rendezvous-server"     = "desk.audira.my.id"
+    "relay-server"                 = "desk.audira.my.id"
+    "api-server"                   = "http://desk.audira.my.id:21114"
+    "key"                          = "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8="
 }
 
 # Baca file TOML jika sudah ada
@@ -44,7 +48,7 @@ if (Test-Path $tomlFile) {
 
 if ([string]::IsNullOrWhiteSpace($baseContent)) {
     $baseContent = @"
-rendezvous_server = '192.168.100.175:21116'
+rendezvous_server = 'desk.audira.my.id:21116'
 nat_type = 1
 serial = 0
 unlock_pin = ''

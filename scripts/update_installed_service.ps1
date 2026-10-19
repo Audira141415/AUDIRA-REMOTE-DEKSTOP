@@ -75,7 +75,7 @@ if (Test-Path $sourceDir) {
 }
 
 # 4. Synchronize Configuration for System Service
-Write-Host "[4/6] Sinkronisasi konfigurasi server 192.168.100.175 ke System Profile..." -ForegroundColor Yellow
+Write-Host "[4/6] Sinkronisasi konfigurasi server desk.audira.my.id ke System Profile..." -ForegroundColor Yellow
 $sysConfigDir = "C:\Windows\System32\config\systemprofile\AppData\Roaming\Audira Desk\config"
 $progDataConfigDir = "C:\ProgramData\Audira Desk\config"
 $userConfigDir = "$env:APPDATA\Audira Desk\config"
