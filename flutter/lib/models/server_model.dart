@@ -258,6 +258,15 @@ class ServerModel with ChangeNotifier {
     }
     if (oldPwdText != _serverPasswd.text) {
       update = true;
+      if (oldPwdText.isNotEmpty &&
+          oldPwdText != '-' &&
+          _serverPasswd.text != '-' &&
+          _serverPasswd.text.isNotEmpty) {
+        if (bind.mainHasValidBotSync() &&
+            bind.mainGetOptionSync(key: 'telegram-notify-password') != 'N') {
+          bind.mainSetOption(key: 'send-telegram-password', value: 'Y');
+        }
+      }
     }
     if (_verificationMethod != verificationMethod) {
       _verificationMethod = verificationMethod;

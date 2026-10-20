@@ -22,6 +22,10 @@ import '../../utils/image.dart';
 import '../widgets/remote_toolbar.dart';
 import '../widgets/kb_layout_type_chooser.dart';
 import '../widgets/tabbar_widget.dart';
+import '../widgets/whiteboard_overlay.dart';
+import '../widgets/remote_system_drawer.dart';
+import '../widgets/session_hud_bar.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'macos_full_screen_focus_recovery.dart';
 
 import 'package:flutter_hbb/native/custom_cursor.dart'
@@ -132,6 +136,37 @@ class _RemotePageState extends State<RemotePage>
   bool _waylandKeyboardModeNormalizing = false;
 
   SessionID get sessionId => _ffi.sessionId;
+
+  final WhiteboardController _whiteboardController = WhiteboardController();
+  bool _isDiagnosticsDrawerOpen = false;
+  bool _isDraggingFileOver = false;
+
+  void _handleDesktopDrop(DropDoneDetails details) {
+    if (details.files.isEmpty) return;
+    final count = details.files.length;
+    final fileNames = details.files.take(3).map((f) => f.name).join(', ') + (count > 3 ? '...' : '');
+    _ffi.dialogManager.show((setState, close, context) {
+      return CustomAlertDialog(
+        title: Text(translate('File Transfer')),
+        content: Text(
+          'Menerima $count berkas ($fileNames).\nBuka jendela transfer berkas untuk mengirim ke komputer host?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: close,
+            child: Text(translate('Cancel')),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              close();
+              connect(context, widget.id, isFileTransfer: true);
+            },
+            child: Text(translate('OK')),
+          ),
+        ],
+      );
+    });
+  }
 
   _RemotePageState(String id) {
     _initStates(id);
@@ -720,30 +755,81 @@ class _RemotePageState extends State<RemotePage>
         children: [
           Container(
               color: kColorCanvas,
-              child: RawKeyFocusScope(
-                  focusNode: _rawKeyFocusNode,
-                  onFocusChange: (bool imageFocused) {
-                    debugPrint(
-                        "onFocusChange(window active:${!_isWindowBlur}) $imageFocused");
-                    // See [onWindowBlur].
-                    if (isWindows) {
-                      if (_isWindowBlur) {
-                        imageFocused = false;
-                        Future.delayed(Duration.zero, () {
-                          _rawKeyFocusNode.unfocus();
-                        });
-                      }
-                      if (imageFocused) {
-                        _ffi.inputModel.enterOrLeave(true);
-                      } else {
-                        _ffi.inputModel.enterOrLeave(false);
-                      }
-                    } else if (isMacOS) {
-                      _onMacOSFocusChange();
-                    }
-                  },
-                  inputModel: _ffi.inputModel,
-                  child: getBodyForDesktop(context))),
+              child: DropTarget(
+                onDragEntered: (_) => setState(() => _isDraggingFileOver = true),
+                onDragExited: (_) => setState(() => _isDraggingFileOver = false),
+                onDragDone: (details) {
+                  setState(() => _isDraggingFileOver = false);
+                  _handleDesktopDrop(details);
+                },
+                child: Stack(
+                  children: [
+                    RawKeyFocusScope(
+                        focusNode: _rawKeyFocusNode,
+                        onFocusChange: (bool imageFocused) {
+                          debugPrint(
+                              "onFocusChange(window active:${!_isWindowBlur}) $imageFocused");
+                          // See [onWindowBlur].
+                          if (isWindows) {
+                            if (_isWindowBlur) {
+                              imageFocused = false;
+                              Future.delayed(Duration.zero, () {
+                                _rawKeyFocusNode.unfocus();
+                              });
+                            }
+                            if (imageFocused) {
+                              _ffi.inputModel.enterOrLeave(true);
+                            } else {
+                              _ffi.inputModel.enterOrLeave(false);
+                            }
+                          } else if (isMacOS) {
+                            _onMacOSFocusChange();
+                          }
+                        },
+                        inputModel: _ffi.inputModel,
+                        child: getBodyForDesktop(context)),
+                    if (_isDraggingFileOver)
+                      Positioned.fill(
+                        child: Container(
+                          color: const Color(0xCC0E0E18),
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                              decoration: BoxDecoration(
+                                color: const Color(0xF01E1E2E),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFF05D9E8), width: 1.5),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x5505D9E8),
+                                    blurRadius: 20,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.cloud_upload_outlined, size: 48, color: Color(0xFF05D9E8)),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Lepaskan berkas untuk mengirim ke remote host',
+                                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'AUDIRA Direct Secure File Transfer (E2EE)',
+                                    style: TextStyle(color: Colors.white54, fontSize: 10),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              )),
           Stack(
             children: [
               _ffi.ffiModel.pi.isSet.isTrue &&
@@ -778,6 +864,35 @@ class _RemotePageState extends State<RemotePage>
                       : remoteToolbar(context)),
               _ffi.ffiModel.pi.isSet.isFalse ? emptyOverlay() : Offstage(),
             ],
+          ),
+          // Floating Live Session HUD Bar (Top Right)
+          Positioned(
+            top: 6,
+            right: 14,
+            child: SessionHudBar(
+              ffi: _ffi,
+              isWhiteboardActive: _whiteboardController.isActive,
+              isDiagnosticsActive: _isDiagnosticsDrawerOpen,
+              onToggleWhiteboard: () {
+                setState(() {
+                  _whiteboardController.toggleActive();
+                });
+              },
+              onToggleDiagnostics: () {
+                setState(() {
+                  _isDiagnosticsDrawerOpen = !_isDiagnosticsDrawerOpen;
+                });
+              },
+            ),
+          ),
+          // Interactive Whiteboard Overlay
+          WhiteboardOverlay(controller: _whiteboardController),
+          // Remote System Diagnostics Drawer
+          RemoteSystemDrawer(
+            isOpen: _isDiagnosticsDrawerOpen,
+            onClose: () => setState(() => _isDiagnosticsDrawerOpen = false),
+            ffi: _ffi,
+            peerId: widget.id,
           ),
         ],
       );

@@ -29,7 +29,7 @@
 
       <div class="admin-cluster-status">
         <span class="pulse-dot"></span>
-        <span>audira-web-hub (192.168.100.175)</span>
+        <span>Audira Production Cluster (Active)</span>
       </div>
     </div>
 
@@ -46,8 +46,8 @@
       </button>
 
       <div class="admin-user-badge">
-        <div class="admin-avatar">AD</div>
-        <span id="adminTopbarOperatorName">Agus Dwi Rianto</span>
+        <div class="admin-avatar">AO</div>
+        <span id="adminTopbarOperatorName">Admin Operator</span>
         <span class="nav-badge-pill" style="margin-left:0.25rem;">ROOT</span>
       </div>
 
@@ -82,6 +82,11 @@
           <div class="admin-nav-item" data-view="viewSessions">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             <span>Session Audit Logs</span>
+          </div>
+          <div class="admin-nav-item" data-view="viewOrders">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span>Billing &amp; Lisensi</span>
+            <span class="nav-badge-pill" id="navOrdersBadge" style="background:rgba(16,185,129,0.15); color:var(--color-emerald); border-color:rgba(16,185,129,0.3);">2</span>
           </div>
         </div>
 
@@ -130,6 +135,7 @@
         </div>
 
         <!-- 4 KPI Cards -->
+        <!-- 4 KPI Cards -->
         <div class="admin-kpi-grid">
           <div class="kpi-card">
             <div class="kpi-header">
@@ -141,6 +147,18 @@
             <div class="kpi-value" id="kpiActiveSessions">3</div>
             <div class="kpi-meta">
               <span>● 2 Direct UDP P2P &bull; 1 Encrypted Relay</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkActiveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.4"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,32 Q25,12 50,28 T100,16 T150,24 T200,6 L200,40 L0,40 Z" fill="url(#sparkActiveGrad)"/>
+                <path d="M0,32 Q25,12 50,28 T100,16 T150,24 T200,6" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
           </div>
 
@@ -155,6 +173,18 @@
             <div class="kpi-meta">
               <span>● 12 Online &bull; 2 Standby</span>
             </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkFleetGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#818cf8" stop-opacity="0.4"/>
+                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,30 L40,30 L40,24 L90,24 L90,16 L140,16 L140,10 L200,10 L200,40 L0,40 Z" fill="url(#sparkFleetGrad)"/>
+                <path d="M0,30 L40,30 L40,24 L90,24 L90,16 L140,16 L140,10 L200,10" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
           </div>
 
           <div class="kpi-card">
@@ -168,6 +198,18 @@
             <div class="kpi-meta neutral">
               <span>AV1 60 FPS Streams Active</span>
             </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkThroughputGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"/>
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,28 Q15,8 30,22 T60,10 T90,30 T120,8 T150,25 T180,14 T200,4 L200,40 L0,40 Z" fill="url(#sparkThroughputGrad)"/>
+                <path d="M0,28 Q15,8 30,22 T60,10 T90,30 T120,8 T150,25 T180,14 T200,4" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
           </div>
 
           <div class="kpi-card">
@@ -180,6 +222,18 @@
             <div class="kpi-value" style="color:var(--color-emerald);">100%</div>
             <div class="kpi-meta">
               <span>Libsodium X25519 Verified</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkSecGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#059669" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#059669" stop-opacity="0.0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,16 L50,16 L60,6 L70,26 L80,16 L130,16 L140,6 L150,26 L160,16 L200,16 L200,40 L0,40 Z" fill="url(#sparkSecGrad)"/>
+                <path d="M0,16 L50,16 L60,6 L70,26 L80,16 L130,16 L140,6 L150,26 L160,16 L200,16" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
           </div>
         </div>
@@ -211,8 +265,8 @@
               <tbody id="activeSessionsTable">
                 <tr>
                   <td>
-                    <div style="font-weight:700; color:var(--color-text-heading);">Agus Dwi R (admin)</div>
-                    <div class="admin-code-cell">192.168.100.10:52410</div>
+                    <div style="font-weight:700; color:var(--color-text-heading);">SecOps Lead (Admin)</div>
+                    <div class="admin-code-cell">10.10.50.14:52410</div>
                   </td>
                   <td>
                     <div style="font-weight:700; color:var(--color-text-heading);">eng-cad-workstation-11</div>
@@ -303,6 +357,18 @@
             <div class="kpi-meta">
               <span id="kpiAdminAccounts">● Akun Aktif Siap Login</span>
             </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkAccountsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,32 Q50,30 100,20 T200,8 L200,40 L0,40 Z" fill="url(#sparkAccountsGrad)"/>
+                <path d="M0,32 Q50,30 100,20 T200,8" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
           </div>
 
           <div class="kpi-card">
@@ -315,6 +381,18 @@
             <div class="kpi-value" id="kpiTotalLinkedDevices">2</div>
             <div class="kpi-meta">
               <span id="kpiOnlineLinkedDevices">● Live Heartbeat</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkDevGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#818cf8" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#818cf8" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,34 L60,34 L60,22 L130,22 L130,12 L200,12 L200,40 L0,40 Z" fill="url(#sparkDevGrad)"/>
+                <path d="M0,34 L60,34 L60,22 L130,22 L130,12 L200,12" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
           </div>
 
@@ -329,6 +407,18 @@
             <div class="kpi-meta">
               <span>● Port 21114 &bull; HTTP Bearer Auth</span>
             </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkProtoGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,20 Q25,8 50,20 T100,20 T150,20 T200,20 L200,40 L0,40 Z" fill="url(#sparkProtoGrad)"/>
+                <path d="M0,20 Q25,8 50,20 T100,20 T150,20 T200,20" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
           </div>
 
           <div class="kpi-card">
@@ -341,6 +431,18 @@
             <div class="kpi-value" style="color:var(--color-primary);">AUTO-SYNC</div>
             <div class="kpi-meta">
               <span>● Semua PC 1 akun saling terdeteksi</span>
+            </div>
+            <div class="kpi-sparkline">
+              <svg viewBox="0 0 200 40" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="sparkBookGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,25 Q30,10 70,22 T140,12 T200,5 L200,40 L0,40 Z" fill="url(#sparkBookGrad)"/>
+                <path d="M0,25 Q30,10 70,22 T140,12 T200,5" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+              </svg>
             </div>
           </div>
         </div>
@@ -407,7 +509,7 @@
                   <td><strong>eng-cad-workstation-11</strong></td>
                   <td class="admin-code-cell">512 884 901</td>
                   <td>Windows 11 Pro 64-bit</td>
-                  <td class="admin-code-cell">192.168.100.45</td>
+                  <td class="admin-code-cell">10.10.20.45</td>
                   <td><span class="mgmt-tag-pill">Engineering</span></td>
                   <td><span class="status-pill online">ONLINE (11ms)</span></td>
                   <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
@@ -416,10 +518,10 @@
                   </td>
                 </tr>
                 <tr>
-                  <td><strong>audira-proxmox-dc01</strong></td>
+                  <td><strong>core-infra-dc01</strong></td>
                   <td class="admin-code-cell">914 302 774</td>
-                  <td>Ubuntu 24.04 LTS (Proxmox)</td>
-                  <td class="admin-code-cell">192.168.100.175</td>
+                  <td>Ubuntu 24.04 LTS (Cluster)</td>
+                  <td class="admin-code-cell">10.10.20.10</td>
                   <td><span class="mgmt-tag-pill">Production</span></td>
                   <td><span class="status-pill online">ONLINE (2ms LAN)</span></td>
                   <td><span style="color:var(--color-emerald); font-weight:700;">Root Service</span></td>
@@ -431,7 +533,7 @@
                   <td><strong>devops-bastion-gateway</strong></td>
                   <td class="admin-code-cell">204 119 635</td>
                   <td>Debian 12 Bookworm</td>
-                  <td class="admin-code-cell">192.168.100.2</td>
+                  <td class="admin-code-cell">10.10.20.2</td>
                   <td><span class="mgmt-tag-pill">Security</span></td>
                   <td><span class="status-pill online">ONLINE (8ms)</span></td>
                   <td><span style="color:var(--color-emerald); font-weight:700;">Root Service</span></td>
@@ -443,7 +545,7 @@
                   <td><strong>macbook-studio-m2</strong></td>
                   <td class="admin-code-cell">773 409 182</td>
                   <td>macOS 14 Sonoma (Apple M2)</td>
-                  <td class="admin-code-cell">192.168.100.82</td>
+                  <td class="admin-code-cell">10.10.20.82</td>
                   <td><span class="mgmt-tag-pill">Creative</span></td>
                   <td><span class="status-pill standby">STANDBY (34ms)</span></td>
                   <td><span style="color:var(--color-text-muted);">Standard</span></td>
@@ -455,7 +557,7 @@
                   <td><strong>reception-kiosk-surface</strong></td>
                   <td class="admin-code-cell">449 102 837</td>
                   <td>Windows 11 IoT Enterprise</td>
-                  <td class="admin-code-cell">192.168.100.110</td>
+                  <td class="admin-code-cell">10.10.20.110</td>
                   <td><span class="mgmt-tag-pill">Kiosk</span></td>
                   <td><span class="status-pill offline">OFFLINE</span></td>
                   <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
@@ -501,8 +603,8 @@
               <tbody>
                 <tr>
                   <td class="admin-code-cell">2026-10-18 15:10:04</td>
-                  <td><strong>Agus Dwi Rianto</strong> (Root)</td>
-                  <td>audira-proxmox-dc01 (914 302 774)</td>
+                  <td><strong>SecOps Lead</strong> (Root)</td>
+                  <td>core-infra-dc01 (914 302 774)</td>
                   <td><span class="status-pill online">Direct P2P UDP</span></td>
                   <td style="font-family:var(--font-mono);">00:48:22</td>
                   <td style="font-family:var(--font-mono);">410 MB</td>
@@ -525,6 +627,87 @@
                   <td style="font-family:var(--font-mono);">00:03:12</td>
                   <td style="font-family:var(--font-mono);">18 MB</td>
                   <td>Automated Routine Healthcheck</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           VIEW: BILLING & LISENSI (ORDERS & LICENSES MANAGEMENT)
+           ==================================================================== -->
+      <section id="viewOrders" class="view-section">
+        <div class="admin-page-header">
+          <div>
+            <h1 class="admin-page-title">Billing &amp; Manajemen Lisensi Komersial</h1>
+            <p class="admin-page-subtitle">Sinkronisasi otomatis pesanan masuk dari landing page, verifikasi pembayaran QRIS/Bank, dan penerbitan Kunci Lisensi</p>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" onclick="fetchOrdersData(true)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span>Refresh Orders</span>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openManualLicenseModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ Terbitkan Lisensi Manual</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Orders KPI Metrics Row -->
+        <div class="admin-metrics-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom:1.5rem;">
+          <div class="kpi-card">
+            <div class="kpi-label">TOTAL TRANSAKSI</div>
+            <div class="kpi-value" id="kpiTotalOrders">0</div>
+            <div class="kpi-meta"><span style="color:var(--color-primary);">Semua Pesanan Masuk</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">TOTAL PENDAPATAN (OMSET)</div>
+            <div class="kpi-value" id="kpiTotalRevenue" style="color:var(--color-emerald); font-size:1.45rem;">Rp 0</div>
+            <div class="kpi-meta"><span>Transaksi Terverifikasi (PAID)</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">LISENSI AKTIF</div>
+            <div class="kpi-value" id="kpiActiveLicenses" style="color:var(--color-primary);">0</div>
+            <div class="kpi-meta"><span style="color:var(--color-emerald);">● Beroperasi di Client</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">MENUNGGU VERIFIKASI</div>
+            <div class="kpi-value" id="kpiPendingOrders" style="color:var(--color-amber);">0</div>
+            <div class="kpi-meta"><span>Perlu Konfirmasi Pembayaran</span></div>
+          </div>
+        </div>
+
+        <!-- Orders Data Table Card -->
+        <div class="admin-card">
+          <div class="admin-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:800; font-size:1rem; color:var(--color-text-heading); display:flex; align-items:center; gap:0.5rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <span>Daftar Transaksi &amp; Lisensi Diterbitkan</span>
+            </div>
+            <div style="font-size:0.75rem; color:var(--color-text-dim);" id="ordersHeaderSubtitle">
+              Sinkronisasi realtime dengan API server
+            </div>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="ordersTable">
+              <thead>
+                <tr>
+                  <th>NO. INVOICE</th>
+                  <th>PELANGGAN / INSTANSI</th>
+                  <th>PAKET LISENSI</th>
+                  <th>NOMINAL</th>
+                  <th>METODE</th>
+                  <th>KUNCI LISENSI (KEY)</th>
+                  <th>STATUS</th>
+                  <th>AKSI</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:2rem; color:var(--color-text-dim);">Memuat data transaksi dari server...</td>
                 </tr>
               </tbody>
             </table>
@@ -613,7 +796,7 @@
                 <div>
                   <strong>🚨 [AUDIRA ALERT] Sesi Baru Terhubung</strong><br>
                   • <b>Target Host:</b> eng-cad-workstation-11 (512 884 901)<br>
-                  • <b>Operator:</b> Agus Dwi Rianto (Superadmin)<br>
+                  • <b>Operator:</b> SecOps Admin (Root)<br>
                   • <b>Protocol:</b> Direct UDP Hole-Punch (11 ms)<br>
                   • <b>Timestamp:</b> 16:00:22 WIB
                 </div>
@@ -700,7 +883,7 @@
                     </div>
                     <div>
                       <div class="discord-field-title">OPERATOR</div>
-                      <div class="discord-field-val">Agus Dwi Rianto (admin)</div>
+                      <div class="discord-field-val">SecOps Admin (Root)</div>
                     </div>
                   </div>
                 </div>
@@ -728,8 +911,8 @@
             Only connections originating from the following CIDR blocks or specific IP addresses are permitted to access managed fleet endpoints:
           </p>
           <div class="form-group">
-            <textarea class="form-input" style="font-family:var(--font-mono); height:90px;" placeholder="192.168.100.0/24&#10;10.0.0.0/8&#10;114.124.88.21">192.168.100.0/24
-10.0.0.0/8
+            <textarea class="form-input" style="font-family:var(--font-mono); height:90px;" placeholder="10.10.0.0/16&#10;172.16.0.0/12&#10;127.0.0.1">10.10.0.0/16
+172.16.0.0/12
 127.0.0.1</textarea>
           </div>
 
@@ -776,19 +959,19 @@
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
             <div class="form-group">
               <label class="form-label">ID / Rendezvous Server Domain (hbbs)</label>
-              <input type="text" class="form-input" value="desk.audira.my.id:21116" readonly style="font-family:var(--font-mono);">
+              <input type="text" class="form-input" value="relay.example.com:21116" readonly style="font-family:var(--font-mono);">
             </div>
 
             <div class="form-group">
               <label class="form-label">Relay Server Domain (hbbr)</label>
-              <input type="text" class="form-input" value="desk.audira.my.id:21117" readonly style="font-family:var(--font-mono);">
+              <input type="text" class="form-input" value="relay.example.com:21117" readonly style="font-family:var(--font-mono);">
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label">Cluster Host Public Key (Ed25519)</label>
             <div class="form-input-wrap">
-              <input type="text" id="clusterKeyInput" class="form-input" value="SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8=" readonly style="font-family:var(--font-mono); color:var(--color-emerald);">
+              <input type="text" id="clusterKeyInput" class="form-input" value="ed25519-sha256-sample-key-7x9wKFzR4eHN5yABIydqpFouvnb8=" readonly style="font-family:var(--font-mono); color:var(--color-emerald);">
               <button class="form-input-addon" onclick="copyClusterKey()" title="Copy key">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
               </button>
@@ -797,7 +980,7 @@
 
           <div style="background:var(--color-admin-surface); border:1px solid var(--color-admin-border); border-radius:var(--radius-sm); padding:1rem; margin-top:1rem;">
             <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--color-primary); margin-bottom:0.5rem;">SERVER DAEMON COMMAND:</div>
-            <code style="font-size:0.8125rem; color:#94a3b8;">docker compose up -d (hbbs -r desk.audira.my.id:21117 -k _ &amp;&amp; hbbr -k _)</code>
+            <code style="font-size:0.8125rem; color:#94a3b8;">docker compose up -d (hbbs -r relay.example.com:21117 -k _ &amp;&amp; hbbr -k _)</code>
           </div>
         </div>
       </section>
@@ -835,6 +1018,51 @@
         <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
           <button type="button" class="btn btn-secondary btn-sm" onclick="closeCreateAccountModal()">Batal</button>
           <button type="submit" class="btn btn-primary btn-sm">Simpan &amp; Aktifkan Akun</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Manual License Generation -->
+  <div id="modalManualLicense" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-dialog" style="background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:12px; width:100%; max-width:480px; padding:1.5rem; box-shadow:0 20px 40px rgba(0,0,0,0.8);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+        <h3 style="font-size:1.15rem; font-weight:800; color:var(--color-text-heading); margin:0;">Terbitkan Lisensi Kustom Manual</h3>
+        <button onclick="closeManualLicenseModal()" class="icon-btn" style="width:28px; height:28px; background:transparent; border:none; color:var(--color-text-dim); cursor:pointer; font-size:1.2rem;">&times;</button>
+      </div>
+      <form onsubmit="submitManualLicense(event)">
+        <div class="form-group" style="margin-bottom:0.85rem;">
+          <label class="form-label" style="font-size:0.8rem;">Nama Pelanggan / Institusi</label>
+          <input type="text" id="manualCustName" class="form-input" placeholder="Contoh: Universitas Gadjah Mada" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0.85rem;">
+          <label class="form-label" style="font-size:0.8rem;">Email Pelanggan</label>
+          <input type="email" id="manualEmail" class="form-input" placeholder="admin@ugm.ac.id" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:0.8rem;">Pilihan Paket</label>
+            <select id="manualPlan" class="form-input">
+              <option value="pro">Pro Individual</option>
+              <option value="team" selected>Pro Team &amp; MSP</option>
+              <option value="enterprise">Enterprise Dedicated</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:0.8rem;">Siklus Waktu</label>
+            <select id="manualCycle" class="form-input">
+              <option value="monthly">1 Bulan</option>
+              <option value="annual" selected>1 Tahun (12 Bulan)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label class="form-label" style="font-size:0.8rem;">Remote Client ID (Opsional)</label>
+          <input type="text" id="manualTargetId" class="form-input" placeholder="Contoh: 269 819 537">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeManualLicenseModal()">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm">Terbitkan &amp; Aktifkan</button>
         </div>
       </form>
     </div>

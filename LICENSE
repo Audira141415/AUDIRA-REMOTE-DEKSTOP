@@ -1,21 +1,54 @@
-MIT License
+AUDIRA COMMERCIAL SOFTWARE LICENSE AGREEMENT
+Version 1.0 (2026)
 
-Copyright (c) 2026 AUDIRA (Agus Dwi R)
+Copyright (c) 2026 AUDIRA / Agus Dwi Rianto (Audira Multimedia Digital).
+All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+IMPORTANT: PLEASE READ THIS LICENSE AGREEMENT CAREFULLY BEFORE DOWNLOADING,
+INSTALLING, COPYING, OR USING THIS SOFTWARE.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. PROPRIETARY SOFTWARE & COMMERCIAL RIGHTS
+This software ("Audira Desk", including all associated binaries, source code,
+interfaces, libraries, and documentation) is proprietary software owned and
+copyrighted by Agus Dwi Rianto / Audira Multimedia Digital ("AUDIRA").
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This software is NOT free public-domain software, and is NOT licensed under
+open-source licenses (such as MIT, GPL, or Apache) unless explicitly specified
+under a separate customized written agreement signed by AUDIRA.
+
+2. LICENSE GRANT & SUBSCRIPTION REQUIREMENTS
+Subject to the terms of this Agreement and payment of applicable license fees,
+AUDIRA grants you a non-exclusive, non-transferable, revocable commercial license
+to install, run, and operate the Software solely in accordance with your chosen
+edition or subscription tier (e.g., Community Starter, Pro Individual, Pro Team,
+or Enterprise).
+
+Active commercial operation, centralized fleet management, automated relay clustering,
+unattended enterprise access, and white-label generation require a valid commercial
+license key issued directly by AUDIRA.
+
+3. RESTRICTIONS
+Unless expressly authorized in writing by AUDIRA, you may NOT:
+a) Sublicense, sell, lease, rent, redistribute, or monetize the Software or any
+   part thereof to third parties without an authorized reseller agreement.
+b) Reverse engineer, decompile, disassemble, or attempt to derive the proprietary
+   algorithms, licensing mechanisms, or DRM tokens of the Software.
+c) Remove, alter, or obscure any copyright, trademark, logo, or proprietary notices
+   contained in or displayed by the Software.
+d) Bypass, tamper with, or circumvent any license verification, quota limits, or
+   security gates enforced by the Software or the Audira API.
+
+4. COMMERCIAL INQUIRIES & ACQUISITIONS
+To purchase commercial licenses, upgrade endpoint quotas, request custom Enterprise
+SLAs, or obtain white-label binary distribution rights, please contact:
+
+- Official Website: https://audira.my.id
+- Official Email: support@audira.my.id / agusdwirianto@gmail.com
+- WhatsApp Hotline: +62 821-1200-1600
+- Founder & Principal: Agus Dwi Rianto (AUDIRA)
+
+5. DISCLAIMER OF WARRANTIES & LIMITATION OF LIABILITY
+THE SOFTWARE IS PROVIDED "AS IS", WITH APPLICABLE COMMERCIAL SLA WARRANTIES
+CORRESPONDING ONLY TO ACTIVE PAID ENTERPRISE CONTRACTS. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+EXCEPT AS EXPRESSLY SET FORTH IN A FORMAL WRITTEN ENTERPRISE SERVICE LEVEL AGREEMENT.

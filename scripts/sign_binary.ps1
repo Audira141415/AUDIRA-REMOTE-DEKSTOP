@@ -37,16 +37,10 @@ if ($cert) {
 
     # Sign the binaries
     $filesToSign = @(
-        "f:\AUDIRA-REMOTE-DEKSTOP\dist\AudiraDesk-v1.5.0-x86_64.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\dist\AudiraDesk.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\dist\AudiraDesk-install.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\dist\AudiraDesk-setup.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\AudiraDesk.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\audira.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\sciter.dll",
-        "f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-v1.5.0-x86_64.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk.exe",
-        "f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-install.exe"
+        "f:\AUDIRA-REMOTE-DEKSTOP\dist\AudiraDesk-Full-Installer.exe",
+        "f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-Full-Installer.exe",
+        "f:\AUDIRA-REMOTE-DEKSTOP\AudiraDesk-Full-Installer.exe",
+        "f:\AUDIRA-REMOTE-DEKSTOP\audira.exe"
     )
 
     foreach ($file in $filesToSign) {

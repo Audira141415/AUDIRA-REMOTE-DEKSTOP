@@ -13,7 +13,8 @@ import uuid
 import sqlite3
 import datetime
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
+import socket
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
 PORT = 21114
@@ -22,6 +23,8 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "db_v2.sqlite3")
 META_PATH = os.path.join(DATA_DIR, "devices_meta.json")
 ACCOUNTS_PATH = os.path.join(DATA_DIR, "accounts.json")
+AUDIT_PATH = os.path.join(DATA_DIR, "audit_logs.json")
+ORDERS_PATH = os.path.join(DATA_DIR, "orders.json")
 
 # In-memory tracking
 PEERS_LOCK = threading.Lock()
@@ -30,14 +33,83 @@ DISCONNECT_QUEUE = {}
 SESSION_HISTORY = []
 
 ACCOUNTS_LOCK = threading.Lock()
+AUDIT_LOCK = threading.Lock()
+ORDERS_LOCK = threading.Lock()
+
+def get_default_audit_logs():
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return [
+        {
+            "id": "AUD-0001",
+            "timestamp": now_str,
+            "event_type": "SYSTEM_START",
+            "peer_id": "SYSTEM",
+            "peer_ip": "127.0.0.1",
+            "operator": "Audira Daemon",
+            "details": "Audira Central Management Service & Fleet Server aktif",
+            "duration_sec": 0
+        },
+        {
+            "id": "AUD-0002",
+            "timestamp": now_str,
+            "event_type": "TELEGRAM_BOT_READY",
+            "peer_id": "TELEGRAM",
+            "peer_ip": "127.0.0.1",
+            "operator": "Telegram Bot Worker",
+            "details": "Layanan verifikasi 2FA & Approval Remote via Telegram Bot siap digunakan",
+            "duration_sec": 0
+        }
+    ]
+
+def load_audit_logs():
+    if os.path.exists(AUDIT_PATH):
+        try:
+            with open(AUDIT_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+        except Exception as e:
+            print(f"[!] Error loading audit_logs.json: {e}")
+    logs = get_default_audit_logs()
+    save_audit_logs(logs)
+    return logs
+
+def save_audit_logs(logs):
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        temp_path = AUDIT_PATH + ".tmp"
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(logs, f, indent=2)
+        os.replace(temp_path, AUDIT_PATH)
+    except Exception as e:
+        print(f"[!] Error saving audit_logs.json: {e}")
+
+def add_audit_log(event_type, peer_id, peer_ip, operator, details, duration_sec=0):
+    with AUDIT_LOCK:
+        logs = load_audit_logs()
+        new_entry = {
+            "id": f"AUD-{int(time.time()*1000) % 1000000:06d}",
+            "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "event_type": event_type,
+            "peer_id": str(peer_id),
+            "peer_ip": str(peer_ip),
+            "operator": str(operator),
+            "details": str(details),
+            "duration_sec": int(duration_sec)
+        }
+        logs.insert(0, new_entry)
+        if len(logs) > 200:
+            logs = logs[:200]
+        save_audit_logs(logs)
+        return new_entry
 
 def get_default_accounts():
     return {
         "audira": {
             "username": "audira",
             "password": "Sigma1993",
-            "display_name": "Agus Dwi Rianto (AUDIRA)",
-            "email": "agus@audira.my.id",
+            "display_name": "Agus Dwi Rianto",
+            "email": "admin@audira.my.id",
             "note": "Audira Certified Administrator",
             "is_admin": True,
             "status": 1,
@@ -48,6 +120,72 @@ def get_default_accounts():
             "tag_colors": {"My Devices": 4282557947, "Audira Fleet": 4280391411}
         }
     }
+
+def generate_license_key(plan="pro"):
+    plan_prefix = "PRO" if "pro" in plan.lower() else ("TEAM" if "team" in plan.lower() else "ENT")
+    p1 = uuid.uuid4().hex[:4].upper()
+    p2 = uuid.uuid4().hex[4:8].upper()
+    p3 = uuid.uuid4().hex[8:12].upper()
+    return f"ADR-{plan_prefix}-{p1}-{p2}-{p3}"
+
+def get_default_orders():
+    return [
+        {
+            "id": "INV-20261019-8801",
+            "plan": "team",
+            "plan_name": "Pro Team & MSP",
+            "cycle": "monthly",
+            "amount": 149000,
+            "currency": "IDR",
+            "customer_name": "PT Solusi Cloud Nusantara",
+            "email": "billing@cloudnusantara.id",
+            "target_id": "269 819 537",
+            "payment_method": "qris",
+            "license_key": "ADR-TEAM-89A1-BC42-7710",
+            "status": "PAID",
+            "created_at": "2026-10-19 14:20:00",
+            "expires_at": "2027-10-19 14:20:00"
+        },
+        {
+            "id": "INV-20261019-9142",
+            "plan": "pro",
+            "plan_name": "Pro Individual",
+            "cycle": "annual",
+            "amount": 499000,
+            "currency": "IDR",
+            "customer_name": "DevOps Consultant Mandiri",
+            "email": "devops@audira.net",
+            "target_id": "313 015 359",
+            "payment_method": "bca",
+            "license_key": "ADR-PRO-3F21-E089-9114",
+            "status": "PAID",
+            "created_at": "2026-10-19 16:45:00",
+            "expires_at": "2027-10-19 16:45:00"
+        }
+    ]
+
+def load_orders():
+    if os.path.exists(ORDERS_PATH):
+        try:
+            with open(ORDERS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
+        except Exception as e:
+            print(f"[!] Error loading orders.json: {e}")
+    orders = get_default_orders()
+    save_orders(orders)
+    return orders
+
+def save_orders(orders):
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        temp_path = ORDERS_PATH + ".tmp"
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(orders, f, indent=2)
+        os.replace(temp_path, ORDERS_PATH)
+    except Exception as e:
+        print(f"[!] Error saving orders.json: {e}")
 
 def load_accounts():
     if os.path.exists(ACCOUNTS_PATH):
@@ -432,7 +570,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
             metrics = {
                 "success": True,
-                "cluster_host": "192.168.100.175",
+                "cluster_host": "desk.audira.my.id",
                 "hbbs_status": "ONLINE",
                 "hbbr_status": "ONLINE",
                 "total_devices": len(devices_list),
@@ -475,6 +613,40 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"success": True, "sessions": sessions}).encode())
+            return
+
+        # 10. Audit Logs endpoint (/api/audit_logs)
+        if path == "/api/audit_logs":
+            with AUDIT_LOCK:
+                logs = load_audit_logs()
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "total": len(logs), "logs": logs}).encode())
+            return
+
+        # 11. Orders & Billing endpoint (/api/orders)
+        if path == "/api/orders":
+            with ORDERS_LOCK:
+                orders = load_orders()
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "total": len(orders), "orders": orders}).encode())
+            return
+
+        # 12. Active Licenses endpoint (/api/licenses)
+        if path == "/api/licenses":
+            with ORDERS_LOCK:
+                orders = load_orders()
+            active_lics = [o for o in orders if o.get("status") in ["PAID", "ACTIVE"]]
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "total_active": len(active_lics), "licenses": active_lics}).encode())
             return
 
         self.send_response(404)
@@ -977,22 +1149,324 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
                 return
 
+        # 13. ACCOUNT ACTION: Change Password (/api/accounts/change-password)
+        if path == "/api/accounts/change-password":
+            try:
+                data = json.loads(body) if body else {}
+                username = str(data.get("username", "")).strip() or "audira"
+                old_pwd = str(data.get("old_password", "")).strip()
+                new_pwd = str(data.get("new_password", "")).strip()
+
+                if not new_pwd or len(new_pwd) < 6:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Password baru minimal 6 karakter"}).encode())
+                    return
+
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if username not in accounts:
+                        self.send_response(404)
+                        self.send_cors_headers()
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": "Akun tidak ditemukan"}).encode())
+                        return
+
+                    u = accounts[username]
+                    if old_pwd and u.get("password") and u.get("password") != old_pwd:
+                        self.send_response(400)
+                        self.send_cors_headers()
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": "Password lama tidak sesuai"}).encode())
+                        return
+
+                    u["password"] = new_pwd
+                    save_accounts(accounts)
+
+                add_audit_log(
+                    event_type="PASSWORD_CHANGED",
+                    peer_id=username,
+                    peer_ip=client_ip,
+                    operator=username,
+                    details=f"Kata sandi akun '{username}' berhasil diperbarui"
+                )
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": "Kata sandi berhasil diperbarui"}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 16. Audit Log Entry
+        if path == "/api/audit_logs":
+            try:
+                data = json.loads(body) if body else {}
+                entry = add_audit_log(
+                    event_type=data.get("event_type", "SESSION_EVENT"),
+                    peer_id=data.get("peer_id", "UNKNOWN"),
+                    peer_ip=data.get("peer_ip", client_ip),
+                    operator=data.get("operator", "Client"),
+                    details=data.get("details", ""),
+                    duration_sec=data.get("duration_sec", 0)
+                )
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "entry": entry}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 17. Audit Log Clear
+        if path == "/api/audit_logs/clear":
+            with AUDIT_LOCK:
+                save_audit_logs([])
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "message": "Audit logs cleared"}).encode())
+            return
+
+        # 18. ORDERS: Create / Checkout Order (/api/orders/create)
+        if path == "/api/orders/create":
+            try:
+                data = json.loads(body) if body else {}
+                plan = str(data.get("plan", "pro")).lower()
+                cycle = str(data.get("cycle", "monthly")).lower()
+                cust_name = str(data.get("customer_name", "Pelanggan Audira")).strip()
+                email = str(data.get("email", "")).strip()
+                target_id = str(data.get("target_id", "")).strip().replace(" ", "")
+                username = str(data.get("username", "")).strip()
+                pay_method = str(data.get("payment_method", "qris")).lower()
+
+                plan_names = {
+                    "free": "Community Free",
+                    "pro": "Pro Individual",
+                    "team": "Pro Team & MSP",
+                    "enterprise": "Enterprise Dedicated Cluster"
+                }
+                plan_prices = {
+                    "free": 0,
+                    "pro": 49000 if cycle == "monthly" else 499000,
+                    "team": 149000 if cycle == "monthly" else 1490000,
+                    "enterprise": 1500000
+                }
+
+                amount = plan_prices.get(plan, 49000)
+                plan_name = plan_names.get(plan, "Pro Individual")
+                inv_id = f"INV-{datetime.datetime.now().strftime('%Y%m%d')}-{int(time.time()*1000)%10000:04d}"
+                lic_key = generate_license_key(plan)
+                status = "PAID" if pay_method == "qris" else "PENDING"
+                now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                exp_date = (datetime.datetime.now() + datetime.timedelta(days=365 if cycle == "annual" else 30)).strftime("%Y-%m-%d %H:%M:%S")
+
+                new_order = {
+                    "id": inv_id,
+                    "plan": plan,
+                    "plan_name": plan_name,
+                    "cycle": cycle,
+                    "amount": amount,
+                    "currency": "IDR",
+                    "customer_name": cust_name,
+                    "email": email or f"buyer-{inv_id[-4:]}@audira.net",
+                    "target_id": format_id(target_id) if target_id else "",
+                    "username": username,
+                    "payment_method": pay_method,
+                    "license_key": lic_key,
+                    "status": status,
+                    "created_at": now_str,
+                    "expires_at": exp_date
+                }
+
+                with ORDERS_LOCK:
+                    orders = load_orders()
+                    orders.insert(0, new_order)
+                    save_orders(orders)
+
+                add_audit_log(
+                    event_type="ORDER_CREATED",
+                    peer_id=target_id or "CHECKOUT",
+                    peer_ip=client_ip,
+                    operator=cust_name,
+                    details=f"Pemesanan lisensi {plan_name} ({inv_id}) via {pay_method.upper()} status {status}"
+                )
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "order": new_order}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 19. ORDERS: Approve Order & Activate License (/api/orders/approve)
+        if path == "/api/orders/approve":
+            try:
+                data = json.loads(body) if body else {}
+                order_id = str(data.get("order_id", "")).strip()
+                updated_order = None
+                with ORDERS_LOCK:
+                    orders = load_orders()
+                    for o in orders:
+                        if o.get("id") == order_id:
+                            o["status"] = "PAID"
+                            o["paid_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            updated_order = o
+                            break
+                    if updated_order:
+                        save_orders(orders)
+
+                if updated_order:
+                    add_audit_log(
+                        event_type="LICENSE_ACTIVATED",
+                        peer_id=updated_order.get("target_id") or "ADMIN",
+                        peer_ip=client_ip,
+                        operator="Admin Operator",
+                        details=f"Lisensi {updated_order.get('license_key')} ({order_id}) disetujui & diaktifkan"
+                    )
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"success": True, "order": updated_order}).encode())
+                    return
+                else:
+                    self.send_response(404)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Order tidak ditemukan"}).encode())
+                    return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 20. ORDERS: Delete Order (/api/orders/delete)
+        if path == "/api/orders/delete":
+            try:
+                data = json.loads(body) if body else {}
+                order_id = str(data.get("order_id", "")).strip()
+                with ORDERS_LOCK:
+                    orders = load_orders()
+                    orders = [o for o in orders if o.get("id") != order_id]
+                    save_orders(orders)
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 21. LICENSES: Validate Key (/api/licenses/validate)
+        if path == "/api/licenses/validate":
+            try:
+                data = json.loads(body) if body else {}
+                lic_key = str(data.get("license_key", "")).strip().upper()
+                target_id = str(data.get("id", "")).strip().replace(" ", "")
+
+                with ORDERS_LOCK:
+                    orders = load_orders()
+                    match = None
+                    for o in orders:
+                        if o.get("status") in ["PAID", "ACTIVE"]:
+                            if lic_key and o.get("license_key") == lic_key:
+                                match = o
+                                break
+                            clean_tid = str(o.get("target_id", "")).replace(" ", "")
+                            if target_id and clean_tid == target_id:
+                                match = o
+                                break
+
+                if match:
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "valid": True,
+                        "plan": match.get("plan"),
+                        "plan_name": match.get("plan_name"),
+                        "license_key": match.get("license_key"),
+                        "expires_at": match.get("expires_at"),
+                        "customer_name": match.get("customer_name")
+                    }).encode())
+                    return
+                else:
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"valid": False, "message": "Kunci lisensi tidak valid atau belum aktif"}).encode())
+                    return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
         self.send_response(404)
         self.send_cors_headers()
         self.end_headers()
         self.wfile.write(b"Not Found")
 
 
+class DualStackServer(ThreadingHTTPServer):
+    address_family = socket.AF_INET6
+
+    def server_bind(self):
+        try:
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        except Exception:
+            pass
+        return super().server_bind()
+
+
 def main():
     print(f"[*] Starting AUDIRA Remote Desktop Central Fleet & Auth API on port {PORT}...")
     # Preload accounts
     load_accounts()
-    server = HTTPServer(("0.0.0.0", PORT), AudiraAPIHandler)
+    try:
+        server = DualStackServer(("::", PORT), AudiraAPIHandler)
+        print(f"[+] Bound multi-threaded dual-stack IPv4/IPv6 server on [::]:{PORT}")
+    except Exception as e:
+        print(f"[!] Dual-stack bind failed ({e}), falling back to IPv4...")
+        server = ThreadingHTTPServer(("0.0.0.0", PORT), AudiraAPIHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("[*] Stopping API server...")
         server.server_close()
+
 
 if __name__ == "__main__":
     main()

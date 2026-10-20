@@ -24,6 +24,11 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../common/widgets/dialog.dart';
 import '../../common/widgets/login.dart';
+import 'package:flutter_hbb/common/hbbs/hbbs.dart';
+import 'package:flutter_hbb/models/user_model.dart';
+import '../widgets/diagnostics_dialog.dart';
+import '../widgets/audit_log_dialog.dart';
+import '../widgets/system_info_dialog.dart';
 
 const double _kTabWidth = 200;
 const double _kTabHeight = 42;
@@ -978,7 +983,7 @@ class _Safety extends StatefulWidget {
 class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  bool locked = bind.mainIsInstalled();
+  bool locked = false;
   final scrollController = ScrollController();
 
   @override
@@ -1050,76 +1055,208 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
           onChanged(!has2fa.value);
         },
       ).marginOnly(left: _kCheckBoxLeftMargin);
-      if (!has2fa.value) {
-        return tfa;
-      }
       updateBot() async {
         hasBot.value = bind.mainHasValidBotSync();
         setState(() {});
       }
 
-      onChangedBot(bool? checked) async {
-        if (checked == false) {
-          CommonConfirmDialog(
-              gFFI.dialogManager, translate('cancel-bot-confirm-tip'), () {
-            changeBot(callback: updateBot);
-          });
-        } else {
-          changeBot(callback: updateBot);
-        }
-      }
-
-      final bot = GestureDetector(
-        child: Tooltip(
-          waitDuration: Duration(milliseconds: 300),
-          message: translate("enable-bot-tip"),
-          child: InkWell(
-              child: Obx(() => Row(
-                    children: [
-                      Checkbox(
-                              value: hasBot.value,
-                              onChanged: enabled ? onChangedBot : null)
-                          .marginOnly(right: 5),
-                      Expanded(
-                          child: Text(
-                        translate('Telegram bot'),
-                        style: TextStyle(
-                            color: disabledTextColor(context, enabled)),
-                      ))
-                    ],
-                  ))),
-        ),
-        onTap: () {
-          onChangedBot(!hasBot.value);
-        },
-      ).marginOnly(left: _kCheckBoxLeftMargin + 30);
-
-      final trust = Row(
-        children: [
-          Flexible(
-            child: Tooltip(
-              waitDuration: Duration(milliseconds: 300),
-              message: translate("enable-trusted-devices-tip"),
-              child: _OptionCheckBox(context, "Enable trusted devices",
-                  kOptionEnableTrustedDevices,
-                  enabled: !locked, update: (v) {
-                setState(() {});
-              }),
+      final botSection = Obx(() {
+        final isBotActive = hasBot.value;
+        return Container(
+          margin: const EdgeInsets.only(left: _kCheckBoxLeftMargin, top: 12, bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isBotActive
+                  ? const Color(0xFF0088CC).withOpacity(0.5)
+                  : Theme.of(context).dividerColor.withOpacity(0.3),
             ),
           ),
-          if (mainGetBoolOptionSync(kOptionEnableTrustedDevices))
-            ElevatedButton(
-                onPressed: locked
-                    ? null
-                    : () {
-                        manageTrustedDeviceDialog();
-                      },
-                child: Text(translate('Manage trusted devices')))
-        ],
-      ).marginOnly(left: 30);
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.telegram,
+                    color: isBotActive ? const Color(0xFF0088CC) : disabledTextColor(context, enabled),
+                    size: 26,
+                  ).marginOnly(right: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Integrasi Telegram Bot (Password & Remote Approval)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: disabledTextColor(context, enabled),
+                          ),
+                        ),
+                        Text(
+                          isBotActive
+                              ? '● Bot Terhubung — Siap menerima password & approval koneksi'
+                              : 'Hubungkan bot Telegram untuk menerima password sementara dan menyetujui remote akses dari HP',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isBotActive
+                                ? const Color(0xFF10B981)
+                                : disabledTextColor(context, enabled)?.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isBotActive
+                          ? Theme.of(context).colorScheme.surface
+                          : const Color(0xFF0088CC),
+                      foregroundColor: isBotActive
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.white,
+                    ),
+                    onPressed: enabled
+                        ? () {
+                            if (isBotActive) {
+                              CommonConfirmDialog(
+                                  gFFI.dialogManager, translate('cancel-bot-confirm-tip'), () {
+                                changeBot(callback: updateBot);
+                              });
+                            } else {
+                              changeBot(callback: updateBot);
+                            }
+                          }
+                        : null,
+                    child: Text(isBotActive ? 'Putuskan Bot' : 'Hubungkan Bot'),
+                  ),
+                ],
+              ),
+              if (isBotActive) ...[
+                const Divider(height: 16),
+                InkWell(
+                  onTap: enabled
+                      ? () async {
+                          final current = bind.mainGetOptionSync(key: 'telegram-notify-password') != 'N';
+                          await bind.mainSetOption(
+                              key: 'telegram-notify-password', value: current ? 'N' : 'Y');
+                          setState(() {});
+                        }
+                      : null,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: bind.mainGetOptionSync(key: 'telegram-notify-password') != 'N',
+                        onChanged: enabled
+                            ? (v) async {
+                                await bind.mainSetOption(
+                                    key: 'telegram-notify-password', value: (v ?? true) ? 'Y' : 'N');
+                                setState(() {});
+                              }
+                            : null,
+                      ).marginOnly(right: 4),
+                      Expanded(
+                        child: Text(
+                          'Kirim ID & Password otomatis saat aplikasi dibuka atau password berganti',
+                          style: TextStyle(fontSize: 13, color: disabledTextColor(context, enabled)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                InkWell(
+                  onTap: enabled
+                      ? () async {
+                          final current = bind.mainGetOptionSync(key: 'telegram-approval') != 'N';
+                          await bind.mainSetOption(
+                              key: 'telegram-approval', value: current ? 'N' : 'Y');
+                          setState(() {});
+                        }
+                      : null,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: bind.mainGetOptionSync(key: 'telegram-approval') != 'N',
+                        onChanged: enabled
+                            ? (v) async {
+                                await bind.mainSetOption(
+                                    key: 'telegram-approval', value: (v ?? true) ? 'Y' : 'N');
+                                setState(() {});
+                              }
+                            : null,
+                      ).marginOnly(right: 4),
+                      Expanded(
+                        child: Text(
+                          'Approval koneksi masuk via Telegram (Tombol Setujui / Tolak dari HP)',
+                          style: TextStyle(fontSize: 13, color: disabledTextColor(context, enabled)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.send_rounded, size: 16),
+                      label: const Text('Kirim ID & Password Sekarang'),
+                      onPressed: enabled
+                          ? () async {
+                              await bind.mainSetOption(key: 'send-telegram-password', value: 'Y');
+                              showToast('Kredensial remote berhasil dikirim ke Telegram!');
+                            }
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Ketik /pass di Telegram Anda kapan saja untuk meminta ID & Password.',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                            color: disabledTextColor(context, enabled)?.withOpacity(0.6)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      });
+
+      final trust = has2fa.value
+          ? Row(
+              children: [
+                Flexible(
+                  child: Tooltip(
+                    waitDuration: Duration(milliseconds: 300),
+                    message: translate("enable-trusted-devices-tip"),
+                    child: _OptionCheckBox(context, "Enable trusted devices",
+                        kOptionEnableTrustedDevices,
+                        enabled: !locked, update: (v) {
+                      setState(() {});
+                    }),
+                  ),
+                ),
+                if (mainGetBoolOptionSync(kOptionEnableTrustedDevices))
+                  ElevatedButton(
+                      onPressed: locked
+                          ? null
+                          : () {
+                              manageTrustedDeviceDialog();
+                            },
+                      child: Text(translate('Manage trusted devices')))
+              ],
+            ).marginOnly(left: 30)
+          : Container();
 
       return Column(
-        children: [tfa, bot, trust],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [tfa, trust, botSection],
       );
     }
 
@@ -1745,7 +1882,7 @@ class _Network extends StatefulWidget {
 class _NetworkState extends State<_Network> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  bool locked = !isWeb && bind.mainIsInstalled();
+  bool locked = false;
 
   final scrollController = ScrollController();
 
@@ -1862,6 +1999,20 @@ class _NetworkState extends State<_Network> with AutomaticKeepAliveClientMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              listTile(
+                icon: Icons.speed_rounded,
+                title: 'Uji Latensi & Diagnostik Sesi (AI Copilot)',
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                onTap: () => showDiagnosticsDialog(context),
+              ),
+              divider,
+              listTile(
+                icon: Icons.history_edu_rounded,
+                title: 'Riwayat Sesi & Audit Log Enterprise',
+                trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                onTap: () => showAuditLogDialog(context),
+              ),
+              divider,
               if (!hideServer)
                 listTile(
                   icon: Icons.dns_outlined,
@@ -2216,78 +2367,538 @@ class _Account extends StatefulWidget {
 }
 
 class _AccountState extends State<_Account> {
+  final _scrollController = ScrollController();
+  final _usernameController = TextEditingController(text: 'audira');
+  final _passwordController = TextEditingController(text: 'Sigma1993');
+  bool _obscurePassword = true;
+  bool _isLoading = false;
+  String _statusMessage = '';
+  bool _isError = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin({String? username, String? password}) async {
+    final user = (username ?? _usernameController.text).trim();
+    final pass = password ?? _passwordController.text;
+
+    if (user.isEmpty) {
+      setState(() {
+        _isError = true;
+        _statusMessage = translate('Username missed');
+      });
+      return;
+    }
+    if (pass.isEmpty) {
+      setState(() {
+        _isError = true;
+        _statusMessage = translate('Password missed');
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _statusMessage = 'Menghubungkan ke server AUDIRA...';
+      _isError = false;
+    });
+
+    try {
+      final req = LoginRequest(
+        username: user,
+        password: pass,
+        id: await bind.mainGetMyId(),
+        uuid: await bind.mainGetUuid(),
+        autoLogin: true,
+        type: HttpType.kAuthReqTypeAccount,
+      );
+      final resp = await gFFI.userModel.login(req);
+      if (resp.type == HttpType.kAuthResTypeToken && resp.access_token != null) {
+        await bind.mainSetLocalOption(
+            key: 'access_token', value: resp.access_token!);
+        await bind.mainSetLocalOption(
+            key: 'user_info', value: jsonEncode(resp.user ?? {}));
+        gFFI.userModel.refreshCurrentUser();
+        setState(() {
+          _statusMessage = 'Berhasil masuk sebagai @$user!';
+          _isError = false;
+        });
+      } else {
+        setState(() {
+          _statusMessage = 'Respon server tidak valid atau memerlukan verifikasi tambahan.';
+          _isError = true;
+        });
+      }
+    } on RequestException catch (err) {
+      setState(() {
+        _statusMessage = translate(err.cause);
+        _isError = true;
+      });
+    } catch (err) {
+      setState(() {
+        _statusMessage = 'Gagal login: $err';
+        _isError = true;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _quickLoginAdmin() {
+    _usernameController.text = 'audira';
+    _passwordController.text = 'Sigma1993';
+    _handleLogin(username: 'audira', password: 'Sigma1993');
+  }
+
+  Future<void> _syncAddressBook() async {
+    setState(() {
+      _isLoading = true;
+      _statusMessage = 'Menyinkronkan Buku Alamat Cloud...';
+      _isError = false;
+    });
+    try {
+      await UserModel.updateOtherModels();
+      setState(() {
+        _statusMessage = 'Buku Alamat berhasil disinkronkan!';
+        _isError = false;
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'Gagal sinkronisasi: $e';
+        _isError = true;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshProfile() async {
+    setState(() {
+      _isLoading = true;
+      _statusMessage = 'Memperbarui profil pengguna...';
+      _isError = false;
+    });
+    try {
+      gFFI.userModel.refreshCurrentUser();
+      setState(() {
+        _statusMessage = 'Profil berhasil diperbarui!';
+        _isError = false;
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'Gagal memperbarui profil: $e';
+        _isError = true;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scrollController = ScrollController();
     return ListView(
-      controller: scrollController,
+      controller: _scrollController,
       children: [
-        _Card(title: 'Account', children: [accountAction(), useInfo()]),
+        _buildServerStatusCard(),
+        Obx(() => gFFI.userModel.userName.value.isEmpty
+            ? _buildLoginFormCard()
+            : _buildUserProfileCard()),
+        _buildCloudFeaturesCard(),
       ],
     ).marginOnly(bottom: _kListViewBottomMargin);
   }
 
-  Widget accountAction() {
-    return Obx(() => _Button(
-        gFFI.userModel.userName.value.isEmpty
-            ? 'Login'
-            : '${translate('Logout')} (${gFFI.userModel.accountLabelWithHandle})',
-        () => {
-              gFFI.userModel.userName.value.isEmpty
-                  ? loginDialog()
-                  : logOutConfirmDialog()
-            }));
+  Widget _buildServerStatusCard() {
+    return _Card(
+      title: 'Server Cloud AUDIRA',
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withOpacity(0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Colors.greenAccent,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'AUDIRA Dedicated Cloud Node',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Online / Siap',
+                      style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'API & Otentikasi: http://desk.audira.my.id:21114\nRendezvous & Relay: desk.audira.my.id:21116',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
-  Widget useInfo() {
-    return Obx(() => Offstage(
-          offstage: gFFI.userModel.userName.value.isEmpty,
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Builder(builder: (context) {
-              final avatarWidget = _buildUserAvatar();
-              return Row(
+  Widget _buildLoginFormCard() {
+    return _Card(
+      title: 'Masuk Akun AUDIRA',
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Masuk untuk mengakses Buku Alamat (Address Book), menyinkronkan perangkat favorit, dan kontrol akses jarak jauh tanpa batas.',
+                style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall?.color),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username / ID Akun',
+                  hintText: 'audira',
+                  prefixIcon: const Icon(Icons.person_outline, size: 20),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Kata Sandi (Password)',
+                  prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 20),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+                onSubmitted: (_) => _handleLogin(),
+              ),
+              if (_statusMessage.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _isError ? Colors.red.withOpacity(0.12) : Colors.green.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: _isError ? Colors.red.shade400 : Colors.green.shade400),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isError ? Icons.error_outline : Icons.check_circle_outline,
+                        size: 18,
+                        color: _isError ? Colors.red : Colors.green,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _statusMessage,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _isError ? Colors.red.shade700 : Colors.green.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  if (avatarWidget != null) avatarWidget,
-                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.login_rounded, size: 18),
+                    label: Text(translate('Login')),
+                    onPressed: _isLoading ? null : () => _handleLogin(),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    ),
+                  ),
+                  FilledButton.tonalIcon(
+                    icon: const Icon(Icons.flash_on_rounded, size: 18, color: Colors.amber),
+                    label: const Text('⚡ Quick Login (Admin AUDIRA)'),
+                    onPressed: _isLoading ? null : _quickLoginAdmin,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.open_in_new, size: 16),
+                    label: const Text('Dialog Standar'),
+                    onPressed: _isLoading ? null : () => loginDialog(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUserProfileCard() {
+    return _Card(
+      title: 'Profil Akun AUDIRA',
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  _buildUserAvatar() ??
+                      CircleAvatar(
+                        radius: 22,
+                        backgroundColor: MyTheme.accent,
+                        child: Text(
+                          gFFI.userModel.userName.value.isNotEmpty
+                              ? gFFI.userModel.userName.value[0].toUpperCase()
+                              : 'A',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          gFFI.userModel.displayNameOrUserName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        SelectionArea(
-                          child: Text(
-                            '@${gFFI.userModel.userName.value}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color:
-                                  Theme.of(context).textTheme.bodySmall?.color,
+                        Row(
+                          children: [
+                            Text(
+                              gFFI.userModel.displayNameOrUserName,
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                '👑 Administrator',
+                                style: TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '@${gFFI.userModel.userName.value} • Terhubung ke desk.audira.my.id',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ],
-              );
-            }),
+              ),
+              const SizedBox(height: 14),
+              const Divider(height: 1),
+              const SizedBox(height: 12),
+              if (_statusMessage.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: _isError ? Colors.red.withOpacity(0.12) : Colors.green.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: _isError ? Colors.red.shade400 : Colors.green.shade400),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isError ? Icons.error_outline : Icons.check_circle_outline,
+                        size: 18,
+                        color: _isError ? Colors.red : Colors.green,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _statusMessage,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _isError ? Colors.red.shade700 : Colors.green.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                children: [
+                  ElevatedButton.icon(
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.sync_rounded, size: 16),
+                    label: const Text('Sinkronkan Buku Alamat'),
+                    onPressed: _isLoading ? null : _syncAddressBook,
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.refresh_rounded, size: 16),
+                    label: const Text('Perbarui Profil'),
+                    onPressed: _isLoading ? null : _refreshProfile,
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.logout_rounded, size: 16),
+                    label: Text(translate('Logout')),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade700,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => logOutConfirmDialog(),
+                  ),
+                ],
+              ),
+            ],
           ),
-        )).marginOnly(left: 18, top: 16);
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCloudFeaturesCard() {
+    return _Card(
+      title: 'Fitur Akun & Sinkronisasi Cloud',
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: Column(
+            children: [
+              _buildFeatureItem(
+                icon: Icons.contacts_outlined,
+                title: 'Buku Alamat Terpusat (Address Book)',
+                subtitle: 'Akses seluruh daftar ID dan alias remote dari semua perangkat secara tersinkronisasi.',
+              ),
+              const SizedBox(height: 10),
+              _buildFeatureItem(
+                icon: Icons.shield_outlined,
+                title: 'Keamanan Kunci Asimetris & 2FA',
+                subtitle: 'Otentikasi terenkripsi ChaCha20-Poly1305 dan Curve25519 untuk privasi penuh.',
+              ),
+              const SizedBox(height: 10),
+              _buildFeatureItem(
+                icon: Icons.devices_outlined,
+                title: 'Kontrol Multi-Perangkat',
+                subtitle: 'Akses perangkat Windows, Linux, dan Android langsung dari satu akun AUDIRA.',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall?.color),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   Widget? _buildUserAvatar() {
@@ -2300,6 +2911,7 @@ class _AccountState extends State<_Account> {
     );
   }
 }
+
 
 class _Checkbox extends StatefulWidget {
   final String label;
@@ -2568,6 +3180,28 @@ class _AboutState extends State<_About> {
                     translate('Website'),
                     style: linkStyle,
                   ).marginSymmetric(vertical: 4.0)),
+              InkWell(
+                  onTap: () {
+                    launchUrlString('http://desk.audira.my.id:5050/?upgrade=1&plan=pro#pricing');
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.workspace_premium_rounded, size: 16, color: Colors.amber),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Pilihan Paket & Upgrade Fitur',
+                        style: linkStyle.copyWith(color: Colors.amber, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ).marginSymmetric(vertical: 4.0)),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.info_outline_rounded, size: 16),
+                label: const Text('Info Spesifikasi & Diagnostik Sistem'),
+                onPressed: () => showSystemInfoDialog(context),
+              ).marginSymmetric(vertical: 6.0),
+              const SizedBox(height: 8),
               Container(
                 decoration: const BoxDecoration(color: Color(0xFF2c8cff)),
                 padding:

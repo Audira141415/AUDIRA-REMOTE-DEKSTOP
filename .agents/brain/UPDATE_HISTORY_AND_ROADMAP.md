@@ -52,6 +52,19 @@
   - Rebranding identitas biner utama dari `rustdesk.exe` ke `audira.exe`.
   - Pembaruan konfigurasi CMake (`flutter/windows/CMakeLists.txt`), Runner Resource metadata (`flutter/windows/runner/Runner.rc`), `build.py`, serta manifest Cargo (`Cargo.toml`).
   - Kompilasi biner native release `audira.exe` menggunakan toolchain lokal Windows (LLVM + vcpkg C++ static libraries).
+- **Audit & Enhancement Menyeluruh `.agents` (v1.6.0 Upgrade - Trek 1 Selesai)**:
+  - Penambahan 3 Rule kritis baru: [git-submodule-and-workspace-scope.md](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/rules/git-submodule-and-workspace-scope.md), [localization-i18n-hygiene.md](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/rules/localization-i18n-hygiene.md), dan [windows-environment-and-toolchain.md](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/rules/windows-environment-and-toolchain.md).
+  - Peningkatan kedalaman teknis seluruh 15/15 skill dengan referensi teknis (`references/`) dan contoh kode implementasi aman (`examples/`).
+  - Konfigurasi automasi hooks ([.agents/hooks.json](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/hooks.json)) dan provider diagnosa ([.agents/mcp_config.json](file:///f:/AUDIRA-REMOTE-DEKSTOP/.agents/mcp_config.json)).
+  - Pembuatan skrip verifikasi otomatis terpadu [scripts/audit_agents.py](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audit_agents.py) (Hasil: 8/8 rules, 15/15 skills, 8 SSOT docs valid).
+- **Implementasi Fitur Profesional Setara TeamViewer/AnyDesk (Poin 1 & Poin 2)**:
+  - **On-Screen Whiteboard / Annotation Tool**: Widget [flutter/lib/desktop/widgets/whiteboard_overlay.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/whiteboard_overlay.dart) dengan dukungan pena neon multi-warna, highlighter, panah penunjuk, undo, dan pembersihan instan.
+  - **Modern Floating Session HUD Bar**: Widget [flutter/lib/desktop/widgets/session_hud_bar.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/session_hud_bar.dart) menampilkan badge live latensi (ms), FPS real-time, tombol pintas Ctrl+Alt+Del, Whiteboard, dan System Diagnostics.
+  - **Seamless Drag-and-Drop File Transfer**: Integrasi `desktop_drop` langsung pada canvas desktop di [flutter/lib/desktop/pages/remote_page.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/pages/remote_page.dart) dengan visual drop-zone glassmorphism dan verifikasi transfer instan.
+  - **Remote System Diagnostics & Hardware Drawer**: Widget [flutter/lib/desktop/widgets/remote_system_drawer.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/remote_system_drawer.dart) menampilkan spek OS target, status streaming, enkripsi E2EE ChaCha20-Poly1305, tombol lock host, dan export ringkasan diagnostik untuk ticketing.
+  - Verifikasi kode `flutter analyze` lulus 100% tanpa error.
+
+
 
 ---
 

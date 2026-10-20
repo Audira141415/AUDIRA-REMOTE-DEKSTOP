@@ -53,6 +53,6 @@ Proyek ini memiliki standar keandalan tinggi karena beroperasi pada sistem tingk
 
 ---
 
-## 3. Lisensi Kontribusi
+## 3. Lisensi Kontribusi & Hak Cipta
 
-Seluruh kontribusi kode yang Anda kirimkan ke repositori ini akan dilisensikan di bawah lisensi **MIT License** yang sama dengan proyek ini.
+Seluruh kontribusi kode yang Anda kirimkan ke repositori ini akan diatur di bawah ketentuan **AUDIRA Commercial Software License** dan menjadi bagian dari basis kode terpadu yang dikelola secara resmi oleh Agus Dwi Rianto (AUDIRA). Kontributor menyetujui bahwa AUDIRA berhak mendistribusikan, mempublikasikan, dan melisensikan perangkat lunak ini secara komersial.

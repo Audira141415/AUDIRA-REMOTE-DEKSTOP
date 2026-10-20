@@ -1,32 +1,32 @@
 /**
  * AUDIRA REMOTE DESKTOP — Anti-AI-Slop Client & Landing Engine
  * Standards: Swiss Precision, Real Telemetry, Zero Fluff
- * Author: Agus Dwi Rianto (AUDIRA) — https://audira.my.id
+ * Author: Audira Core Development Team
  */
 
 // Comprehensive i18n Localization Dictionary
 const i18n = {
   en: {
-    bannerText: "Official Release: Audira Desk v1.5.0 Standalone Single-EXE with zero-install execution is now available.",
-    bannerLink: "Get Executable",
+    bannerText: "Official Release: Audira Desk v1.5.0 Full Installer with zero-trust security is now available.",
+    bannerLink: "Get Installer",
+    navHome: "Home",
     navArchitecture: "Architecture",
     navTelemetry: "Live Demo",
-    navFleet: "Fleet Console",
+    navFleet: "Fleet",
     navComparison: "Compare",
-    navSelfHost: "Self-Hosting",
-    navLatency: "Latency",
-    navDownloads: "Downloads",
+    navSelfHost: "Self-Host",
+    navPricing: "Pricing",
     navFaq: "FAQ",
     navConsoleLogin: "Console Login",
     btnDownloads: "Downloads",
     heroBadge: "P2P NAT Traversal • Hardware AV1/VP9 Codec • 100% Data Sovereignty",
-    heroTitle: "Data-Sovereign <span>Remote Desktop</span> for Modern Engineering",
-    heroSubtitle: "The high-performance, open-source alternative to TeamViewer and AnyDesk. Direct UDP hole-punching, hardware-accelerated video streaming at 60 FPS, and zero-trust private server hosting.",
-    btnHeroWin: "Download AudiraDesk.exe (Windows 64-bit)",
+    heroTitle: "High-Performance <span>Remote Desktop</span>. Zero Cloud Relays.",
+    heroSubtitle: "Direct peer-to-peer UDP streaming at 60 FPS with hardware AV1/VP9 encoding and end-to-end encryption. Run your own private relay cluster in minutes.",
+    btnHeroWin: "Download AudiraDesk-Full-Installer.exe (Windows 64-bit)",
     btnHeroConsole: "Access Web Console",
     specPortable: "Zero-Installation Portable (Single Binary)",
     specCrypto: "Libsodium X25519-ChaCha20-Poly1305",
-    specLicense: "Free & Open-Source (MIT License)",
+    specLicense: "Audira Commercial License",
     simYourId: "This Device ID",
     simOneTimePw: "One-Time Password",
     simRemoteControl: "Control Remote Desktop",
@@ -91,11 +91,11 @@ const i18n = {
     lblMonthly: "Monthly",
     lblAnnual: "Annual",
     badgeSave: "SAVE 20%",
-    tierFreeTag: "OPEN SOURCE",
-    tierFreeTitle: "Community Free",
-    tierFreeSub: "For individuals, homelabs & tech enthusiasts managing their own relay.",
-    noteFree: "100% Free & Open Source (MIT)",
-    btnFree: "Get Started Free",
+    tierFreeTag: "STARTER / TRIAL",
+    tierFreeTitle: "Starter Standalone",
+    tierFreeSub: "For individuals & technicians testing standalone remote desktop capabilities.",
+    noteFree: "Standalone Portable (Free Evaluation)",
+    btnFree: "Download Free Trial",
     tierProTag: "INDIVIDUAL PRO",
     tierProTitle: "Pro Individual",
     tierProSub: "For IT technicians & consultants needing centralized management.",
@@ -106,7 +106,10 @@ const i18n = {
     tierTeamSub: "For IT support departments, MSPs & growing distributed teams.",
     noteProTeam: "Billed annually ($286.50 / yr)",
     btnTeam: "Choose Pro Team",
+    badgeFree: "STARTER • FREE TRIAL",
+    badgePro: "RECOMMENDED • INDIVIDUAL PRO",
     badgePopular: "MOST POPULAR • FLEET READY",
+    badgeEnterprise: "ENTERPRISE • DEDICATED CLUSTER",
     tierEntTag: "ENTERPRISE",
     tierEntTitle: "Enterprise",
     tierEntSub: "For large enterprises requiring private cluster & custom SLAs.",
@@ -117,27 +120,26 @@ const i18n = {
     colFeature: "CORE CAPABILITY"
   },
   id: {
-    bannerText: "Rilis Resmi: Audira Desk v1.5.0 Standalone Single-EXE siap dijalankan tanpa perlu instalasi.",
-    bannerLink: "Unduh File EXE",
+    bannerText: "Rilis Resmi: Audira Desk v1.5.0 Full Installer dengan keamanan zero-trust kini telah tersedia.",
+    bannerLink: "Unduh Installer",
+    navHome: "Beranda",
     navArchitecture: "Arsitektur",
     navTelemetry: "Demo Langsung",
-    navFleet: "Konsol Armada",
+    navFleet: "Armada",
     navComparison: "Perbandingan",
-    navSelfHost: "Self-Hosting",
-    navLatency: "Latensi",
-    navPricing: "Harga & Lisensi",
-    navDownloads: "Unduhan",
+    navSelfHost: "Self-Host",
+    navPricing: "Harga",
     navFaq: "FAQ",
     navConsoleLogin: "Login Konsol",
     btnDownloads: "Unduhan",
     heroBadge: "NAT Traversal P2P • Codec Hardware AV1/VP9 • Kedaulatan Data 100%",
-    heroTitle: "Infrastruktur <span>Remote Desktop</span> Andal & Mandiri",
-    heroSubtitle: "Alternatif open-source berkecepatan tinggi pengganti TeamViewer dan AnyDesk. Direct UDP hole-punching, streaming video hardware 60 FPS, dan relay server mandiri zero-trust.",
-    btnHeroWin: "Unduh AudiraDesk.exe (Windows 64-bit)",
+    heroTitle: "Infrastruktur <span>Remote Desktop</span> Cepat. Tanpa Perantara Cloud.",
+    heroSubtitle: "Koneksi langsung peer-to-peer UDP 60 FPS dengan akselerasi hardware AV1/VP9 dan enkripsi end-to-end. Jalankan cluster relay privat Anda dalam hitungan menit.",
+    btnHeroWin: "Unduh AudiraDesk-Full-Installer.exe (Windows 64-bit)",
     btnHeroConsole: "Masuk Konsol Web",
     specPortable: "Portabel Tanpa Install (File Tunggal)",
     specCrypto: "Enkripsi Libsodium X25519-ChaCha20",
-    specLicense: "Gratis & Open-Source (Lisensi MIT)",
+    specLicense: "Lisensi Komersial (Proprietary)",
     simYourId: "ID Perangkat Ini",
     simOneTimePw: "Kata Sandi Sekali Pakai",
     simRemoteControl: "Kendalikan Desktop Jarak Jauh",
@@ -182,11 +184,11 @@ const i18n = {
     lblMonthly: "Bulanan",
     lblAnnual: "Tahunan",
     badgeSave: "HEMAT 20%",
-    tierFreeTag: "OPEN SOURCE",
-    tierFreeTitle: "Community Free",
-    tierFreeSub: "Untuk individu, homelab & teknisi mandiri yang menjalankan server sendiri.",
-    noteFree: "100% Gratis & Open-Source (MIT)",
-    btnFree: "Mulai Gratis",
+    tierFreeTag: "STARTER / TRIAL",
+    tierFreeTitle: "Starter Standalone",
+    tierFreeSub: "Untuk individu & teknisi yang ingin menguji kendali desktop jarak jauh mandiri.",
+    noteFree: "Portabel Mandiri (Evaluasi Bebas)",
+    btnFree: "Unduh Uji Coba",
     tierProTag: "INDIVIDUAL PRO",
     tierProTitle: "Pro Individual",
     tierProSub: "Untuk teknisi IT & konsultan yang memerlukan konsol admin terpusat.",
@@ -197,7 +199,10 @@ const i18n = {
     tierTeamSub: "Untuk departemen IT support, MSP & perusahaan yang berkembang.",
     noteProTeam: "Ditagih tahunan ($286.50 / thn)",
     btnTeam: "Pilih Pro Team",
+    badgeFree: "EVALUASI BEBAS • MANDIRI",
+    badgePro: "PILIHAN TERBAIK • INDIVIDUAL",
     badgePopular: "PALING POPULER • FLEET READY",
+    badgeEnterprise: "ENTERPRISE • KLUSTER PRIVAT",
     tierEntTag: "ENTERPRISE",
     tierEntTitle: "Enterprise",
     tierEntSub: "Untuk korporasi besar dengan kebutuhan kluster privat & SLA khusus.",
@@ -233,6 +238,7 @@ let currentLang = 'en';
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initLanguage();
+  initMobileMenu();
   initSimulator();
   initCopyActions();
   initFaqAccordion();
@@ -240,6 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initFleetFilter();
   initLatencyBenchmark();
   initPricingToggle();
+  initPricingCards();
+  handleUrlRouting();
+  initModalDismiss();
 });
 
 // Theme Management (OLED Dark Default / Swiss Monochrome)
@@ -321,42 +330,6 @@ function openLoginModalWithTab(tab) {
   if (btn) btn.click();
 }
 
-function initPricingToggle() {
-  const toggle = document.getElementById('pricingBillingToggle');
-  const priceIndiv = document.getElementById('priceProIndiv');
-  const noteIndiv = document.getElementById('noteProIndiv');
-  const priceTeam = document.getElementById('priceProTeam');
-  const noteTeam = document.getElementById('noteProTeam');
-  const monthlyLabel = document.getElementById('pricingMonthlyLabel');
-  const annualLabel = document.getElementById('pricingAnnualLabel');
-
-  if (!toggle) return;
-
-  function updatePricing() {
-    const isAnnual = toggle.checked;
-    if (monthlyLabel) monthlyLabel.classList.toggle('active', !isAnnual);
-    if (annualLabel) annualLabel.classList.toggle('active', isAnnual);
-
-    const isId = currentLang === 'id';
-    if (isAnnual) {
-      if (priceIndiv) priceIndiv.textContent = '11.88';
-      if (noteIndiv) noteIndiv.textContent = isId ? 'Ditagih tahunan ($142.50 / thn)' : 'Billed annually ($142.50 / yr)';
-      if (priceTeam) priceTeam.textContent = '23.88';
-      if (noteTeam) noteTeam.textContent = isId ? 'Ditagih tahunan ($286.50 / thn)' : 'Billed annually ($286.50 / yr)';
-    } else {
-      if (priceIndiv) priceIndiv.textContent = '14.90';
-      if (noteIndiv) noteIndiv.textContent = isId ? 'Ditagih bulanan' : 'Billed monthly';
-      if (priceTeam) priceTeam.textContent = '29.90';
-      if (noteTeam) noteTeam.textContent = isId ? 'Ditagih bulanan' : 'Billed monthly';
-    }
-  }
-
-  window.updatePricingBilling = updatePricing;
-  toggle.addEventListener('change', updatePricing);
-  if (monthlyLabel) monthlyLabel.addEventListener('click', () => { toggle.checked = false; updatePricing(); });
-  if (annualLabel) annualLabel.addEventListener('click', () => { toggle.checked = true; updatePricing(); });
-  updatePricing();
-}
 
 // Interactive Simulator & Telemetry Engine
 function initSimulator() {
@@ -411,19 +384,21 @@ function initSimulator() {
         if (simFps) simFps.textContent = '60.0 FPS';
         showToast(`Connected to ${id}! Protocol: Direct UDP Hole-Punch (AV1 60fps)`, 'success');
         dispatchIntegratedWebhooks(id);
-      }, 900);
+        openRemoteSession(id);
+      }, 700);
+    });
+
+    targetIdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        connectBtn.click();
+      }
     });
   }
 
   if (fileTransferBtn && targetIdInput) {
     fileTransferBtn.addEventListener('click', () => {
-      const id = targetIdInput.value.trim();
-      if (!id) {
-        showToast('Please specify a Remote ID to open file browser.', 'warning');
-        targetIdInput.focus();
-        return;
-      }
-      showToast(`Chunked SFTP channel opened to ${id} (libs/base/src/fs.rs)`, 'info');
+      const id = targetIdInput.value.trim() || '512 884 901';
+      openFileTransferModal(id);
     });
   }
 
@@ -459,12 +434,12 @@ function dispatchIntegratedWebhooks(targetId) {
   const tgToken = localStorage.getItem('audira_tg_token');
   const tgChatId = localStorage.getItem('audira_tg_chat_id');
   const dcUrl = localStorage.getItem('audira_discord_webhook');
-  const operator = sessionStorage.getItem('audira_operator_name') || 'Agus Dwi Rianto (Admin)';
+  const operator = sessionStorage.getItem('audira_operator_name') || 'SecOps Operator (Admin)';
   const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   // Dispatch to Telegram
   if (tgToken && tgChatId) {
-    const tgMsg = `🚨 <b>[AUDIRA ALERT] Sesi Baru Terhubung</b>\n• <b>Target Host:</b> <code>${targetId}</code>\n• <b>Operator:</b> ${operator}\n• <b>Protocol:</b> Direct UDP Hole-Punch (AV1 60fps)\n• <b>Waktu:</b> ${timeStr} WIB\n• <b>Server:</b> audira-web-hub (192.168.100.175)`;
+    const tgMsg = `<b>[AUDIRA SEC-OPS] Sesi Baru Terhubung</b>\n• <b>Target Host:</b> <code>${targetId}</code>\n• <b>Operator:</b> ${operator}\n• <b>Protocol:</b> Direct UDP Hole-Punch (AV1 60fps)\n• <b>Waktu:</b> ${timeStr} WIB\n• <b>Server:</b> Audira Production Relay (relay.audira.my.id)`;
     fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -480,14 +455,14 @@ function dispatchIntegratedWebhooks(targetId) {
       username: "Audira Sentinel Bot",
       avatar_url: "https://audira.my.id/favicon.ico",
       embeds: [{
-        title: "🛡️ Remote Desktop Session Initiated",
+        title: "Remote Desktop Session Initiated",
         description: `Secure remote session connected to target endpoint <code>${targetId}</code>.`,
         color: 4322490, // Emerald Green
         fields: [
           { name: "TARGET ID", value: targetId, inline: true },
           { name: "OPERATOR", value: operator, inline: true },
           { name: "PROTOCOL", value: "Direct UDP P2P (AV1 60 FPS)", inline: true },
-          { name: "SERVER NODE", value: "audira-web-hub (192.168.100.175)", inline: true }
+          { name: "SERVER NODE", value: "Audira Production Relay Cluster", inline: true }
         ],
         footer: { text: `Audira Sentinel Webhook • ${timeStr} WIB` }
       }]
@@ -513,6 +488,10 @@ function quickConnect(id) {
     }
     showToast(`Loaded ${id} into Remote Desktop Cockpit`, 'success');
     targetIdInput.focus();
+    setTimeout(() => {
+      const connectBtn = document.getElementById('simConnectBtn');
+      if (connectBtn) connectBtn.click();
+    }, 450);
   }
 }
 
@@ -583,14 +562,14 @@ function initAuthModal() {
     });
   });
 
-  // Quick-fill credentials
+  // Quick-fill credentials (Demo only)
   if (quickFillBtn) {
     quickFillBtn.addEventListener('click', () => {
       const email = document.getElementById('adminEmail');
       const pw = document.getElementById('adminPassword');
-      if (email) email.value = 'audira@audira.my.id';
-      if (pw) pw.value = 'Sigma1993';
-      showToast('Loaded demo administrator credentials', 'info');
+      if (email) email.value = 'admin@example.com';
+      if (pw) pw.value = 'DemoPass123!';
+      showToast('Loaded demo placeholder credentials', 'info');
     });
   }
 
@@ -664,7 +643,7 @@ function simulateSso(provider) {
   showToast(`Authenticating via ${provider} OAuth...`, 'info');
   setTimeout(() => {
     sessionStorage.setItem('audira_logged_in', 'true');
-    showLoggedInState({ name: 'audira', display_name: 'Agus Dwi Rianto' });
+    showLoggedInState({ name: 'admin', display_name: 'Audira Admin' });
     showToast(`Authenticated via ${provider}! Root access granted.`, 'success');
   }, 900);
 }
@@ -678,18 +657,29 @@ function simulateTotpSubmit() {
   showToast('Hardware token verified via Libsodium HMAC.', 'success');
   setTimeout(() => {
     sessionStorage.setItem('audira_logged_in', 'true');
-    showLoggedInState({ name: 'audira', display_name: 'Agus Dwi Rianto' });
+    showLoggedInState({ name: 'admin', display_name: 'Audira Admin' });
   }, 600);
 }
 
-function showLoggedInState(user) {
+async function showLoggedInState(user) {
   document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
-  document.querySelector('.modal-tabs').style.display = 'none';
+  const tabs = document.querySelector('.modal-tabs');
+  if (tabs) tabs.style.display = 'none';
 
   const loggedInView = document.getElementById('authViewLoggedIn');
   if (loggedInView) loggedInView.classList.add('active');
 
-  const displayName = (user && (user.display_name || user.name)) || 'Agus Dwi R';
+  if (!user) {
+    try {
+      const stored = localStorage.getItem('audira_user');
+      if (stored) user = JSON.parse(stored);
+    } catch (e) {}
+  }
+
+  const displayName = (user && (user.display_name || user.name)) || 'Agus Dwi Rianto';
+  const username = (user && (user.username || user.name)) || 'audira';
+  const email = (user && user.email) || `${username}@audira.my.id`;
+
   const openBtn = document.getElementById('openLoginBtn');
   if (openBtn) {
     openBtn.innerHTML = `
@@ -698,12 +688,150 @@ function showLoggedInState(user) {
     `;
     openBtn.style.borderColor = '#10b981';
   }
+
+  const nameEl = document.getElementById('profileDisplayName');
+  if (nameEl) nameEl.textContent = displayName;
+
+  const handleEl = document.getElementById('profileUserHandle');
+  if (handleEl) handleEl.innerHTML = `@${escapeHtml(username)} &bull; ${escapeHtml(email)}`;
+
+  const avatarEl = document.getElementById('profileAvatarInitial');
+  if (avatarEl) {
+    const parts = displayName.trim().split(/\s+/);
+    const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
+    avatarEl.textContent = initials || 'AD';
+  }
+
+  // Asynchronously query live accounts and active licenses
+  try {
+    const [accRes, licRes] = await Promise.all([
+      fetch('/api/accounts').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/licenses').then(r => r.ok ? r.json() : null).catch(() => null)
+    ]);
+
+    if (accRes && accRes.accounts && accRes.accounts.length > 0) {
+      const acc = accRes.accounts.find(a => a.username === username) || accRes.accounts[0];
+      if (acc && acc.devices && acc.devices.length > 0) {
+        const countEl = document.getElementById('profileDeviceCount');
+        if (countEl) countEl.textContent = acc.devices.length;
+
+        const devListEl = document.getElementById('profileLinkedDevicesList');
+        if (devListEl) {
+          devListEl.innerHTML = acc.devices.map(d => `
+            <div style="background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span style="width:8px; height:8px; background:${d.is_online ? '#10b981' : 'var(--color-text-dim)'}; border-radius:50%; ${d.is_online ? 'box-shadow:0 0 6px #10b981;' : ''}"></span>
+                <div>
+                  <div style="font-size:0.82rem; font-weight:700; color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname || 'Device')}</div>
+                  <div style="font-size:0.7rem; color:var(--color-text-dim); font-family:var(--font-mono);">ID: ${escapeHtml(d.id)} &bull; ${escapeHtml(d.os || 'Windows')}</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="quickConnect('${escapeHtml(d.id)}'); document.getElementById('loginModal')?.classList.remove('open');" style="padding:0.25rem 0.6rem; font-size:0.72rem;">Remote</button>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    if (licRes && licRes.licenses && licRes.licenses.length > 0) {
+      const lic = licRes.licenses[0];
+      const keyEl = document.getElementById('profileLicenseKey');
+      if (keyEl && lic.license_key) keyEl.textContent = lic.license_key;
+
+      const planBadge = document.getElementById('profilePlanBadge');
+      if (planBadge && lic.plan_name) planBadge.textContent = lic.plan_name;
+    }
+  } catch (e) {
+    console.warn('Could not populate extended profile data:', e);
+  }
+}
+
+function copyProfileLicenseKey() {
+  const keyEl = document.getElementById('profileLicenseKey');
+  const key = keyEl ? keyEl.textContent.trim() : '';
+  if (!key) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(key).then(() => {
+      showToast('Kunci lisensi berhasil disalin ke clipboard!', 'success');
+    }).catch(() => fallbackCopy(key));
+  } else {
+    fallbackCopy(key);
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('Kunci lisensi berhasil disalin!', 'success');
+    } catch (e) {
+      showToast('Gagal menyalin kunci lisensi.', 'error');
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+function openChangePasswordModal() {
+  const modal = document.getElementById('changePasswordModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeChangePasswordModal() {
+  const modal = document.getElementById('changePasswordModal');
+  if (modal) modal.style.display = 'none';
+  const f = modal ? modal.querySelector('form') : null;
+  if (f) f.reset();
+}
+
+async function submitChangePassword(event) {
+  if (event) event.preventDefault();
+  const oldPwd = (document.getElementById('pwdOld')?.value || '').trim();
+  const newPwd = (document.getElementById('pwdNew')?.value || '').trim();
+  const confirmPwd = (document.getElementById('pwdConfirm')?.value || '').trim();
+
+  if (newPwd.length < 6) {
+    showToast('Password baru minimal 6 karakter.', 'warning');
+    return;
+  }
+  if (newPwd !== confirmPwd) {
+    showToast('Konfirmasi password tidak cocok dengan password baru.', 'error');
+    return;
+  }
+
+  let storedUser = {};
+  try {
+    storedUser = JSON.parse(localStorage.getItem('audira_user') || '{}');
+  } catch (e) {}
+  const username = storedUser.username || storedUser.name || 'audira';
+
+  try {
+    const res = await fetch('/api/accounts/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: username,
+        old_password: oldPwd,
+        new_password: newPwd
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Kata sandi berhasil diperbarui dengan aman!', 'success');
+      closeChangePasswordModal();
+    } else {
+      showToast(data.error || 'Gagal mengubah password.', 'error');
+    }
+  } catch (err) {
+    showToast('Koneksi server gagal saat memperbarui password.', 'error');
+  }
 }
 
 function handleSignOut() {
   sessionStorage.removeItem('audira_logged_in');
   document.getElementById('authViewLoggedIn').classList.remove('active');
-  document.querySelector('.modal-tabs').style.display = 'flex';
+  const tabs = document.querySelector('.modal-tabs');
+  if (tabs) tabs.style.display = 'flex';
   document.getElementById('authViewCredentials').classList.add('active');
 
   const openBtn = document.getElementById('openLoginBtn');
@@ -724,12 +852,51 @@ function navigateToFleet() {
 }
 
 // ==========================================================================
-// Fleet Filter & Search
+// Fleet Filter & Search + Dynamic Live Sync
 // ==========================================================================
+async function fetchLandingFleet() {
+  try {
+    const res = await fetch('/api/fleet');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.success && Array.isArray(data.devices) && data.devices.length > 0) {
+      const tbody = document.getElementById('fleetTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = data.devices.slice(0, 10).map(d => {
+        const isOnline = d.is_online;
+        const osName = d.os || 'Windows 11 Pro';
+        const tag = (d.tags && d.tags[0]) || 'Fleet Node';
+        const latency = isOnline ? (d.latency_ms || 2) + ' ms' : 'Offline';
+        const latencyColor = isOnline ? 'var(--color-emerald)' : 'var(--color-text-dim)';
+        return `
+          <tr>
+            <td>
+              <div class="mgmt-node-cell">
+                <span class="mgmt-node-status ${isOnline ? 'online' : 'offline'}" title="${isOnline ? 'Online' : 'Offline'}"></span>
+                <strong style="color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname || 'Device')}</strong>
+              </div>
+            </td>
+            <td><code>${escapeHtml(d.id)}</code></td>
+            <td>${escapeHtml(osName)}</td>
+            <td><span class="mgmt-tag-pill">${escapeHtml(tag)}</span></td>
+            <td style="color:${latencyColor}; font-family:var(--font-mono); font-weight:700;">${latency}</td>
+            <td><span style="color:var(--color-primary); font-size:0.75rem;">X25519 E2EE</span></td>
+            <td>
+              <button class="mgmt-action-btn" onclick="quickConnect('${escapeHtml(d.id)}')">Connect</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  } catch (err) {
+    console.debug('Using cached fleet table rows');
+  }
+}
+
 function initFleetFilter() {
+  fetchLandingFleet();
   const tabs = document.querySelectorAll('.console-tab-pill');
   const searchInput = document.getElementById('fleetSearchInput');
-  const rows = document.querySelectorAll('#fleetTableBody tr');
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -749,6 +916,7 @@ function initFleetFilter() {
   }
 
   function applyFleetFilter(category, query) {
+    const rows = document.querySelectorAll('#fleetTableBody tr');
     const q = query.toLowerCase().trim();
     rows.forEach(row => {
       const text = row.textContent.toLowerCase();
@@ -871,3 +1039,821 @@ function showToast(message, type = 'info') {
     toast.classList.remove('show');
   }, 3200);
 }
+
+// ==========================================================================
+// Pricing Billing Toggle (Monthly / Annual)
+// ==========================================================================
+let currentPricingCurrency = 'idr';
+
+function setPricingCurrency(curr = 'idr') {
+  currentPricingCurrency = curr.toLowerCase();
+  const idrBtn = document.getElementById('currIdrBtn');
+  const usdBtn = document.getElementById('currUsdBtn');
+  if (idrBtn) idrBtn.classList.toggle('active', currentPricingCurrency === 'idr');
+  if (usdBtn) usdBtn.classList.toggle('active', currentPricingCurrency === 'usd');
+
+  if (window.updatePricingBilling) {
+    window.updatePricingBilling();
+  }
+}
+
+function initPricingToggle() {
+  const toggle = document.getElementById('pricingBillingToggle');
+  const monthlyLabel = document.getElementById('pricingMonthlyLabel');
+  const annualLabel = document.getElementById('pricingAnnualLabel');
+  const priceIndiv = document.getElementById('priceProIndiv');
+  const noteIndiv = document.getElementById('noteProIndiv');
+  const priceTeam = document.getElementById('priceProTeam');
+  const noteTeam = document.getElementById('noteProTeam');
+
+  if (!toggle) return;
+
+  const updatePrices = (isAnnual) => {
+    const isIdr = currentPricingCurrency === 'idr';
+    const symFree = document.getElementById('currSymFree');
+    const symIndiv = document.getElementById('currSymProIndiv');
+    const symTeam = document.getElementById('currSymProTeam');
+
+    if (symFree) symFree.textContent = isIdr ? 'Rp' : '$';
+    if (symIndiv) symIndiv.textContent = isIdr ? 'Rp' : '$';
+    if (symTeam) symTeam.textContent = isIdr ? 'Rp' : '$';
+
+    if (isAnnual) {
+      if (monthlyLabel) monthlyLabel.classList.remove('active');
+      if (annualLabel) annualLabel.classList.add('active');
+
+      if (priceIndiv) priceIndiv.textContent = isIdr ? '49.000' : '11.88';
+      if (noteIndiv) noteIndiv.textContent = isIdr ? 'Ditagih tahunan (Hemat 20% • Rp 588.000 / thn)' : 'Billed annually ($142.50 / yr)';
+
+      if (priceTeam) priceTeam.textContent = isIdr ? '149.000' : '23.88';
+      if (noteTeam) noteTeam.textContent = isIdr ? 'Ditagih tahunan (Hemat 20% • Rp 1.788.000 / thn)' : 'Billed annually ($286.50 / yr)';
+    } else {
+      if (monthlyLabel) monthlyLabel.classList.add('active');
+      if (annualLabel) annualLabel.classList.remove('active');
+
+      if (priceIndiv) priceIndiv.textContent = isIdr ? '59.000' : '14.88';
+      if (noteIndiv) noteIndiv.textContent = isIdr ? 'Ditagih bulanan (Rp 59.000 / bln)' : 'Billed monthly ($14.88 / mo)';
+
+      if (priceTeam) priceTeam.textContent = isIdr ? '179.000' : '29.88';
+      if (noteTeam) noteTeam.textContent = isIdr ? 'Ditagih bulanan (Rp 179.000 / bln)' : 'Billed monthly ($29.88 / mo)';
+    }
+  };
+
+  toggle.addEventListener('change', (e) => {
+    updatePrices(e.target.checked);
+  });
+
+  if (monthlyLabel) {
+    monthlyLabel.addEventListener('click', () => {
+      toggle.checked = false;
+      updatePrices(false);
+    });
+  }
+  if (annualLabel) {
+    annualLabel.addEventListener('click', () => {
+      toggle.checked = true;
+      updatePrices(true);
+    });
+  }
+
+  window.updatePricingBilling = () => updatePrices(toggle.checked);
+  updatePrices(toggle.checked);
+}
+
+// ==========================================================================
+// Interactive Pricing Card Selector (Seamless Switching & Highlighting)
+// ==========================================================================
+function selectPricingCard(planKey) {
+  if (!planKey) return;
+  currentSelectedPlan = planKey;
+
+  const cards = document.querySelectorAll('.pricing-grid .pricing-card');
+  cards.forEach(card => {
+    const cardPlan = card.getAttribute('data-plan');
+    const isTarget = (cardPlan === planKey);
+
+    card.classList.toggle('selected', isTarget);
+    card.classList.toggle('featured', isTarget);
+    card.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+
+    // Update CTA button styling inside footer
+    const ctaBtn = card.querySelector('.pricing-cta-btn');
+    if (ctaBtn) {
+      if (isTarget) {
+        ctaBtn.classList.remove('btn-secondary');
+        ctaBtn.classList.add('btn-primary');
+      } else {
+        ctaBtn.classList.remove('btn-primary');
+        ctaBtn.classList.add('btn-secondary');
+      }
+    }
+  });
+
+  // Synchronize column highlight in Feature Comparison Table
+  const tableHeaders = document.querySelectorAll('.comparison-table thead th[data-plan-col]');
+  tableHeaders.forEach(th => {
+    const colPlan = th.getAttribute('data-plan-col');
+    if (colPlan === planKey) {
+      th.style.color = 'var(--color-primary)';
+      th.style.fontWeight = '800';
+    } else {
+      th.style.color = '';
+      th.style.fontWeight = '';
+    }
+  });
+}
+
+function initPricingCards() {
+  const cards = document.querySelectorAll('.pricing-grid .pricing-card');
+  cards.forEach(card => {
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const plan = card.getAttribute('data-plan');
+        if (plan) {
+          selectPricingCard(plan);
+          if (plan !== 'free') {
+            openUpgradeModal(plan);
+          }
+        }
+      }
+    });
+  });
+
+  // Default selection is Pro Team
+  selectPricingCard(currentSelectedPlan || 'team');
+}
+
+// ==========================================================================
+// Interactive Upgrade & Feature Checkout Modal Controller
+// ==========================================================================
+const PLAN_DATA = {
+  free: {
+    name: "Community Free",
+    tag: "Open Source",
+    price: "Rp 0 / Gratis Selamanya",
+    desc: "Akses remote P2P langsung untuk personal & homelab.",
+    features: [
+      "Koneksi Direct UDP P2P Hole Punching",
+      "Enkripsi End-to-End ChaCha20-Poly1305",
+      "Streaming hingga 60 FPS (Hardware AV1/H.264)",
+      "1 Sesi Aktif Simultan",
+      "Tanpa Perlu Instalasi (Single Portable EXE)"
+    ]
+  },
+  pro: {
+    name: "Pro Individual",
+    tag: "Paling Populer",
+    price: "Rp 49.000 / bulan",
+    desc: "Untuk teknisi IT, konsultan, dan remote workstation mandiri.",
+    features: [
+      "Semua Fitur Community Free",
+      "Cloud Address Book Sync (Buku Alamat Fleet)",
+      "Multi-Monitor & Switcher Virtual Display",
+      "Streaming Audio WASAPI Loopback & Mic Remote",
+      "Integrasi Notifikasi & Approval Telegram Bot",
+      "Hingga 5 Sesi Aktif Simultan",
+      "Riwayat Sesi & Audit Log 30 Hari"
+    ]
+  },
+  team: {
+    name: "Pro Team & MSP",
+    tag: "Untuk Tim & Departemen IT",
+    price: "Rp 149.000 / bulan",
+    desc: "Untuk tim support, kantor cabang, dan armada server terpusat.",
+    features: [
+      "Semua Fitur Pro Individual",
+      "10 Akun Operator Teknis (Bisa Ditambah)",
+      "100 Managed Workstations & Unattended Servers",
+      "Central Web Admin Console & Role-Based Access (RBAC)",
+      "White-Label Custom Branding (Logo & Nama Sendiri)",
+      "OIDC Single Sign-On (SSO) & LDAP Sync",
+      "Prioritas Routing Relay Latensi Rendah",
+      "Audit Log Compliance & Ekspor Laporan"
+    ]
+  },
+  enterprise: {
+    name: "Enterprise Dedicated Cluster",
+    tag: "Solusi Kustom Perusahaan",
+    price: "Hubungi Sales (Kustom)",
+    desc: "Untuk korporasi dan institusi dengan kedaulatan data 100%.",
+    features: [
+      "Semua Fitur Pro Team",
+      "Dedicated Private Relay Cluster (Server Sendiri)",
+      "Unlimited Operator & Unlimited Managed Devices",
+      "Dukungan Prioritas SLA 99.99% 24/7",
+      "Custom Domain & SSL Dedicated (desk.perusahaan.com)",
+      "Konsultasi Arsitektur & Pendampingan Deployment",
+      "WhatsApp & Telegram Hot-Line Langsung Developer"
+    ]
+  }
+};
+
+let currentSelectedPlan = 'pro';
+let currentGeneratedOrder = null;
+
+function updateCheckoutPlanPrice() {
+  const plan = PLAN_DATA[currentSelectedPlan] || PLAN_DATA['pro'];
+  const cycleSelect = document.getElementById('checkoutCycleSelect');
+  const cycle = cycleSelect ? cycleSelect.value : 'annual';
+  const priceEl = document.getElementById('upgradeModalPlanPrice');
+
+  if (!priceEl) return;
+
+  if (currentSelectedPlan === 'pro') {
+    priceEl.textContent = cycle === 'annual' ? 'Rp 499.000 / tahun (Hemat Rp 89rb)' : 'Rp 49.000 / bulan';
+  } else if (currentSelectedPlan === 'team') {
+    priceEl.textContent = cycle === 'annual' ? 'Rp 1.490.000 / tahun (Hemat Rp 298rb)' : 'Rp 149.000 / bulan';
+  } else if (currentSelectedPlan === 'free') {
+    priceEl.textContent = 'Rp 0 / Gratis Selamanya';
+  } else {
+    priceEl.textContent = 'Rp 1.500.000 / cluster';
+  }
+}
+
+function togglePayMethodUI(method) {
+  const qrisBox = document.getElementById('qrisDetailBox');
+  const bankBox = document.getElementById('bankDetailBox');
+  const lblQris = document.getElementById('lblMethodQris');
+  const lblBank = document.getElementById('lblMethodBank');
+
+  if (method === 'qris') {
+    if (qrisBox) qrisBox.style.display = 'block';
+    if (bankBox) bankBox.style.display = 'none';
+    if (lblQris) {
+      lblQris.style.borderColor = 'var(--color-primary)';
+      lblQris.style.background = 'rgba(0,240,255,0.05)';
+    }
+    if (lblBank) {
+      lblBank.style.borderColor = 'var(--color-border)';
+      lblBank.style.background = 'var(--color-bg-subtle)';
+    }
+  } else {
+    if (qrisBox) qrisBox.style.display = 'none';
+    if (bankBox) bankBox.style.display = 'block';
+    if (lblBank) {
+      lblBank.style.borderColor = 'var(--color-primary)';
+      lblBank.style.background = 'rgba(0,240,255,0.05)';
+    }
+    if (lblQris) {
+      lblQris.style.borderColor = 'var(--color-border)';
+      lblQris.style.background = 'var(--color-bg-subtle)';
+    }
+  }
+}
+
+function openUpgradeModal(planKey = 'pro') {
+  currentSelectedPlan = planKey;
+  selectPricingCard(planKey);
+  const modal = document.getElementById('upgradeModal');
+  const plan = PLAN_DATA[planKey] || PLAN_DATA['pro'];
+
+  // Reset steps
+  const stepForm = document.getElementById('checkoutStepForm');
+  const stepSuccess = document.getElementById('checkoutStepSuccess');
+  if (stepForm) stepForm.style.display = 'block';
+  if (stepSuccess) stepSuccess.style.display = 'none';
+
+  const titleEl = document.getElementById('upgradeModalPlanTitle');
+  const tagEl = document.getElementById('upgradeModalPlanTag');
+  const descEl = document.getElementById('upgradeModalPlanDesc');
+  const featuresListEl = document.getElementById('upgradeModalFeaturesList');
+
+  if (titleEl) titleEl.textContent = plan.name;
+  if (tagEl) tagEl.textContent = plan.tag;
+  if (descEl) descEl.textContent = plan.desc;
+
+  updateCheckoutPlanPrice();
+
+  if (featuresListEl) {
+    featuresListEl.innerHTML = plan.features.map(f => `
+      <li style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.45rem; font-size:0.85rem; color:var(--color-text-body);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>${f}</span>
+      </li>
+    `).join('');
+  }
+
+  // Pre-fill target ID from client if query param exists
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetId = urlParams.get('id') || '';
+  const devInput = document.getElementById('upgradeTargetId');
+  if (devInput && targetId) devInput.value = targetId;
+
+  if (modal) {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+}
+
+function closeUpgradeModal() {
+  const modal = document.getElementById('upgradeModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  // Clear URL query parameters so page doesn't get trapped in ?upgrade=1
+  if (window.location.search.includes('upgrade') || window.location.search.includes('plan')) {
+    window.history.replaceState({}, document.title, window.location.pathname + (window.location.hash || ''));
+  }
+}
+
+async function submitCheckoutOrder() {
+  const name = (document.getElementById('upgradeName')?.value || '').trim();
+  const email = (document.getElementById('upgradeEmail')?.value || '').trim();
+  const targetId = (document.getElementById('upgradeTargetId')?.value || '').trim();
+  const cycleSelect = document.getElementById('checkoutCycleSelect');
+  const cycle = cycleSelect ? cycleSelect.value : 'annual';
+  const payMethodInput = document.querySelector('input[name="payMethod"]:checked');
+  const payMethod = payMethodInput ? payMethodInput.value : 'qris';
+
+  if (!name) {
+    showToast('Silakan isi Nama Lengkap atau Nama Instansi Anda.', 'warning');
+    document.getElementById('upgradeName')?.focus();
+    return;
+  }
+  if (!email || !email.includes('@')) {
+    showToast('Silakan isi Email kontak yang valid untuk penerimaan lisensi.', 'warning');
+    document.getElementById('upgradeEmail')?.focus();
+    return;
+  }
+
+  const btnSubmit = document.getElementById('btnSubmitOrder');
+  const btnText = document.getElementById('btnSubmitOrderText');
+  if (btnSubmit) btnSubmit.disabled = true;
+  if (btnText) btnText.textContent = 'Memproses Aktivasi & Transaksi...';
+
+  try {
+    const payload = {
+      plan: currentSelectedPlan,
+      cycle: cycle,
+      customer_name: name,
+      email: email,
+      target_id: targetId,
+      payment_method: payMethod
+    };
+
+    const res = await fetch('/api/orders/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+    if (res.ok && result.success && result.order) {
+      currentGeneratedOrder = result.order;
+
+      // Populate Receipt Screen
+      const receiptInvoiceId = document.getElementById('receiptInvoiceId');
+      const receiptPlanName = document.getElementById('receiptPlanName');
+      const receiptAmount = document.getElementById('receiptAmount');
+      const receiptLicenseKey = document.getElementById('receiptLicenseKey');
+      const receiptStatus = document.getElementById('receiptStatus');
+
+      if (receiptInvoiceId) receiptInvoiceId.textContent = result.order.id;
+      if (receiptPlanName) receiptPlanName.textContent = `${result.order.plan_name} (${result.order.cycle === 'annual' ? 'Tahunan' : 'Bulanan'})`;
+      if (receiptAmount) receiptAmount.textContent = `Rp ${Number(result.order.amount).toLocaleString('id-ID')}`;
+      if (receiptLicenseKey) receiptLicenseKey.textContent = result.order.license_key;
+      if (receiptStatus) {
+        receiptStatus.textContent = result.order.status === 'PAID' ? 'AKTIF & LISENSI TERBIT' : 'MENUNGGU VERIFIKASI';
+      }
+
+      // Switch to Step 2
+      const stepForm = document.getElementById('checkoutStepForm');
+      const stepSuccess = document.getElementById('checkoutStepSuccess');
+      if (stepForm) stepForm.style.display = 'none';
+      if (stepSuccess) stepSuccess.style.display = 'block';
+
+      showToast(`Pemesanan Berhasil! Kunci lisensi ${result.order.license_key} telah diterbitkan.`, 'success');
+    } else {
+      showToast(result.error || 'Gagal memproses pesanan.', 'warning');
+    }
+  } catch (err) {
+    showToast('Terjadi kesalahan jaringan saat memproses pesanan.', 'error');
+  } finally {
+    if (btnSubmit) btnSubmit.disabled = false;
+    if (btnText) btnText.textContent = 'Bayar & Dapatkan Kunci Lisensi Sekarang';
+  }
+}
+
+function copyReceiptLicenseKey() {
+  const licKey = document.getElementById('receiptLicenseKey')?.textContent || '';
+  if (licKey) {
+    navigator.clipboard.writeText(licKey).then(() => {
+      showToast(`Kunci Lisensi "${licKey}" berhasil disalin!`, 'success');
+    }).catch(() => {
+      showToast('Kunci disalin!', 'info');
+    });
+  }
+}
+
+function handleWhatsAppOrderAssistance() {
+  const plan = PLAN_DATA[currentSelectedPlan] || PLAN_DATA['pro'];
+  const name = (document.getElementById('upgradeName')?.value || '').trim() || 'Pelanggan Audira';
+  const email = (document.getElementById('upgradeEmail')?.value || '').trim();
+  const targetId = (document.getElementById('upgradeTargetId')?.value || '').trim();
+
+  let msg = `Halo Tim Official Audira Desk,\n\nSaya ingin memesan / konfirmasi lisensi berikut:\n• *Paket:* ${plan.name}\n• *Pemesan:* ${name}`;
+  if (email) msg += `\n• *Email:* ${email}`;
+  if (targetId) msg += `\n• *ID Client:* ${targetId}`;
+  msg += `\n\nMohon dibantu panduan aktivasi lisensi & faktur resminya. Terima kasih!`;
+
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+}
+
+// Direct URL routing for upgrade plans & parameters
+function handleUrlRouting() {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  if (urlParams.get('upgrade') === '1' || urlParams.has('plan')) {
+    const plan = urlParams.get('plan') || 'pro';
+    setTimeout(() => {
+      openUpgradeModal(plan);
+      // Clean query parameter from URL bar immediately so subsequent reloads or logo clicks go to clean Home
+      window.history.replaceState({}, document.title, window.location.pathname + (window.location.hash || ''));
+    }, 350);
+  }
+}
+
+// Navigation to Home (clean URL and scroll to top)
+function navigateToHome(e) {
+  if (e) e.preventDefault();
+  closeUpgradeModal();
+  closeRemoteSession();
+  closeFileTransferModal();
+  closeMobilePairModal();
+  closeChangePasswordModal();
+  const loginModal = document.getElementById('loginModal');
+  if (loginModal) loginModal.classList.remove('open');
+
+  // Strip query parameters and hashes from URL
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  // Set active link in nav
+  document.querySelectorAll('.nav-links .nav-link').forEach(l => l.classList.remove('active'));
+  const homeLink = document.querySelector('.nav-links .nav-link[data-i18n="navHome"]');
+  if (homeLink) homeLink.classList.add('active');
+
+  // Smooth scroll to top of page
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Global Modal Dismissal (Escape key & backdrop)
+function initModalDismiss() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeUpgradeModal();
+      closeRemoteSession();
+      closeFileTransferModal();
+      closeMobilePairModal();
+      closeChangePasswordModal();
+      const loginModal = document.getElementById('loginModal');
+      if (loginModal) loginModal.classList.remove('open');
+    }
+  });
+}
+
+// Mobile Responsive Navigation Drawer
+function initMobileMenu() {
+  const toggleBtn = document.getElementById('mobileNavToggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (!toggleBtn || !navLinks) return;
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    navLinks.classList.toggle('open');
+  });
+
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!toggleBtn.contains(e.target) && !navLinks.contains(e.target)) {
+      navLinks.classList.remove('open');
+    }
+  });
+}
+
+// Telegram Bot Interactive Simulator Actions
+function simulateTgApprove() {
+  const statusEl = document.getElementById('tgSimStatus');
+  const btnApprove = document.getElementById('tgSimApproveBtn');
+  const btnReject = document.getElementById('tgSimRejectBtn');
+  if (statusEl) {
+    statusEl.style.display = 'flex';
+    statusEl.style.alignItems = 'center';
+    statusEl.style.gap = '6px';
+    statusEl.style.color = '#10b981';
+    statusEl.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span><b>Sesi Disetujui!</b> Sesi remote P2P <code>512 884 901</code> dibuka seketika dengan proteksi E2EE.</span>';
+  }
+  if (btnApprove) btnApprove.disabled = true;
+  if (btnReject) btnReject.disabled = true;
+  showToast('Telegram 2FA Approved! Menginisiasi sesi remote...', 'success');
+
+  const simInput = document.getElementById('simTargetId');
+  const simConnectBtn = document.getElementById('simConnectBtn');
+  if (simInput) simInput.value = '512 884 901';
+  if (simConnectBtn) {
+    setTimeout(() => {
+      simConnectBtn.click();
+    }, 700);
+  }
+}
+
+function simulateTgReject() {
+  const statusEl = document.getElementById('tgSimStatus');
+  const btnApprove = document.getElementById('tgSimApproveBtn');
+  const btnReject = document.getElementById('tgSimRejectBtn');
+  if (statusEl) {
+    statusEl.style.display = 'flex';
+    statusEl.style.alignItems = 'center';
+    statusEl.style.gap = '6px';
+    statusEl.style.color = '#f43f5e';
+    statusEl.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> <span><b>Sesi Ditolak</b> oleh Administrator via Webhook. Endpoint diblokir.</span>';
+  }
+  if (btnApprove) btnApprove.disabled = true;
+  if (btnReject) btnReject.disabled = true;
+  showToast('Permintaan koneksi ditolak via Telegram!', 'warning');
+}
+
+// ==========================================================================
+// Interactive Remote Session Viewport & Floating Toolbar HUD
+// Skill Reference: flutter-desktop-ui & AUDIRA UI/UX Pro Max
+// ==========================================================================
+let sessionTickerInterval = null;
+let currentSessionId = '512 884 901';
+
+function openRemoteSession(targetId) {
+  currentSessionId = targetId || '512 884 901';
+  const modal = document.getElementById('remoteSessionModal');
+  const targetDisplay = document.getElementById('sessionTargetIdDisplay');
+  const ftTargetDisplay = document.getElementById('ftTargetIdDisplay');
+  
+  if (targetDisplay) targetDisplay.textContent = currentSessionId;
+  if (ftTargetDisplay) ftTargetDisplay.textContent = currentSessionId;
+
+  if (modal) {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  // Update clock in remote taskbar
+  updateRemoteTaskbarClock();
+
+  // Start live telemetry jitter ticker
+  if (sessionTickerInterval) clearInterval(sessionTickerInterval);
+  sessionTickerInterval = setInterval(() => {
+    const latEl = document.getElementById('sessionHudLatency');
+    const fpsEl = document.getElementById('sessionHudFps');
+    const bitEl = document.getElementById('sessionHudBitrate');
+    
+    if (latEl) latEl.textContent = (9 + Math.floor(Math.random() * 5)) + ' ms';
+    if (fpsEl) fpsEl.textContent = (59.8 + Math.random() * 0.4).toFixed(1) + ' FPS';
+    if (bitEl) bitEl.textContent = (1.6 + Math.random() * 0.7).toFixed(1) + ' MB/s';
+  }, 1200);
+
+  // Send Audit Log to backend API
+  fetch('/api/audit_logs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      event_type: 'SESSION_CONNECTED',
+      peer_id: currentSessionId,
+      operator: sessionStorage.getItem('audira_operator_name') || 'Admin Operator',
+      details: 'Direct P2P session opened with AV1 NVENC DXGI pipeline'
+    })
+  }).catch(() => {});
+}
+
+function closeRemoteSession() {
+  const modal = document.getElementById('remoteSessionModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  if (sessionTickerInterval) {
+    clearInterval(sessionTickerInterval);
+    sessionTickerInterval = null;
+  }
+  showToast(`Sesi remote dengan ${currentSessionId} telah ditutup dengan aman.`, 'info');
+}
+
+function updateRemoteTaskbarClock() {
+  const clockEl = document.getElementById('remoteTaskbarClock');
+  if (clockEl) {
+    const now = new Date();
+    clockEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+  }
+}
+
+function sendSasCtrlAltDel() {
+  showToast('Injeksi Keystroke: Sent Ctrl+Alt+Del (SAS) ke Windows Secure Desktop', 'success');
+  const logs = document.getElementById('remoteTerminalLogs');
+  if (logs) {
+    const entry = document.createElement('div');
+    entry.style.color = '#38bdf8';
+    entry.style.marginTop = '4px';
+    entry.textContent = `[UAC SAS] Ctrl+Alt+Del sequence dispatched. Winlogon SAS event triggered.`;
+    logs.appendChild(entry);
+    logs.scrollTop = logs.scrollHeight;
+  }
+}
+
+function togglePrivacyMode() {
+  const overlay = document.getElementById('privacyModeOverlay');
+  const btn = document.getElementById('hudPrivacyModeBtn');
+  if (!overlay) return;
+
+  const isActive = overlay.classList.toggle('active');
+  if (btn) btn.classList.toggle('active', isActive);
+
+  if (isActive) {
+    showToast('Privacy Mode AKTIF: Layar monitor fisik target telah dihitamkan.', 'info');
+  } else {
+    showToast('Privacy Mode NONAKTIF: Layar monitor fisik target menyala kembali.', 'info');
+  }
+}
+
+function switchSessionDisplay(displayId) {
+  showToast(`Beralih ke Monitor ${displayId} (${displayId === '1' ? '4K Ultra' : 'Full HD'})`, 'info');
+  const logs = document.getElementById('remoteTerminalLogs');
+  if (logs) {
+    const entry = document.createElement('div');
+    entry.style.color = '#94a3b8';
+    entry.textContent = `[DXGI] Direct3D11 Desktop Duplication switched to Display Adapter 0, Output ${displayId}`;
+    logs.appendChild(entry);
+    logs.scrollTop = logs.scrollHeight;
+  }
+}
+
+function switchSessionQuality(mode) {
+  showToast(`Kualitas Video: ${mode.toUpperCase()} (Hardware Pacing 60 FPS)`, 'info');
+  const logs = document.getElementById('remoteTerminalLogs');
+  if (logs) {
+    const entry = document.createElement('div');
+    entry.style.color = '#10b981';
+    entry.textContent = `[HWCODEC] Encoder bitrate dynamically adjusted for mode: ${mode}`;
+    logs.appendChild(entry);
+    logs.scrollTop = logs.scrollHeight;
+  }
+}
+
+function toggleFullscreenSession() {
+  const modal = document.getElementById('remoteSessionModal');
+  if (!document.fullscreenElement) {
+    if (modal && modal.requestFullscreen) {
+      modal.requestFullscreen().catch(() => {});
+    } else if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+}
+
+function executeRemoteCommand(cmd) {
+  const input = document.getElementById('terminalCmdInput');
+  const logs = document.getElementById('remoteTerminalLogs');
+  if (!cmd || !cmd.trim() || !logs) return;
+
+  cmd = cmd.trim();
+  const cmdLower = cmd.toLowerCase();
+
+  // Echo command
+  const cmdDiv = document.createElement('div');
+  cmdDiv.style.color = '#00f0ff';
+  cmdDiv.style.marginTop = '6px';
+  cmdDiv.textContent = `PS C:\\Windows\\System32> ${cmd}`;
+  logs.appendChild(cmdDiv);
+
+  const outDiv = document.createElement('div');
+  outDiv.style.color = '#cbd5e1';
+  outDiv.style.fontSize = '0.72rem';
+  outDiv.style.lineHeight = '1.4';
+  outDiv.style.margin = '2px 0 6px 0';
+
+  if (cmdLower === 'cls' || cmdLower === 'clear') {
+    logs.innerHTML = '';
+    if (input) input.value = '';
+    return;
+  } else if (cmdLower.startsWith('ping')) {
+    outDiv.innerHTML = `
+      Pinging target relay <code>desk.audira.my.id</code> with 32 bytes of data:<br>
+      Reply from 192.168.100.175: bytes=32 time=1ms TTL=64<br>
+      Reply from 192.168.100.175: bytes=32 time=1ms TTL=64<br>
+      Reply from 192.168.100.175: bytes=32 time=1ms TTL=64<br>
+      Ping statistics: Packets: Sent = 3, Received = 3, Lost = 0 (0% loss)
+    `;
+  } else if (cmdLower === 'systeminfo' || cmdLower === 'sys') {
+    outDiv.innerHTML = `
+      OS Name: Microsoft Windows 11 Pro (23H2)<br>
+      System Model: Audira Edge High-Performance Node<br>
+      Processor: 16 Virtual Core AMD EPYC / Intel Xeon 3.40 GHz<br>
+      Total Physical Memory: 32,768 MB<br>
+      Network Adapter: 10 Gbps VirtIO Virtual Ethernet
+    `;
+  } else if (cmdLower === 'status' || cmdLower === 'audiractl') {
+    outDiv.innerHTML = `
+      Service: AudiraDesk-Service [RUNNING - ELEVATED]<br>
+      HBBS Connection: ONLINE (Port 21116 UDP P2P)<br>
+      HBBR Relay: STANDBY (Direct P2P active, relay not needed)<br>
+      E2EE Cipher: ChaCha20-Poly1305 with Curve25519 Ephemeral Keys
+    `;
+  } else if (cmdLower === 'whoami') {
+    outDiv.innerHTML = `nt authority\\system (Elevated Background Daemon)`;
+  } else if (cmdLower === 'netstat') {
+    outDiv.innerHTML = `
+      TCP  0.0.0.0:21114  LISTENING   (audira-api)<br>
+      TCP  0.0.0.0:21116  LISTENING   (audira-hbbs)<br>
+      TCP  0.0.0.0:21117  LISTENING   (audira-hbbr)<br>
+      UDP  0.0.0.0:21116  *.*         (P2P Rendezvous)
+    `;
+  } else {
+    outDiv.innerHTML = `Command executed successfully on remote daemon: <code>${escapeHtml(cmd)}</code>`;
+  }
+
+  logs.appendChild(outDiv);
+  logs.scrollTop = logs.scrollHeight;
+  if (input) input.value = '';
+}
+
+// ==========================================================================
+// Dual-Pane SFTP File Manager Actions (libs/base/src/fs.rs)
+// ==========================================================================
+function openFileTransferModal(targetId) {
+  const modal = document.getElementById('fileTransferModal');
+  const targetDisplay = document.getElementById('ftTargetIdDisplay');
+  if (targetDisplay) targetDisplay.textContent = targetId || currentSessionId;
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeFileTransferModal() {
+  const modal = document.getElementById('fileTransferModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function selectFtItem(el) {
+  if (!el || !el.parentElement) return;
+  el.parentElement.querySelectorAll('.ft-file-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function startSimulatedTransfer(direction) {
+  const progressBar = document.getElementById('ftProgressBar');
+  const statusText = document.getElementById('ftTransferStatusText');
+  const chunkText = document.getElementById('ftChunkText');
+  const hashText = document.getElementById('ftHashText');
+
+  const selectedLocal = document.querySelector('#localFileList .ft-file-item.selected span')?.textContent || 'AudiraDesk-Setup.exe';
+  const selectedRemote = document.querySelector('#remoteFileList .ft-file-item.selected span')?.textContent || 'audit_telemetry.db';
+  const filename = direction === 'upload' ? selectedLocal : selectedRemote;
+
+  if (statusText) statusText.textContent = `${direction === 'upload' ? 'Mengunggah (Upload)' : 'Mengunduh (Download)'}: ${filename}`;
+  if (progressBar) progressBar.style.width = '0%';
+
+  let percent = 0;
+  const totalChunks = 96;
+  const timer = setInterval(() => {
+    percent += 8;
+    if (progressBar) progressBar.style.width = percent + '%';
+    const currentChunk = Math.min(totalChunks, Math.floor((percent / 100) * totalChunks));
+    if (chunkText) chunkText.textContent = `Chunk: ${currentChunk} / ${totalChunks} (512 KB/chunk)`;
+
+    if (percent >= 100) {
+      clearInterval(timer);
+      if (statusText) statusText.textContent = `Transfer Selesai: ${filename}`;
+      if (hashText) hashText.innerHTML = `<span style="color:#10b981; display:inline-flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> SHA-256 Validated (f4e198a2...3b)</span>`;
+      showToast(`Transfer ${filename} selesai via chunked SFTP!`, 'success');
+    }
+  }, 120);
+}
+
+// ==========================================================================
+// Mobile Client Pairing (QR Code) Actions
+// ==========================================================================
+function openMobilePairModal() {
+  const modal = document.getElementById('mobilePairModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeMobilePairModal() {
+  const modal = document.getElementById('mobilePairModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function copyMobilePairUri() {
+  const uri = 'audira://connect?id=849203118&relay=desk.audira.my.id';
+  navigator.clipboard.writeText(uri).then(() => {
+    showToast('Mobile Pairing URI berhasil disalin!', 'success');
+  }).catch(() => {
+    showToast('URI: ' + uri, 'info');
+  });
+}
+
+

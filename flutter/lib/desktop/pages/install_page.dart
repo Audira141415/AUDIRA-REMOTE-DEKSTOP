@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,7 @@ class _InstallPageBodyState extends State<_InstallPageBody>
   final RxBool startmenu = true.obs;
   final RxBool desktopicon = true.obs;
   final RxBool printer = false.obs;
+  final RxBool cleanInstall = true.obs;
   final RxBool showProgress = false.obs;
   final RxBool btnEnabled = true.obs;
 
@@ -130,13 +132,17 @@ class _InstallPageBodyState extends State<_InstallPageBody>
   Widget build(BuildContext context) {
     final double em = 13;
     final isDarkTheme = MyTheme.currentThemeMode() == ThemeMode.dark;
+    final bool isInstalled = bind.mainIsInstalled();
     return Scaffold(
         backgroundColor: null,
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(translate('Installation'),
+              Text(
+                  isInstalled
+                      ? '${translate('Update')} Audira Desk'
+                      : translate('Installation'),
                   style: Theme.of(context).textTheme.headlineMedium),
               Row(
                 children: [
@@ -161,11 +167,98 @@ class _InstallPageBodyState extends State<_InstallPageBody>
                   )
                 ],
               ).marginSymmetric(vertical: 2 * em),
+              if (isInstalled)
+                Container(
+                  padding: EdgeInsets.all(12),
+                  margin: EdgeInsets.only(bottom: 1.5 * em),
+                  decoration: BoxDecoration(
+                    color: isDarkTheme
+                        ? const Color.fromARGB(140, 20, 70, 120)
+                        : const Color.fromARGB(255, 230, 243, 255),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDarkTheme
+                          ? const Color.fromARGB(255, 50, 130, 210)
+                          : const Color.fromARGB(255, 120, 180, 240),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.system_update_alt_rounded,
+                              size: 32,
+                              color: isDarkTheme
+                                  ? Colors.lightBlueAccent
+                                  : Colors.blue[700])
+                          .marginOnly(right: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              translate('Update'),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14),
+                            ).marginOnly(bottom: 4),
+                            Text(
+                              'Aplikasi versi sebelumnya terdeteksi pada sistem ini. Seluruh berkas program akan diperbarui ke versi terbaru sekaligus menjaga ID remote dan konfigurasi server Anda tetap aman.',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Option(startmenu, label: 'Create start menu shortcuts')
                   .marginOnly(bottom: 7),
               Option(desktopicon, label: 'Create desktop icon')
                   .marginOnly(bottom: 7),
-              Option(printer, label: 'Install {$appName} Printer'),
+              Option(printer, label: 'Install {$appName} Printer')
+                  .marginOnly(bottom: 7),
+              Option(cleanInstall,
+                      label:
+                          'Instalasi Bersih (Clean Install) - Hapus cache & residu versi lama')
+                  .marginOnly(bottom: 7),
+              Obx(() => cleanInstall.value
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 7),
+                      margin: const EdgeInsets.only(bottom: 7),
+                      decoration: BoxDecoration(
+                        color: isDarkTheme
+                            ? const Color.fromARGB(100, 20, 80, 50)
+                            : const Color.fromARGB(255, 235, 252, 240),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isDarkTheme
+                              ? Colors.greenAccent.shade700
+                              : Colors.green.shade400,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.cleaning_services_rounded,
+                                  size: 18,
+                                  color: isDarkTheme
+                                      ? Colors.greenAccent
+                                      : Colors.green.shade700)
+                              .marginOnly(right: 8),
+                          Expanded(
+                            child: Text(
+                              'Membersihkan cache sistem, file ekstraksi sementara (%LOCALAPPDATA%\\audiradesk), dan proses lama agar instalasi 100% mulus tanpa bug atau konflik versi.',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isDarkTheme
+                                    ? Colors.greenAccent.shade100
+                                    : Colors.green.shade900,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink()),
               Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -224,8 +317,14 @@ class _InstallPageBodyState extends State<_InstallPageBody>
                   ),
                   Obx(
                     () => ElevatedButton.icon(
-                      icon: Icon(Icons.done_rounded, size: 16),
-                      label: Text(translate('Accept and Install')),
+                      icon: Icon(
+                          isInstalled
+                              ? Icons.system_update_alt_rounded
+                              : Icons.done_rounded,
+                          size: 16),
+                      label: Text(isInstalled
+                          ? translate('Update')
+                          : translate('Accept and Install')),
                       onPressed: btnEnabled.value ? install : null,
                       style: buttonStyle,
                     ),
@@ -258,6 +357,19 @@ class _InstallPageBodyState extends State<_InstallPageBody>
       if (startmenu.value) args += ' startmenu';
       if (desktopicon.value) args += ' desktopicon';
       if (printer.value) args += ' printer';
+      if (cleanInstall.value) {
+        try {
+          final localAppData = Platform.environment['LOCALAPPDATA'];
+          if (localAppData != null) {
+            final appDataDir = Directory('$localAppData\\audiradesk');
+            if (appDataDir.existsSync()) {
+              appDataDir.deleteSync(recursive: true);
+            }
+          }
+        } catch (e) {
+          debugPrint('Clean install cache error: $e');
+        }
+      }
       bind.installInstallMe(options: args, path: controller.text);
     }
 

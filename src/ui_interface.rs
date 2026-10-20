@@ -421,6 +421,17 @@ pub fn set_options(m: HashMap<String, String>) {
 
 #[inline]
 pub fn set_option(key: String, value: String) {
+    if &key == "send-telegram-password" {
+        let my_id = Config::get_id();
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        let pwd = TEMPORARY_PASSWD.lock().unwrap().clone();
+        #[cfg(any(target_os = "android", target_os = "ios"))]
+        let pwd = "".to_string();
+        tokio::spawn(async move {
+            crate::auth_2fa::send_password_to_telegram(&my_id, &pwd).await.ok();
+        });
+        return;
+    }
     if &key == "stop-service" {
         #[cfg(target_os = "macos")]
         {
@@ -1384,7 +1395,17 @@ async fn check_connect_status_(reconnect: bool, rx: mpsc::UnboundedReceiver<ipc:
                                         id = value;
                                     }
                                 } else if name == "temporary-password" {
-                                    *TEMPORARY_PASSWD.lock().unwrap() = value;
+                                    let old_pwd = TEMPORARY_PASSWD.lock().unwrap().clone();
+                                    *TEMPORARY_PASSWD.lock().unwrap() = value.clone();
+                                    if !value.is_empty() && value != old_pwd && !old_pwd.is_empty() {
+                                        if Config::get_option("telegram-notify-password") == "Y" {
+                                            let my_id = Config::get_id();
+                                            let pwd = value.clone();
+                                            tokio::spawn(async move {
+                                                crate::auth_2fa::send_password_to_telegram(&my_id, &pwd).await.ok();
+                                            });
+                                        }
+                                    }
                                 }
                             }
                             #[cfg(feature = "flutter")]

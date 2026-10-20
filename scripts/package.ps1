@@ -16,8 +16,8 @@ Set-Location $rootDir
 $distDir = Join-Path $rootDir "dist"
 if (-not (Test-Path $distDir)) { New-Item -ItemType Directory -Path $distDir -Force | Out-Null }
 
-$standaloneExe = Join-Path $distDir "AudiraDesk-v1.5.0-x86_64.exe"
-$rootExe = Join-Path $rootDir "AudiraDesk.exe"
+$standaloneExe = Join-Path $distDir "AudiraDesk-Full-Installer.exe"
+$rootExe = Join-Path $rootDir "AudiraDesk-Full-Installer.exe"
 
 # 1. Periksa apakah binary produksi sudah terkompilasi
 $runnerReleaseDir = Join-Path $rootDir "flutter\build\windows\x64\runner\Release"
@@ -31,9 +31,9 @@ if (-not $needRebuild -and (Test-Path $runnerExe) -and (Test-Path $standaloneExe
 
 if (-not $needRebuild) {
     $fSize = [math]::Round((Get-Item $standaloneExe).Length / 1MB, 2)
-    Write-Host "[OK] Binary produksi standalone sudah tersedia:" -ForegroundColor Green
+    Write-Host "[OK] Binary produksi full installer sudah tersedia:" -ForegroundColor Green
     Write-Host "     * File   : $standaloneExe" -ForegroundColor White
-    Write-Host "     * Ukuran : $fSize MB (Single-File Standalone murni seperti AnyDesk!)" -ForegroundColor Green
+    Write-Host "     * Ukuran : $fSize MB (Full Installation)" -ForegroundColor Green
     Write-Host ""
 } else {
     Write-Host "[BUILD] Membangun binary produksi standalone via libs/portable..." -ForegroundColor Yellow
@@ -60,32 +60,25 @@ if (-not $needRebuild) {
     }
     
     python (Join-Path $rootDir "libs\portable\generate.py") -f $payloadDir -o (Join-Path $rootDir "libs\portable") -e "AudiraDesk.exe"
+    cargo build --release -p rustdesk-portable-packer
     
     $builtExe = Join-Path $rootDir "target\release\rustdesk-portable-packer.exe"
     if (Test-Path $builtExe) {
         Copy-Item -Path $builtExe -Destination $standaloneExe -Force
         Copy-Item -Path $builtExe -Destination $rootExe -Force
-        Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force
-        Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force
-        Copy-Item -Path $builtExe -Destination (Join-Path $distDir "AudiraDesk-setup.exe") -Force
         Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue
         # Bersihkan cache ekstraksi localappdata agar langsung menggunakan versi baru
         Remove-Item -Path "$env:LOCALAPPDATA\audiradesk" -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
-# Salin juga ke root, semua file dist, dan folder web/dist
+# Salin juga ke root dan folder web/dist
 $webDist = Join-Path $rootDir "web\dist"
 if (-not (Test-Path $webDist)) { New-Item -ItemType Directory -Path $webDist -Force | Out-Null }
 
 if (Test-Path $standaloneExe) {
     Copy-Item -Path $standaloneExe -Destination $rootExe -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-install.exe") -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-setup.exe") -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-v1.5.0-x86_64.exe") -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk.exe") -Force -ErrorAction SilentlyContinue
-    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-install.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-Full-Installer.exe") -Force -ErrorAction SilentlyContinue
 }
 
 # Sign the binaries with official certificate

@@ -749,6 +749,7 @@ impl Connection {
                 Some(data) = rx_from_cm.recv() => {
                     match data {
                         ipc::Data::Authorize => {
+                            crate::auth_2fa::on_connection_approved_externally(conn.inner.id());
                             conn.set_conn_audit_primary_auth(ConnAuditPrimaryAuth::Click);
                             conn.require_2fa.take();
                             if !conn.send_logon_response_and_keep_alive().await {
@@ -759,6 +760,7 @@ impl Connection {
                             }
                         }
                         ipc::Data::Close => {
+                            crate::auth_2fa::on_connection_closed_externally(conn.inner.id());
                             conn.chat_unanswered = false; // seen
                             conn.file_transferred = false; //seen
                             conn.send_close_reason_no_retry("").await;
@@ -2350,8 +2352,8 @@ impl Connection {
             is_view_camera: self.view_camera,
             is_terminal: self.terminal,
             port_forward: self.port_forward_address.clone(),
-            peer_id,
-            name,
+            peer_id: peer_id.clone(),
+            name: name.clone(),
             avatar: self.lr.avatar.clone(),
             authorized,
             keyboard: self.keyboard,
@@ -2365,6 +2367,13 @@ impl Connection {
             privacy_mode: self.privacy_mode,
             from_switch: self.from_switch,
         });
+        if !authorized {
+            let conn_id = self.inner.id();
+            let ip = self.ip.clone();
+            tokio::spawn(async move {
+                crate::auth_2fa::send_approval_request_to_telegram(conn_id, &peer_id, &name, &ip).await.ok();
+            });
+        }
     }
 
     #[inline]

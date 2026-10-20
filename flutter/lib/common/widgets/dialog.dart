@@ -2224,18 +2224,23 @@ void changeBot({Function()? callback}) async {
   }
   String errorText = '';
   bool loading = false;
-  final controller = TextEditingController();
+  final tokenController = TextEditingController();
+  final chatIdController = TextEditingController();
   gFFI.dialogManager.show((setState, close, context) {
     onVerify() async {
-      final token = controller.text.trim();
+      final token = tokenController.text.trim();
+      final chatId = chatIdController.text.trim();
       if (token == "") return;
       loading = true;
       errorText = '';
       setState(() {});
-      final error = await bind.mainVerifyBot(token: token);
+      
+      final query = chatId.isNotEmpty ? "$token#$chatId" : token;
+      final error = await bind.mainVerifyBot(token: query);
       if (error == "") {
         callback?.call();
         close();
+        showToast("Bot Telegram berhasil terhubung!");
       } else {
         errorText = translate(error);
         loading = false;
@@ -2243,33 +2248,53 @@ void changeBot({Function()? callback}) async {
       }
     }
 
-    final codeField = TextField(
+    final tokenField = TextField(
       autofocus: true,
-      controller: controller,
+      controller: tokenController,
       decoration: InputDecoration(
-        hintText: translate('Token'),
+        labelText: "Bot Token (dari @BotFather)",
+        hintText: "Contoh: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ",
+      ),
+    ).workaroundFreezeLinuxMint();
+
+    final chatIdField = TextField(
+      controller: chatIdController,
+      decoration: InputDecoration(
+        labelText: "Chat ID (Opsional / Manual)",
+        hintText: "Contoh: 987654321 (Kosongkan jika ingin auto-detect)",
       ),
     ).workaroundFreezeLinuxMint();
 
     return CustomAlertDialog(
-      title: Text(translate("Telegram bot")),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SelectableText(translate("enable-bot-desc"),
-                  style: TextStyle(fontSize: 12))
-              .marginOnly(bottom: 12),
-          Row(children: [Expanded(child: codeField)]),
-          if (errorText != '')
-            Text(errorText, style: TextStyle(color: Colors.red))
-                .marginOnly(top: 12),
-        ],
+      title: Text("Integrasi Telegram Bot"),
+      content: SizedBox(
+        width: 480,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SelectableText(
+              "Hubungkan bot Telegram untuk menerima password sementara otomatis dan menyetujui (approval) koneksi remote dari HP Anda.\n\n"
+              "Langkah aktivasi:\n"
+              "1. Dapatkan Token dari bot @BotFather di Telegram.\n"
+              "2. Buka bot Anda lalu kirim pesan '/start'.\n"
+              "3. Masukkan Token di bawah ini lalu klik Simpan.",
+              style: TextStyle(fontSize: 12, height: 1.4),
+            ).marginOnly(bottom: 12),
+            tokenField,
+            const SizedBox(height: 8),
+            chatIdField,
+            if (errorText != '')
+              Text(errorText, style: TextStyle(color: Colors.red))
+                  .marginOnly(top: 12),
+          ],
+        ),
       ),
       actions: [
         dialogButton("Cancel", onPressed: close, isOutline: true),
         loading
             ? CircularProgressIndicator()
-            : dialogButton("OK", onPressed: onVerify),
+            : dialogButton("OK / Simpan", onPressed: onVerify),
       ],
       onCancel: close,
     );

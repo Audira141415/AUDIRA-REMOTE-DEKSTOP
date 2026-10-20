@@ -17,6 +17,8 @@ import '../../common.dart';
 import '../../models/peer_model.dart';
 import '../../models/platform_model.dart';
 import 'peer_card.dart';
+import '../../desktop/widgets/diagnostics_dialog.dart';
+import '../../desktop/widgets/audit_log_dialog.dart';
 
 typedef PeerFilter = bool Function(Peer peer);
 typedef PeerCardBuilder = Widget Function(Peer peer);
@@ -187,31 +189,108 @@ class _PeersViewState extends State<_PeersView>
       child: Consumer<Peers>(builder: (context, peers, child) {
         if (peers.peers.isEmpty) {
           gFFI.peerTabModel.setCurrentTabCachedPeers([]);
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.sentiment_very_dissatisfied_rounded,
-                  color: Theme.of(context).tabBarTheme.labelColor,
-                  size: 40,
-                ).paddingOnly(bottom: 10),
-                Text(
-                  translate(
-                    _emptyMessages[widget.peers.loadEvent] ?? 'Empty',
-                  ),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Theme.of(context).tabBarTheme.labelColor,
-                  ),
-                ),
-              ],
-            ),
-          );
+          return _buildModernEmptyPeersView(context, widget.peers.loadEvent);
         } else {
           return _buildPeersView(peers);
         }
       }),
+    );
+  }
+
+  Widget _buildModernEmptyPeersView(BuildContext context, String loadEvent) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF1E222D) : const Color(0xFFF8FAFC);
+    final borderColor =
+        isDark ? const Color(0xFF2A2E3D) : const Color(0xFFE2E8F0);
+
+    String title = 'Belum Ada Riwayat Sesi Remote';
+    String desc =
+        'Masukkan ID remote pada kolom di atas lalu klik Sambungkan untuk memulai sesi baru.';
+    IconData icon = Icons.devices_other_rounded;
+
+    if (loadEvent == LoadEvent.favorite) {
+      title = 'Belum Ada Perangkat Favorit';
+      desc =
+          'Beri tanda bintang pada perangkat untuk menyematkannya di daftar akses cepat favorit.';
+      icon = Icons.star_border_rounded;
+    } else if (loadEvent == LoadEvent.lan) {
+      title = 'Mencari Perangkat di Jaringan Lokal (LAN)';
+      desc =
+          'Pastikan komputer lain di jaringan WiFi atau kabel yang sama sedang membuka Audira Desk.';
+      icon = Icons.wifi_find_rounded;
+    }
+
+    return Center(
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 480),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: MyTheme.accent.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: MyTheme.accent, size: 30),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              desc,
+              style: TextStyle(
+                fontSize: 13,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: const Icon(Icons.speed_rounded, size: 15),
+                  label: const Text('Diagnostik Jaringan'),
+                  onPressed: () => showDiagnosticsDialog(context),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: const Icon(Icons.history_rounded, size: 15),
+                  label: const Text('Audit Log Sesi'),
+                  onPressed: () => showAuditLogDialog(context),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 

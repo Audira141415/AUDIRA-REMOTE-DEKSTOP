@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/partial-config.json",
+  "version": "1.0",
+  "hooks": {
+    "audit_check": {
+      "description": "Runs comprehensive health audit of .agents skills, rules, and brain documents",
+      "command": "python scripts/audit_agents.py",
+      "trigger": "pre-commit"
+    },
+    "i18n_guard": {
+      "description": "Prevents unauthorized modifications to template.rs and it.rs",
+      "paths": [
+        "src/lang/template.rs",
+        "src/lang/it.rs"
+      ],
+      "action": "warn"
+    }
+  }
+}

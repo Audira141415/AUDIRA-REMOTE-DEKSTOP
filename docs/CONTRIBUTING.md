@@ -25,13 +25,12 @@ efforts from contributors on the same issue.
   correct independently (i.e., each commit should compile and pass tests).
 
 - Commits should be accompanied by a Developer Certificate of Origin
-  (http://developercertificate.org) sign-off, which indicates that you (and
-  your employer if applicable) agree to be bound by the terms of the
-  [project license](../LICENCE). In git, this is the `-s` option to `git commit`
+  (http://developercertificate.org) sign-off, which indicates that you
+  agree to be bound by the terms of the [project license](../LICENSE).
+  In git, this is the `-s` option to `git commit`.
 
-- If your patch is not getting reviewed or you need a specific person to review
-  it, you can @-reply a reviewer asking for a review in the pull request or a
-  comment, or you can ask for a review via [email](mailto:info@rustdesk.com).
+- If your patch requires technical review, submit a pull request or contact
+  the development team via [email](mailto:support@audira.my.id).
 
 - Add tests relevant to the fixed bug or new feature.
 
@@ -39,8 +38,8 @@ For specific git instructions, see [GitHub workflow 101](https://github.com/serv
 
 ## Conduct
 
-https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT.md
+https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/blob/main/CODE_OF_CONDUCT.md
 
-## Communication
+## Communication & Official Support
 
-RustDesk contributors frequent the [Discord](https://discord.gg/nDceKgxnkV).
+Audira Desk contributors and enterprise operators can reach out via [https://audira.my.id](https://audira.my.id) or WhatsApp [+62 821-1200-1600](https://wa.me/6282112001600).

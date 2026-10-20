@@ -40,6 +40,15 @@
   - Deteksi event perubahan clipboard tanpa polling CPU tinggi.
   - Proteksi privasi: Dapat dinonaktifkan secara sepihak oleh host melalui permission gates.
 
+### 2.3 AI Predictive Latency & Mouse Smoothing
+- **Lokasi Sumber**: [`libs/base/src/predictive_mouse.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/libs/base/src/predictive_mouse.rs)
+- **Fungsi**: Algoritma smoothing adaptif berbasis Kalman dan ekstrapolasi kecepatan kursor untuk memitigasi jitter dan latensi transmisi jaringan.
+- **Kemampuan**:
+  - Ekstrapolasi arah gerak kursor ke depan sesuai jendela latensi RTT aktif.
+  - Adaptasi bobot smoothing otomatis (presisi tinggi pada kecepatan rendah, ultra-responsif pada gerakan cepat).
+  - *Overshoot snap prevention* saat terjadi pembalikan arah gerak mouse secara tiba-tiba.
+
+
 ---
 
 ## 3. File Transfer & Sistem Berkas
@@ -71,6 +80,15 @@
 - **Lokasi Sumber**: [`src/platform/windows.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/platform/windows.rs)
 - **Fungsi**: Menggelapkan layar monitor fisik host dan mengunci input fisik lokal untuk kerahasiaan saat sesi berlangsung.
 
+### 4.4 Telegram Bot Integration & Remote 2FA Approval
+- **Lokasi Sumber**: [`src/auth_2fa.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/auth_2fa.rs), [`flutter/lib/desktop/pages/desktop_setting_page.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/pages/desktop_setting_page.dart)
+- **Fungsi**: Asisten cerdas Telegram untuk approval permintaan koneksi masuk, auto-dispatch password sementara, dan remote management (`/pass`, `/status`, `/specs`, `/refresh`).
+- **Mekanisme**: Long polling Telegram API dengan verifikasi callback token `approve:<id>` dan `reject:<id>`.
+
+### 4.5 Enterprise Audit Trail & Compliance Logging
+- **Lokasi Sumber**: [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py), [`flutter/lib/desktop/widgets/audit_log_dialog.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/audit_log_dialog.dart)
+- **Fungsi**: Pencatatan riwayat sesi remote, persetujuan otentikasi Telegram, alamat IP remote peer, durasi koneksi, dan ekspor data audit berformat CSV.
+
 ---
 
 ## 5. Networking & Tunneling
@@ -82,6 +100,10 @@
 ### 5.2 TCP Port Forwarding (Encrypted Tunnels)
 - **Lokasi Sumber**: [`src/server/connection.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/server/connection.rs), [`src/server/port_forward_mux.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/server/port_forward_mux.rs)
 - **Fungsi**: Meneruskan port layanan lokal (misal: port 8080, port 22) di mesin host ke port lokal klien melalui tunnel terenkripsi.
+
+### 5.3 AI Session Copilot & Live Network Diagnostics
+- **Lokasi Sumber**: [`flutter/lib/desktop/widgets/diagnostics_dialog.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/diagnostics_dialog.dart)
+- **Fungsi**: Pengukuran latensi socket RTT secara real-time ke Rendezvous server, pengecekan API Gateway, penilaian mutu jaringan (Grade A+ s/d D), dan rekomendasi pintar AI Copilot untuk optimasi bitrate/FPS.
 
 ---
 
@@ -98,3 +120,25 @@
 ### 6.3 Lokalisasi Multi-Bahasa
 - **Lokasi Sumber**: [`src/lang/`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/lang/)
 - **Fungsi**: Mendukung 25+ bahasa dunia dengan template master di `src/lang/template.rs`.
+
+### 6.4 Host System Health & Quick Hardware Specs
+- **Lokasi Sumber**: [`flutter/lib/desktop/widgets/system_info_dialog.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/system_info_dialog.dart), [`flutter/lib/desktop/pages/desktop_home_page.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/pages/desktop_home_page.dart)
+- **Fungsi**: Dialog cepat 1-klik untuk memeriksa spesifikasi perangkat keras, sistem operasi, Remote ID, konfigurasi server aktif, dan menyalin ringkasan sistem ke clipboard.
+
+### 6.5 Interactive On-Screen Whiteboard (Pena & Anotasi Layar)
+- **Lokasi Sumber**: [`flutter/lib/desktop/widgets/whiteboard_overlay.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/whiteboard_overlay.dart)
+- **Fungsi**: Lapisan kanvas interaktif di atas layar remote session untuk menggambar anotasi panduan secara langsung (pena neon, highlighter, panah penunjuk, undo, clear).
+
+### 6.6 Modern Floating Session HUD Bar
+- **Lokasi Sumber**: [`flutter/lib/desktop/widgets/session_hud_bar.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/session_hud_bar.dart)
+- **Fungsi**: Floating toolbar bergaya glassmorphism menampilkan metrik real-time (latensi ms, FPS) dan tombol aksi cepat 1-klik (`Ctrl+Alt+Del`, Whiteboard, System Drawer).
+
+### 6.7 Seamless Drag-and-Drop Direct File Transfer
+- **Lokasi Sumber**: [`flutter/lib/desktop/pages/remote_page.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/pages/remote_page.dart)
+- **Fungsi**: Pengiriman berkas instan dengan menyeret berkas dari desktop lokal langsung ke atas kanvas remote desktop dengan visual drop-zone.
+
+### 6.8 Remote System Diagnostics Drawer
+- **Lokasi Sumber**: [`flutter/lib/desktop/widgets/remote_system_drawer.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/remote_system_drawer.dart)
+- **Fungsi**: Panel samping geser yang menampilkan spesifikasi perangkat target, performa streaming, verifikasi cipher E2EE, dan tombol ekspor laporan diagnostik IT.
+
+

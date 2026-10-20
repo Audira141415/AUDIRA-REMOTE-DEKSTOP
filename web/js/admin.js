@@ -1,7 +1,7 @@
 /**
  * AUDIRA REMOTE DESKTOP — Admin Panel & Fleet Management Controller
  * Fully integrated with Central Auth, Multi-Device 1-Account Sync, Webhooks & Fleet Telemetry
- * Author: Agus Dwi Rianto (AUDIRA) — https://audira.my.id
+ * Author: Audira Core Development Team
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,12 +29,14 @@ function initLiveFleetSync() {
   fetchMetricsData();
   fetchSessionsData();
   fetchAccountsData();
+  fetchOrdersData();
   if (!fleetPollingTimer) {
     fleetPollingTimer = setInterval(() => {
       fetchFleetData();
       fetchMetricsData();
       fetchSessionsData();
       fetchAccountsData();
+      fetchOrdersData();
     }, 4000);
   }
 }
@@ -88,7 +90,7 @@ function checkOperatorSession() {
     } catch (_) {}
   }
   if (operatorEl) {
-    operatorEl.textContent = 'Agus Dwi Rianto (AUDIRA)';
+    operatorEl.textContent = 'Admin Operator (SecOps)';
   }
 }
 
@@ -564,7 +566,7 @@ function showAddDeviceModal() {
 
   const id = Math.floor(100000000 + Math.random() * 900000000).toString();
   const formattedId = `${id.slice(0,3)} ${id.slice(3,6)} ${id.slice(6,9)}`;
-  const lanIp = `192.168.100.${Math.floor(100 + Math.random() * 150)}`;
+  const lanIp = `10.10.20.${Math.floor(100 + Math.random() * 150)}`;
 
   const fleetTableBody = document.querySelector('#adminFleetTable tbody');
   if (fleetTableBody) {
@@ -600,7 +602,7 @@ function showAddDeviceModal() {
 function exportLogsCsv() {
   const headers = ['Timestamp', 'Operator', 'Target Host', 'Remote ID', 'Protocol', 'Duration', 'Traffic MB', 'Status'];
   const rows = [
-    ['2026-10-18 15:10:04', 'Agus Dwi Rianto', 'audira-proxmox-dc01', '914 302 774', 'Direct P2P UDP', '00:48:22', '410', 'Normal Closure'],
+    ['2026-10-18 15:10:04', 'SecOps Lead', 'core-infra-dc01', '914 302 774', 'Direct P2P UDP', '00:48:22', '410', 'Normal Closure'],
     ['2026-10-18 14:02:19', 'Operator IT Helpdesk', 'eng-cad-workstation-11', '512 884 901', 'Direct P2P UDP', '00:15:30', '128', 'Normal Closure'],
     ['2026-10-18 11:35:48', 'Security Bastion', 'devops-bastion-gateway', '204 119 635', 'Relay Tunnel', '00:03:12', '18', 'Routine Check']
   ];
@@ -698,7 +700,7 @@ function sendTestTelegramAlert() {
 
   if (token && chatId) {
     showToast('Sending real HTTP POST to Telegram Bot API...', 'info');
-    const message = `🚨 <b>[AUDIRA ALERT] Test Notification</b>\n• <b>Target Host:</b> eng-cad-workstation-11\n• <b>Status:</b> Operational\n• <b>Time:</b> ${timeStr} WIB\n• <b>Server:</b> audira-web-hub (192.168.100.175)`;
+    const message = `🚨 <b>[AUDIRA ALERT] Test Notification</b>\n• <b>Target Host:</b> eng-cad-workstation-11\n• <b>Status:</b> Operational\n• <b>Time:</b> ${timeStr} WIB\n• <b>Server:</b> Audira Production Relay Cluster`;
     
     fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
@@ -754,8 +756,8 @@ function sendTestDiscordAlert() {
             { name: "TARGET NODE", value: "eng-cad-workstation-11", inline: true },
             { name: "REMOTE ID", value: "512 884 901", inline: true },
             { name: "PROTOCOL", value: "UDP Direct P2P (11ms)", inline: true },
-            { name: "OPERATOR", value: "Agus Dwi Rianto (admin)", inline: true },
-            { name: "SERVER RELAY", value: "audira-web-hub (192.168.100.175)", inline: true }
+            { name: "OPERATOR", value: "SecOps Admin (Root)", inline: true },
+            { name: "SERVER RELAY", value: "Audira Production Relay Cluster", inline: true }
           ],
           footer: { text: `Audira Desk Fleet Sentinel • ${timeStr} WIB` }
         }
@@ -789,6 +791,202 @@ function copyClusterKey() {
     navigator.clipboard.writeText(input.value).then(() => {
       showToast('Cluster host public key copied to clipboard!', 'success');
     });
+  }
+}
+
+// ==========================================================================
+// Billing & Orders Management (Real-Time Synchronized)
+// ==========================================================================
+async function fetchOrdersData(showToastFeedback = false) {
+  try {
+    const res = await fetch('/api/orders');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.orders)) {
+      renderOrdersTable(data.orders);
+
+      const total = data.orders.length;
+      const paidOrders = data.orders.filter(o => o.status === 'PAID' || o.status === 'ACTIVE');
+      const pendingOrders = data.orders.filter(o => o.status === 'PENDING');
+      const totalRevenue = paidOrders.reduce((acc, o) => acc + (Number(o.amount) || 0), 0);
+
+      const badge = document.getElementById('navOrdersBadge');
+      if (badge) badge.textContent = total.toString();
+
+      const kpiTotal = document.getElementById('kpiTotalOrders');
+      if (kpiTotal) kpiTotal.textContent = total.toString();
+
+      const kpiRev = document.getElementById('kpiTotalRevenue');
+      if (kpiRev) kpiRev.textContent = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
+
+      const kpiLic = document.getElementById('kpiActiveLicenses');
+      if (kpiLic) kpiLic.textContent = paidOrders.length.toString();
+
+      const kpiPend = document.getElementById('kpiPendingOrders');
+      if (kpiPend) kpiPend.textContent = pendingOrders.length.toString();
+
+      const subtitle = document.getElementById('ordersHeaderSubtitle');
+      if (subtitle) {
+        subtitle.textContent = `${total} Transaksi (${paidOrders.length} Aktif, ${pendingOrders.length} Menunggu)`;
+      }
+
+      if (showToastFeedback) {
+        showToast('Data transaksi & lisensi berhasil diperbarui!', 'success');
+      }
+    }
+  } catch (e) {
+    console.debug('Orders API not reachable.');
+  }
+}
+
+function renderOrdersTable(orders) {
+  const tbody = document.getElementById('ordersTableBody');
+  if (!tbody) return;
+
+  if (orders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--color-text-dim);">Belum ada transaksi lisensi yang tercatat.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(o => {
+    const isPaid = o.status === 'PAID' || o.status === 'ACTIVE';
+    const statusPill = isPaid
+      ? `<span class="status-pill online"><span class="pulse-dot" style="display:inline-block; width:6px; height:6px; margin-right:4px; background:var(--color-emerald); border-radius:50%;"></span>AKTIF</span>`
+      : `<span class="status-pill standby" style="color:var(--color-amber); border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);"><span style="display:inline-block; width:6px; height:6px; margin-right:4px; background:var(--color-amber); border-radius:50%;"></span>PENDING</span>`;
+
+    const planBadge = o.plan === 'team'
+      ? `<span class="mgmt-tag-pill" style="background:rgba(0,240,255,0.1); color:var(--color-primary); border:1px solid rgba(0,240,255,0.25);">Pro Team</span>`
+      : (o.plan === 'enterprise' ? `<span class="mgmt-tag-pill" style="background:rgba(168,85,247,0.1); color:#a855f7; border:1px solid rgba(168,85,247,0.25);">Enterprise</span>` : `<span class="mgmt-tag-pill">Pro Indiv</span>`);
+
+    return `
+      <tr data-order-id="${escapeHtml(o.id)}">
+        <td class="admin-code-cell" style="font-weight:700; color:var(--color-primary);">
+          ${escapeHtml(o.id)}
+        </td>
+        <td>
+          <div style="font-weight:700; color:var(--color-text-heading);">${escapeHtml(o.customer_name)}</div>
+          <div style="font-size:0.75rem; color:var(--color-text-dim);">${escapeHtml(o.email || '-')} ${o.target_id ? `&bull; ID: ${escapeHtml(o.target_id)}` : ''}</div>
+        </td>
+        <td>
+          ${planBadge}
+          <div style="font-size:0.72rem; color:var(--color-text-dim); margin-top:2px;">${o.cycle === 'annual' ? 'Tahunan' : 'Bulanan'}</div>
+        </td>
+        <td style="font-family:var(--font-mono); font-weight:700; color:var(--color-text-heading);">
+          Rp ${(Number(o.amount) || 0).toLocaleString('id-ID')}
+        </td>
+        <td style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">
+          ${escapeHtml(o.payment_method || 'QRIS')}
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:0.4rem;">
+            <span class="admin-code-cell" style="font-weight:700; font-size:0.78rem; cursor:pointer;" onclick="navigator.clipboard.writeText('${escapeHtml(o.license_key)}'); showToast('Kunci disalin!', 'success');" title="Klik untuk salin">
+              ${escapeHtml(o.license_key)}
+            </span>
+            <button class="icon-btn-inline" title="Salin Kunci" onclick="navigator.clipboard.writeText('${escapeHtml(o.license_key)}'); showToast('Kunci disalin!', 'success');">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+        </td>
+        <td>${statusPill}</td>
+        <td style="white-space:nowrap;">
+          ${!isPaid ? `
+            <button class="mgmt-action-btn" style="background:#10b981; border-color:#10b981; margin-right:4px;" onclick="approveOrder('${escapeHtml(o.id)}')">Setujui</button>
+          ` : ''}
+          <button class="icon-btn-inline" style="color:var(--color-rose);" title="Hapus transaksi ini" onclick="deleteOrder('${escapeHtml(o.id)}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function approveOrder(orderId) {
+  try {
+    const res = await fetch('/api/orders/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId })
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      showToast(`Pesanan ${orderId} disetujui & lisensi diaktifkan!`, 'success');
+      fetchOrdersData();
+    } else {
+      showToast(result.error || 'Gagal menyetujui pesanan.', 'warning');
+    }
+  } catch (err) {
+    showToast('Terjadi kesalahan jaringan.', 'error');
+  }
+}
+
+async function deleteOrder(orderId) {
+  if (!confirm(`Hapus catatan transaksi ${orderId}?`)) return;
+  try {
+    const res = await fetch('/api/orders/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId })
+    });
+    if (res.ok) {
+      showToast(`Transaksi ${orderId} dihapus.`, 'info');
+      fetchOrdersData();
+    }
+  } catch (err) {
+    showToast('Gagal menghapus transaksi.', 'error');
+  }
+}
+
+// Modal: Manual License Generation
+function openManualLicenseModal() {
+  const modal = document.getElementById('modalManualLicense');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('manualCustName')?.focus();
+  }
+}
+
+function closeManualLicenseModal() {
+  const modal = document.getElementById('modalManualLicense');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitManualLicense(e) {
+  e.preventDefault();
+  const name = document.getElementById('manualCustName')?.value.trim();
+  const email = document.getElementById('manualEmail')?.value.trim();
+  const plan = document.getElementById('manualPlan')?.value;
+  const cycle = document.getElementById('manualCycle')?.value;
+  const targetId = document.getElementById('manualTargetId')?.value.trim();
+
+  if (!name || !email) {
+    showToast('Nama dan Email wajib diisi!', 'warning');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/orders/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: name,
+        email: email,
+        plan: plan,
+        cycle: cycle,
+        target_id: targetId,
+        payment_method: 'manual_admin'
+      })
+    });
+    const result = await res.json();
+    if (res.ok && result.success) {
+      showToast(`Lisensi manual ${result.order.license_key} berhasil diterbitkan!`, 'success');
+      closeManualLicenseModal();
+      fetchOrdersData();
+    } else {
+      showToast(result.error || 'Gagal menerbitkan lisensi.', 'warning');
+    }
+  } catch (err) {
+    showToast('Error koneksi saat menerbitkan lisensi.', 'error');
   }
 }
 

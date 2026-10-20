@@ -4,7 +4,7 @@ title AUDIRA Remote Desktop - Web Portal Preview
 
 echo ======================================================================
 echo           AUDIRA REMOTE DESKTOP - Official Web Portal                
-echo           Created by Agus Dwi R (AUDIRA)                             
+echo           AUDIRA Multimedia Digital (Open Source)
 echo ======================================================================
 echo.
 echo [*] Menjalankan server lokal di http://localhost:5050 ...

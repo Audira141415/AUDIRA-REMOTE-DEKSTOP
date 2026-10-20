@@ -14,9 +14,9 @@ Apabila kamu ingin mengatasi sebuah masalah yang sudah ada di daftar issue, hara
 
 - Sebaiknya buatlah commit seminimal mungkin, sambil memastikan bahwa setiap commit yang dibuat sudah benar (contohnya, setiap commit harus bisa di kompilasi dan berhasil melewati tahap test).
 
-- Setiap commit harus disertai dengan tanda tangan Sertifikat Asal Pengembang (Developer Certificate of Origin) (<http://developercertificate.org>), yang mengindikasikan bahwa kamu (and your employer if applicable) bersedia untuk patuh terhadap persyaratan dari [lisensi projek](../LICENCE). Di git bash, ini adalah opsi parameter `-s` pada `git commit`
+- Setiap commit harus disertai dengan tanda tangan Sertifikat Asal Pengembang (Developer Certificate of Origin) (<http://developercertificate.org>), yang mengindikasikan bahwa kamu bersedia untuk patuh terhadap persyaratan dari [lisensi projek](../LICENSE). Di git bash, ini adalah opsi parameter `-s` pada `git commit`
 
-- Jika perubahan yang kamu buat tidak mendapat tinjauan atau kamu membutuhkan orang tertentu untuk meninjaunya, kamu bisa @-reply seorang reviewer meminta peninjauan dalam permintaan pull request atau komentar, atau kamu bisa meminta tinjauan melalui [email](mailto:info@rustdesk.com).
+- Jika perubahan yang kamu buat membutuhkan tinjauan teknis, silakan ajukan pull request atau hubungi tim pengembang melalui [email](mailto:support@audira.my.id).
 
 - Sertakan test yang relevan terhadap bug atau fitur baru yang sudah dikerjakan.
 
@@ -24,8 +24,8 @@ Untuk instruksi Git yang lebih lanjut, cek disini [GitHub workflow 101](https://
 
 ## Tindakan
 
-<https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT.md>
+<https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/blob/main/CODE_OF_CONDUCT.md>
 
-## Komunikasi
+## Komunikasi & Dukungan Resmi
 
-Kontributor RustDesk sering berkunjung ke [Discord](https://discord.gg/nDceKgxnkV).
+Pengembang dan pengguna Audira Desk dapat menghubungi tim resmi melalui [https://audira.my.id](https://audira.my.id) atau WhatsApp [+62 821-1200-1600](https://wa.me/6282112001600).

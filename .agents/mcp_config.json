@@ -1,4 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/mcp-config.json",
-  "mcpServers": {}
+  "mcpServers": {
+    "audira-diagnostics": {
+      "command": "python",
+      "args": [
+        "scripts/audit_agents.py"
+      ],
+      "env": {},
+      "description": "AUDIRA Remote Desktop agentic health and integrity diagnostics provider"
+    }
+  }
 }

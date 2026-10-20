@@ -23,7 +23,9 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart' as window_size;
+import 'package:flutter_hbb/common/widgets/dialog.dart';
 import '../widgets/button.dart';
+import '../widgets/system_info_dialog.dart';
 
 class DesktopHomePage extends StatefulWidget {
   const DesktopHomePage({Key? key}) : super(key: key);
@@ -129,7 +131,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
       child: Container(
-        width: isIncomingOnly ? 280.0 : 200.0,
+        width: isIncomingOnly ? 280.0 : 240.0,
         color: Theme.of(context).colorScheme.background,
         child: Stack(
           children: [
@@ -220,7 +222,31 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                   ?.color
                                   ?.withOpacity(0.5)),
                         ).marginOnly(top: 5),
-                        buildPopupMenu(context)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Tooltip(
+                              message: 'Spesifikasi Sistem Host',
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(15),
+                                onTap: () => showSystemInfoDialog(context),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Icon(
+                                    Icons.info_outline_rounded,
+                                    size: 17,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.color
+                                        ?.withOpacity(0.5),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            buildPopupMenu(context),
+                          ],
+                        )
                       ],
                     ),
                   ),
@@ -405,6 +431,31 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                               SettingsTabKey.safety),
                           onHover: (value) => editHover.value = value,
                         ),
+                      InkWell(
+                        child: Tooltip(
+                          message: 'Kirim ID & Password ke Telegram Bot',
+                          child: Icon(
+                            Icons.send_rounded,
+                            color: const Color(0xFF0088CC),
+                            size: 20,
+                          ).marginOnly(right: 8, top: 4),
+                        ),
+                        onTap: () async {
+                          if (bind.mainHasValidBotSync()) {
+                            await bind.mainSetOption(
+                                key: 'send-telegram-password', value: 'Y');
+                            showToast('ID & Password berhasil dikirim ke Telegram!');
+                          } else {
+                            changeBot(callback: () {
+                              if (bind.mainHasValidBotSync()) {
+                                bind.mainSetOption(
+                                    key: 'send-telegram-password', value: 'Y');
+                                showToast('Bot terhubung! ID & Password dikirim ke Telegram.');
+                              }
+                            });
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ],
@@ -465,8 +516,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('http://desk.audira.my.id:5050/#downloads');
-        await launchUrl(url);
+        final Uri url = Uri.parse('http://desk.audira.my.id:5050/?upgrade=1&plan=pro#pricing');
+        await launchUrl(url, mode: LaunchMode.externalApplication);
       };
       if (isToUpdate) {
         onPressed = () {
@@ -479,9 +530,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           btnText,
           onPressed,
           closeButton: true,
-          help: isToUpdate ? 'Changelog' : null,
+          help: isToUpdate ? 'Pilihan Fitur' : null,
           link: isToUpdate
-              ? 'http://desk.audira.my.id:5050/#downloads'
+              ? 'http://desk.audira.my.id:5050/?upgrade=1&plan=pro#pricing'
               : null);
     }
     if (systemError.isNotEmpty) {
@@ -500,9 +551,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         return buildInstallCard(
             "Status", "Your installation is lower version.", "Click to upgrade",
             () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainGotoInstall();
-        });
+          final Uri url = Uri.parse('http://desk.audira.my.id:5050/?upgrade=1&plan=pro#pricing');
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }, closeButton: true, help: 'Pilihan Fitur & Upgrade', link: 'http://desk.audira.my.id:5050/?upgrade=1&plan=pro#pricing');
       }
     } else if (isMacOS) {
       final isOutgoingOnly = bind.isOutgoingOnly();
@@ -637,16 +688,25 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           margin: EdgeInsets.fromLTRB(
               0, marginTop, 0, bind.isIncomingOnly() ? marginTop : 0),
           child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromARGB(255, 226, 66, 188),
-                  Color.fromARGB(255, 244, 114, 124),
-                ],
-              )),
-              padding: EdgeInsets.all(20),
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF2563EB),
+                      Color(0xFF1D4ED8),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ]),
+              padding: const EdgeInsets.all(16),
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,7 +4,7 @@
 
 ### High-Performance, Ultra-Low Latency & End-to-End Encrypted Remote Desktop
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Commercial Paid](https://img.shields.io/badge/License-Commercial%20Paid-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Flutter](https://img.shields.io/badge/Flutter-Desktop%20%26%20Mobile-02569B.svg?logo=flutter)](https://flutter.dev/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-lightgrey.svg)](https://github.com/)
@@ -106,7 +106,7 @@ AUDIRA-REMOTE-DEKSTOP/
 ├── package.bat                   # Pintasan packaging produksi sekali klik
 ├── start.bat                     # Pintasan menjalankan aplikasi
 ├── stop.bat                      # Pintasan menghentikan aplikasi
-├── LICENSE                       # Lisensi Resmi MIT
+├── LICENSE                       # Lisensi Komersial AUDIRA
 └── README.md                     # Dokumentasi Proyek
 ```
 
@@ -193,20 +193,18 @@ Kontribusi dari komunitas sangat disambut! Silakan baca [**CONTRIBUTING.md**](CO
 
 ---
 
-## 📄 Lisensi
+## 📄 Lisensi Komersial (Commercial Paid License)
 
-Proyek ini dilisensikan di bawah **[MIT License](LICENSE)**.
+Proyek ini dilisensikan di bawah **[AUDIRA Commercial Software License](LICENSE)** (Hak Cipta © 2026 Agus Dwi Rianto / AUDIRA. All rights reserved).
 
-```text
-Copyright (c) 2026 AUDIRA (Agus Dwi R)
+Perangkat lunak ini merupakan produk perangkat lunak komersial berbayar yang memerlukan kunci lisensi resmi aktif (*Commercial License Key*) yang diterbitkan oleh AUDIRA untuk penggunaan operasional, integrasi relay mandiri, dan manajemen armada enterprise.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-...
-```
+Untuk aktivasi paket lisensi komersial (Pro Individual, Pro Team, atau Enterprise):
+* **Website Resmi**: [https://audira.my.id](https://audira.my.id)
+* **Email Dukungan**: [support@audira.my.id](mailto:support@audira.my.id) / [agusdwirianto@gmail.com](mailto:agusdwirianto@gmail.com)
+* **WhatsApp Hotline**: [+62 821-1200-1600](https://wa.me/6282112001600)
+* **Owner & Lead Developer**: Agus Dwi Rianto (AUDIRA)
 
-Dibuat dengan ❤️ dan dedikasi oleh **AUDIRA (Agus Dwi R)**.
+---
+
+Dibuat dengan ❤️ dan dedikasi oleh **AUDIRA (Agus Dwi Rianto)**.

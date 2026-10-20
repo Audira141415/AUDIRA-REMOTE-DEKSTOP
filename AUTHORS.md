@@ -11,8 +11,8 @@
 ---
 
 ## Software License
-* **License**: MIT License
-* **Copyright**: Copyright © 2026 Agus Dwi R (Audira). All rights reserved.
+* **License**: AUDIRA Commercial Proprietary Software License (Lisensi Komersial Berbayar)
+* **Copyright**: Copyright © 2026 Agus Dwi Rianto (AUDIRA). All rights reserved.
 
 ---
 
