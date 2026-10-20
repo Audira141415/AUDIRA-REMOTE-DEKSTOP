@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=1.5.3">
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
 </head>
 <body>
@@ -42,7 +42,7 @@
         <ul class="nav-links">
           <li><a href="/" class="nav-link active" onclick="navigateToHome(event)" data-i18n="navHome">Home</a></li>
           <li><a href="#architecture" class="nav-link" data-i18n="navArchitecture">Architecture</a></li>
-          <li><a href="#telemetry" class="nav-link" data-i18n="navTelemetry">Live Demo</a></li>
+          <li><a href="#telemetry" class="nav-link" data-i18n="navTelemetry">Live Session</a></li>
           <li><a href="#fleet" class="nav-link" data-i18n="navFleet">Fleet</a></li>
           <li><a href="#comparison" class="nav-link" data-i18n="navComparison">Compare</a></li>
           <li><a href="#selfhost" class="nav-link" data-i18n="navSelfHost">Self-Host</a></li>
@@ -830,18 +830,18 @@
       <!-- 4-Tier Pricing Grid -->
       <div class="pricing-grid">
         <!-- Tier 1: Free Community OSS -->
-        <div class="pricing-card" id="pricingCardFree" data-plan="free" onclick="selectPricingCard('free')" tabindex="0" role="button" aria-label="Select Starter Standalone Plan">
-          <div class="pricing-card-badge" data-i18n="badgeFree">STARTER • FREE TRIAL</div>
+        <div class="pricing-card" id="pricingCardFree" data-plan="free" onclick="selectPricingCard('free')" tabindex="0" role="button" aria-label="Select Community Standalone Plan">
+          <div class="pricing-card-badge" data-i18n="badgeFree">COMMUNITY • STANDALONE</div>
           <div class="pricing-card-header">
-            <div class="pricing-tier-tag" data-i18n="tierFreeTag">STARTER / TRIAL</div>
-            <h3 class="pricing-title" data-i18n="tierFreeTitle">Starter Standalone</h3>
-            <p class="pricing-subtitle" data-i18n="tierFreeSub">For individuals & technicians testing standalone remote desktop capabilities.</p>
+            <div class="pricing-tier-tag" data-i18n="tierFreeTag">COMMUNITY</div>
+            <h3 class="pricing-title" data-i18n="tierFreeTitle">Community Edition</h3>
+            <p class="pricing-subtitle" data-i18n="tierFreeSub">For individuals & technicians using standalone remote desktop capabilities.</p>
             <div class="pricing-price-wrap">
               <span class="pricing-currency" id="currSymFree">Rp</span>
               <span class="pricing-amount">0</span>
-              <span class="pricing-period">/ evaluasi</span>
+              <span class="pricing-period">/ bebas</span>
             </div>
-            <div class="pricing-billing-note" data-i18n="noteFree">Standalone Portable (Free Evaluation)</div>
+            <div class="pricing-billing-note" data-i18n="noteFree">Standalone Portable (Full Access)</div>
           </div>
 
           <ul class="pricing-features-list">
@@ -877,7 +877,7 @@
 
           <div class="pricing-card-footer" style="display:flex; gap:0.5rem;">
             <a href="#downloads" class="btn btn-secondary pricing-cta-btn" style="flex:1;" onclick="event.stopPropagation(); selectPricingCard('free');">
-              <span data-i18n="btnFree">Download Trial</span>
+              <span data-i18n="btnFree">Download Community</span>
             </a>
             <button class="btn btn-outline" onclick="event.stopPropagation(); selectPricingCard('free'); openUpgradeModal('free');" title="Detail Fitur Community" style="padding:0.6rem 0.85rem;">
               <span>Fitur</span>
@@ -1059,7 +1059,7 @@
             <tbody>
               <tr>
                 <td><strong>Hosting Infrastructure</strong></td>
-                <td style="text-align:center;">Standalone / Trial</td>
+                <td style="text-align:center;">Standalone Community</td>
                 <td style="text-align:center;">Self-Hosted Pro</td>
                 <td style="text-align:center; font-weight:700; color:var(--color-primary);">Self-Hosted Pro</td>
                 <td style="text-align:center;">Dedicated Cluster</td>
@@ -2222,6 +2222,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=1.5.3"></script>
 </body>
 </html>

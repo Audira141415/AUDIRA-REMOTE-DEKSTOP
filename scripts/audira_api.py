@@ -328,7 +328,7 @@ def build_fleet_devices():
             "ip": ip,
             "os": custom.get("os") or "Windows / Desktop",
             "group": custom.get("group") or "Local Fleet",
-            "version": "1.5.0",
+            "version": "1.5.3",
             "is_online": is_arp_online,
             "status": "online" if is_arp_online else "offline",
             "last_seen": sp["created_at"],
@@ -353,7 +353,7 @@ def build_fleet_devices():
                 "ip": peer_ip,
                 "os": lp.get("os") or "Windows 11 / Desktop",
                 "group": custom.get("group") or "Local Fleet",
-                "version": lp.get("version", "1.5.0"),
+                "version": lp.get("version", "1.5.3"),
                 "is_online": is_online,
                 "status": "online" if is_online else "offline",
                 "last_seen": time_str,
@@ -387,7 +387,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.send_cors_headers()
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "service": "Audira API", "version": "1.5.0"}).encode())
+            self.wfile.write(json.dumps({"status": "ok", "service": "Audira API", "version": "1.5.3"}).encode())
             return
 
         # 2. Login options (Empty array = standard username/password login in client)
@@ -685,7 +685,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             "uuid": data.get("uuid", ""),
                             "hostname": data.get("hostname", "") or peer.get("hostname", ""),
                             "username": data.get("username", "") or peer.get("username", ""),
-                            "version": data.get("version", "1.5.0"),
+                            "version": data.get("version", "1.5.3"),
                             "os": data.get("os", "Windows / Desktop"),
                             "ip": client_ip,
                             "last_heartbeat": time.time(),

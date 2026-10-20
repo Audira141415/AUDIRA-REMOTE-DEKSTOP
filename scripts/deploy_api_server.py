@@ -18,9 +18,16 @@ print("[*] Uploading web/js/app.js and admin.js...")
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\js\app.js', '/home/audira/projects/audira-remote-desktop/web/js/app.js')
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\js\admin.js', '/home/audira/projects/audira-remote-desktop/web/js/admin.js')
 
-print("[*] Uploading web/index.html and web/css/styles.css...")
+print("[*] Uploading web/index.html and web/admin.html...")
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\index.html', '/home/audira/projects/audira-remote-desktop/web/index.html')
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\admin.html', '/home/audira/projects/audira-remote-desktop/web/admin.html')
+
+print("[*] Uploading web/css/styles.css and admin.css...")
 sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\css\styles.css', '/home/audira/projects/audira-remote-desktop/web/css/styles.css')
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\css\admin.css', '/home/audira/projects/audira-remote-desktop/web/css/admin.css')
+
+print("[*] Uploading web/dist/AudiraDesk-Full-Installer.exe (v1.5.3)...")
+sftp.put(r'f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-Full-Installer.exe', '/home/audira/projects/audira-remote-desktop/web/dist/AudiraDesk-Full-Installer.exe')
 
 # Write service file to /tmp/audira-api.service
 service_unit = """[Unit]
@@ -69,7 +76,8 @@ def run_user(cmd):
     if err:
         print("ERR:", err)
 
-run_user("cd /home/audira/projects/audira-remote-desktop && docker compose up -d web")
+run_user("cd /home/audira/projects/audira-remote-desktop && docker compose restart web")
+run_user("curl -s http://127.0.0.1:80/ | grep -i 'modalTabRegister'")
 run_user("curl -s http://127.0.0.1:21114/api/health")
 run_user("curl -s http://127.0.0.1:5050/api/health")
 run_user("curl -s http://127.0.0.1:5050/api/fleet")
