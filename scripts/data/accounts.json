@@ -1,0 +1,22 @@
+{
+  "audira": {
+    "username": "audira",
+    "password": "Sigma1993",
+    "display_name": "Agus Dwi Rianto",
+    "email": "admin@audira.my.id",
+    "note": "Audira Certified Administrator",
+    "is_admin": true,
+    "status": 1,
+    "created_at": "2026-10-18 00:00:00",
+    "tokens": {},
+    "devices": {},
+    "tags": [
+      "My Devices",
+      "Audira Fleet"
+    ],
+    "tag_colors": {
+      "My Devices": 4282557947,
+      "Audira Fleet": 4280391411
+    }
+  }
+}

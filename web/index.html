@@ -1367,8 +1367,8 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v3H9V7z"/></svg>
           </div>
           <div>
-            <h3 id="modalTitle" class="modal-title" data-i18n="modalTitle">Fleet Management Console</h3>
-            <p style="font-size:0.75rem; color:var(--color-text-dim); margin-top:0.1rem;" data-i18n="modalSubtitle">Private Cluster Admin Portal</p>
+            <h3 id="modalTitle" class="modal-title" data-i18n="modalTitle">Audira Account Portal</h3>
+            <p style="font-size:0.75rem; color:var(--color-text-dim); margin-top:0.1rem;" data-i18n="modalSubtitle">Akses Fleet Control & Perangkat Remote</p>
           </div>
         </div>
         <button id="closeLoginBtn" class="modal-close-btn" title="Close dialog" aria-label="Close dialog">
@@ -1376,32 +1376,27 @@
         </button>
       </div>
 
-      <!-- Modal Tabs -->
+      <!-- Modal Tabs (Login, Register, SSO, 2FA) -->
       <div class="modal-tabs">
-        <button class="modal-tab-btn active" data-tab="credentials" data-i18n="tabCredentials">Credentials</button>
+        <button class="modal-tab-btn active" data-tab="login" id="modalTabLogin">Masuk</button>
+        <button class="modal-tab-btn" data-tab="register" id="modalTabRegister">Daftar Akun</button>
         <button class="modal-tab-btn" data-tab="sso" data-i18n="tabSso">OIDC / SSO</button>
         <button class="modal-tab-btn" data-tab="token" data-i18n="tabHardwareToken">2FA / Token</button>
       </div>
 
       <div class="modal-body">
-        <!-- View 1: Standard Credentials Form -->
+        <!-- View 1: Standard Login Form -->
         <div id="authViewCredentials" class="auth-form-view active">
-          <div class="auth-quick-fill">
-            <span>Demo Operator:</span>
-            <code>audira@audira.my.id</code>
-            <button id="quickFillBtn" class="quick-fill-btn">Autofill</button>
-          </div>
-
           <form id="adminLoginForm" onsubmit="event.preventDefault(); handleAdminLogin();">
             <div class="form-group">
-              <label for="adminEmail" class="form-label" data-i18n="lblEmail">Operator Email / Username</label>
+              <label for="adminEmail" class="form-label" data-i18n="lblEmail">Username atau Email</label>
               <div class="form-input-wrap">
-                <input type="text" id="adminEmail" class="form-input" required autocomplete="username" placeholder="admin@domain.com" value="">
+                <input type="text" id="adminEmail" class="form-input" required autocomplete="username" placeholder="Masukkan username atau email Anda" value="">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="adminPassword" class="form-label" data-i18n="lblPassword">Access Password</label>
+              <label for="adminPassword" class="form-label" data-i18n="lblPassword">Kata Sandi</label>
               <div class="form-input-wrap">
                 <input type="password" id="adminPassword" class="form-input" required autocomplete="current-password" placeholder="••••••••••••" value="">
                 <button type="button" id="togglePasswordVisibility" class="form-input-addon" title="Toggle password visibility">
@@ -1413,14 +1408,66 @@
             <div class="form-row-meta">
               <label class="form-checkbox-label">
                 <input type="checkbox" id="rememberSession" checked>
-                <span data-i18n="lblRemember">Remember workstation</span>
+                <span data-i18n="lblRemember">Ingat sesi di perangkat ini</span>
               </label>
               <a href="#cluster" class="form-link" data-i18n="lnkKeyRecovery">Cluster Keys</a>
             </div>
 
             <button type="submit" id="adminLoginSubmitBtn" class="btn btn-primary" style="width:100%; padding:0.75rem;">
-              <span id="loginBtnLabel" data-i18n="btnSignIn">Sign In to Fleet Control</span>
+              <span id="loginBtnLabel" data-i18n="btnSignIn">Masuk ke Fleet Control</span>
             </button>
+
+            <div style="text-align:center; margin-top:1.25rem; font-size:0.8125rem; color:var(--color-text-dim);">
+              Belum memiliki akun? <a href="javascript:void(0)" onclick="switchToRegister()" style="color:var(--color-primary); font-weight:700; text-decoration:none;">Daftar Akun Baru &rarr;</a>
+            </div>
+          </form>
+        </div>
+
+        <!-- View 1B: New User Registration Form -->
+        <div id="authViewRegister" class="auth-form-view">
+          <form id="adminRegisterForm" onsubmit="event.preventDefault(); handleAdminRegister();">
+            <div class="form-group">
+              <label for="regUsername" class="form-label">Username</label>
+              <div class="form-input-wrap">
+                <input type="text" id="regUsername" class="form-input" required autocomplete="username" placeholder="Huruf/angka unik (min. 3 karakter)" minlength="3">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regDisplayName" class="form-label">Nama Lengkap</label>
+              <div class="form-input-wrap">
+                <input type="text" id="regDisplayName" class="form-input" required placeholder="Nama lengkap atau panggilan">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regEmail" class="form-label">Alamat Email</label>
+              <div class="form-input-wrap">
+                <input type="email" id="regEmail" class="form-input" required autocomplete="email" placeholder="nama@perusahaan.com">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regPassword" class="form-label">Kata Sandi</label>
+              <div class="form-input-wrap">
+                <input type="password" id="regPassword" class="form-input" required autocomplete="new-password" placeholder="Minimal 6 karakter" minlength="6">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regPasswordConfirm" class="form-label">Konfirmasi Kata Sandi</label>
+              <div class="form-input-wrap">
+                <input type="password" id="regPasswordConfirm" class="form-input" required autocomplete="new-password" placeholder="Ulangi kata sandi di atas" minlength="6">
+              </div>
+            </div>
+
+            <button type="submit" id="regSubmitBtn" class="btn btn-primary" style="width:100%; padding:0.75rem; margin-top:0.25rem;">
+              <span id="regBtnLabel">Daftar Akun Sekarang</span>
+            </button>
+
+            <div style="text-align:center; margin-top:1.25rem; font-size:0.8125rem; color:var(--color-text-dim);">
+              Sudah memiliki akun? <a href="javascript:void(0)" onclick="switchToLogin()" style="color:var(--color-primary); font-weight:700; text-decoration:none;">Masuk di sini &rarr;</a>
+            </div>
           </form>
         </div>
 

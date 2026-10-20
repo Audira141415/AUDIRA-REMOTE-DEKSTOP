@@ -5,6 +5,21 @@
 
 ## 1. Log Riwayat Rilis & Arsitektur
 
+### Versi v1.5.3 (Production Web Auth & Account Registration Engine) — 2026-10-20
+- **Penghapusan Total Mock Data & Demo UI**:
+  - Menghapus banner `Demo Operator (audira@audira.my.id)` dan tombol autofill palsu pada portal web (`web/index.html`).
+  - Menghilangkan fallback *fake offline mock login* pada `web/js/app.js`, digantikan penanganan error nyata dari server API.
+- **Implementasi Fitur Registrasi & Login Produksi**:
+  - **Backend API (`scripts/audira_api.py`)**:
+    - Endpoint baru `POST /api/register`: Validasi username unik (min 3 karakter, alfanumerik), validasi format email, validasi password (min 6 karakter), penyimpanan aman tersinkronisasi (`ACCOUNTS_LOCK`) ke `accounts.json`, pencatatan audit log `USER_REGISTER`, dan penerbitan token sesi UUID nyata.
+    - Pembaruan `POST /api/login`: Mendukung login dengan username atau email, verifikasi kata sandi ketat (menolak sandi salah dengan 401 dan akun tidak ada dengan 400), pencatatan audit log `LOGIN_SUCCESS` dan `LOGIN_FAILED`.
+  - **Portal Frontend (`web/index.html` & `web/js/app.js`)**:
+    - Antarmuka dual-tab: **Masuk** dan **Daftar Akun Baru** dengan navigasi instan antar tab.
+    - Form registrasi lengkap: Username, Nama Lengkap (Display Name), Email, Password, dan Konfirmasi Password.
+    - Fungsi `handleAdminRegister()` dan `handleAdminLogin()` dengan validasi real-time dan notifikasi toast profesional.
+  - **Pengujian & Verifikasi**:
+    - Dibuat dan dijalankan script tes otomasi `scripts/test_auth_api.py` yang memvalidasi seluruh siklus registrasi, persistensi token, pencegahan duplikasi, dan audit log (100% lulus).
+
 ### Versi v1.5.1 (Complete Rebranding "Audira Desk" & Standalone Packaging) — 2026-10-18
 - **Core Engine & Windows Platform Rebranding**:
   - `libs/hbb_common/src/config.rs`: `APP_NAME` diubah secara fundamental menjadi `"Audira Desk"`.

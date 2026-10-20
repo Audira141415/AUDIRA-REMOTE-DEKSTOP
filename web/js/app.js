@@ -503,7 +503,6 @@ function initAuthModal() {
   const openBtn = document.getElementById('openLoginBtn');
   const heroOpenBtn = document.getElementById('heroOpenLoginBtn');
   const closeBtn = document.getElementById('closeLoginBtn');
-  const quickFillBtn = document.getElementById('quickFillBtn');
   const togglePwBtn = document.getElementById('togglePasswordVisibility');
   const adminPassword = document.getElementById('adminPassword');
 
@@ -541,7 +540,7 @@ function initAuthModal() {
     }
   });
 
-  // Tab switching
+  // Tab switching (Login, Register, SSO, Token)
   document.querySelectorAll('.modal-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
@@ -549,8 +548,11 @@ function initAuthModal() {
 
       btn.classList.add('active');
       const targetTab = btn.getAttribute('data-tab');
-      if (targetTab === 'credentials') {
+      if (targetTab === 'credentials' || targetTab === 'login') {
         const v = document.getElementById('authViewCredentials');
+        if (v) v.classList.add('active');
+      } else if (targetTab === 'register') {
+        const v = document.getElementById('authViewRegister');
         if (v) v.classList.add('active');
       } else if (targetTab === 'sso') {
         const v = document.getElementById('authViewSso');
@@ -561,17 +563,6 @@ function initAuthModal() {
       }
     });
   });
-
-  // Quick-fill credentials (Demo only)
-  if (quickFillBtn) {
-    quickFillBtn.addEventListener('click', () => {
-      const email = document.getElementById('adminEmail');
-      const pw = document.getElementById('adminPassword');
-      if (email) email.value = 'admin@example.com';
-      if (pw) pw.value = 'DemoPass123!';
-      showToast('Loaded demo placeholder credentials', 'info');
-    });
-  }
 
   // Toggle password visibility
   if (togglePwBtn && adminPassword) {
@@ -590,6 +581,34 @@ function initAuthModal() {
   }
 }
 
+function switchToRegister() {
+  document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
+
+  const tab = document.querySelector('.modal-tab-btn[data-tab="register"]');
+  const view = document.getElementById('authViewRegister');
+  if (tab) tab.classList.add('active');
+  if (view) {
+    view.classList.add('active');
+    const uInput = document.getElementById('regUsername');
+    if (uInput) setTimeout(() => uInput.focus(), 100);
+  }
+}
+
+function switchToLogin() {
+  document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
+
+  const tab = document.querySelector('.modal-tab-btn[data-tab="login"]') || document.querySelector('.modal-tab-btn[data-tab="credentials"]');
+  const view = document.getElementById('authViewCredentials');
+  if (tab) tab.classList.add('active');
+  if (view) {
+    view.classList.add('active');
+    const eInput = document.getElementById('adminEmail');
+    if (eInput) setTimeout(() => eInput.focus(), 100);
+  }
+}
+
 async function handleAdminLogin() {
   const submitBtn = document.getElementById('adminLoginSubmitBtn');
   const label = document.getElementById('loginBtnLabel');
@@ -599,7 +618,9 @@ async function handleAdminLogin() {
   const password = passwordInput ? passwordInput.value : '';
 
   if (!username || !password) {
-    showToast('Username dan password tidak boleh kosong.', 'warning');
+    showToast('Username/Email dan kata sandi tidak boleh kosong.', 'warning');
+    if (!username && emailInput) emailInput.focus();
+    else if (passwordInput) passwordInput.focus();
     return;
   }
 
@@ -627,15 +648,86 @@ async function handleAdminLogin() {
         navigateToFleet();
       }, 750);
     } else {
-      showToast(data.error || 'Autentikasi gagal. Periksa username dan password.', 'error');
+      showToast(data.error || 'Autentikasi gagal. Periksa username dan kata sandi.', 'error');
     }
   } catch (err) {
-    sessionStorage.setItem('audira_logged_in', 'true');
-    showLoggedInState({ name: username, display_name: username });
-    showToast(`Login offline: ${username}`, 'info');
+    console.error('Login error:', err);
+    showToast('Gagal menghubungi server API autentikasi. Pastikan koneksi server aktif.', 'error');
   } finally {
     if (submitBtn) submitBtn.disabled = false;
-    if (label) label.textContent = 'Sign In to Fleet Control';
+    if (label) label.textContent = 'Masuk ke Fleet Control';
+  }
+}
+
+async function handleAdminRegister() {
+  const submitBtn = document.getElementById('regSubmitBtn');
+  const label = document.getElementById('regBtnLabel');
+  const usernameInput = document.getElementById('regUsername');
+  const nameInput = document.getElementById('regDisplayName');
+  const emailInput = document.getElementById('regEmail');
+  const pwInput = document.getElementById('regPassword');
+  const pwConfirmInput = document.getElementById('regPasswordConfirm');
+
+  const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
+  const displayName = nameInput ? nameInput.value.trim() : '';
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  const password = pwInput ? pwInput.value : '';
+  const passwordConfirm = pwConfirmInput ? pwConfirmInput.value : '';
+
+  if (!username || username.length < 3) {
+    showToast('Username harus minimal 3 karakter.', 'warning');
+    if (usernameInput) usernameInput.focus();
+    return;
+  }
+  if (!email || !email.includes('@')) {
+    showToast('Alamat email tidak valid.', 'warning');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+  if (!password || password.length < 6) {
+    showToast('Kata sandi harus minimal 6 karakter.', 'warning');
+    if (pwInput) pwInput.focus();
+    return;
+  }
+  if (password !== passwordConfirm) {
+    showToast('Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.', 'warning');
+    if (pwConfirmInput) pwConfirmInput.focus();
+    return;
+  }
+
+  if (submitBtn) submitBtn.disabled = true;
+  if (label) label.textContent = 'Mendaftarkan Akun...';
+
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        email: email,
+        display_name: displayName || username
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+      localStorage.setItem('audira_access_token', data.access_token);
+      localStorage.setItem('audira_user', JSON.stringify(data.user));
+      sessionStorage.setItem('audira_logged_in', 'true');
+      showLoggedInState(data.user);
+      showToast(`Pendaftaran berhasil! Akun '${data.user.username}' siap digunakan.`, 'success');
+      setTimeout(() => {
+        navigateToFleet();
+      }, 750);
+    } else {
+      showToast(data.error || 'Pendaftaran gagal. Silakan periksa data Anda.', 'error');
+    }
+  } catch (err) {
+    console.error('Registration error:', err);
+    showToast('Gagal menghubungi server API saat mendaftar.', 'error');
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+    if (label) label.textContent = 'Daftar Akun Sekarang';
   }
 }
 

@@ -766,60 +766,62 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         if path == "/api/login":
             try:
                 data = json.loads(body) if body else {}
-                username = str(data.get("username", "")).strip()
+                raw_identity = str(data.get("username", "")).strip()
                 password = str(data.get("password", "")).strip()
                 device_id = str(data.get("id", "")).strip().replace(" ", "")
                 device_uuid = str(data.get("uuid", "")).strip()
                 device_info = data.get("deviceInfo", {})
 
-                if not username:
+                if not raw_identity:
                     self.send_response(400)
                     self.send_cors_headers()
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
-                    self.wfile.write(json.dumps({"error": "Username tidak boleh kosong"}).encode())
+                    self.wfile.write(json.dumps({"error": "Username atau email tidak boleh kosong."}).encode())
                     return
 
                 with ACCOUNTS_LOCK:
                     accounts = load_accounts()
 
-                    # Authenticate or auto-register account
-                    if username in accounts:
-                        user = accounts[username]
-                        if user.get("password") and user.get("password") != password:
-                            self.send_response(400)
-                            self.send_cors_headers()
-                            self.send_header("Content-Type", "application/json")
-                            self.end_headers()
-                            self.wfile.write(json.dumps({"error": "Kata sandi salah / Invalid password"}).encode())
-                            return
-                    else:
-                        # Auto-create user account if not existing
-                        user = {
-                            "username": username,
-                            "password": password,
-                            "display_name": username,
-                            "email": f"{username}@audira.my.id",
-                            "note": "Audira Registered Member",
-                            "is_admin": False,
-                            "status": 1,
-                            "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "tokens": {},
-                            "devices": {},
-                            "tags": ["My Devices", "Audira Fleet"],
-                            "tag_colors": {"My Devices": 4282557947, "Audira Fleet": 4280391411}
-                        }
-                        accounts[username] = user
+                    # Find account by username (case-insensitive) or email
+                    target_user = None
+                    target_username = None
+                    for uname, u in accounts.items():
+                        if uname.lower() == raw_identity.lower() or u.get("email", "").lower() == raw_identity.lower():
+                            target_user = u
+                            target_username = uname
+                            break
+
+                    if not target_user:
+                        self.send_response(400)
+                        self.send_cors_headers()
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": "Akun tidak terdaftar. Silakan lakukan registrasi terlebih dahulu."}).encode())
+                        return
+
+                    if target_user.get("password") and target_user.get("password") != password:
+                        add_audit_log("LOGIN_FAILED", device_id or "WEB", client_ip, raw_identity, f"Percobaan login gagal untuk '{raw_identity}': Kata sandi salah")
+                        self.send_response(401)
+                        self.send_cors_headers()
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": "Kata sandi salah / Invalid password."}).encode())
+                        return
+
+                    user = target_user
+                    username = target_username
 
                     # Generate new session access token
                     access_token = uuid.uuid4().hex
                     if "tokens" not in user: user["tokens"] = {}
                     user["tokens"][access_token] = {
                         "created_at": time.time(),
-                        "device_id": device_id
+                        "device_id": device_id,
+                        "client_ip": client_ip
                     }
 
-                    # Link device to user's account
+                    # Link device to user's account if sent from desktop/mobile client
                     if device_id:
                         if "devices" not in user: user["devices"] = {}
                         
@@ -863,18 +865,21 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
                     save_accounts(accounts)
 
-                # Return Flutter LoginResponse
+                add_audit_log("LOGIN_SUCCESS", device_id or "WEB", client_ip, username, f"Login berhasil untuk pengguna '{username}' ({user.get('display_name')})")
+
+                # Return Flutter & Web LoginResponse
                 resp = {
                     "type": "access_token",
                     "access_token": access_token,
                     "user": {
                         "name": user["username"],
+                        "username": user["username"],
                         "display_name": user.get("display_name", user["username"]),
                         "avatar": "",
                         "email": user.get("email", f"{user['username']}@audira.my.id"),
                         "note": user.get("note", "Audira Certified Member"),
                         "status": user.get("status", 1),
-                        "is_admin": user.get("is_admin", True)
+                        "is_admin": user.get("is_admin", False)
                     }
                 }
 
@@ -889,6 +894,122 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 self.send_cors_headers()
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 4B. USER AUTHENTICATION: REGISTER (POST /api/register)
+        if path == "/api/register":
+            try:
+                data = json.loads(body) if body else {}
+                username = str(data.get("username", "")).strip().lower()
+                password = str(data.get("password", "")).strip()
+                email = str(data.get("email", "")).strip().lower()
+                display_name = str(data.get("display_name", "")).strip() or username
+
+                if not username or len(username) < 3:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Username harus terdiri dari minimal 3 karakter."}).encode())
+                    return
+
+                # Alphanumeric with underscore / dash
+                if not username.replace("_", "").replace("-", "").isalnum():
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Username hanya boleh memuat huruf, angka, underscore (_), atau strip (-)."}).encode())
+                    return
+
+                if not password or len(password) < 6:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Kata sandi harus terdiri dari minimal 6 karakter."}).encode())
+                    return
+
+                if not email or "@" not in email:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Format alamat email tidak valid."}).encode())
+                    return
+
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+
+                    if username in accounts:
+                        self.send_response(400)
+                        self.send_cors_headers()
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": f"Username '{username}' sudah terdaftar. Silakan pilih username lain."}).encode())
+                        return
+
+                    for u in accounts.values():
+                        if u.get("email", "").lower() == email:
+                            self.send_response(400)
+                            self.send_cors_headers()
+                            self.send_header("Content-Type", "application/json")
+                            self.end_headers()
+                            self.wfile.write(json.dumps({"error": f"Email '{email}' sudah terdaftar pada akun lain. Silakan gunakan menu Masuk."}).encode())
+                            return
+
+                    # Create new production user
+                    new_user = {
+                        "username": username,
+                        "password": password,
+                        "display_name": display_name,
+                        "email": email,
+                        "note": "Audira Registered Member (Production)",
+                        "is_admin": False,
+                        "status": 1,
+                        "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "tokens": {},
+                        "devices": {},
+                        "tags": ["My Devices"],
+                        "tag_colors": {"My Devices": 4282557947}
+                    }
+
+                    access_token = uuid.uuid4().hex
+                    new_user["tokens"][access_token] = {
+                        "created_at": time.time(),
+                        "client_ip": client_ip
+                    }
+                    accounts[username] = new_user
+                    save_accounts(accounts)
+
+                add_audit_log("USER_REGISTER", "WEB", client_ip, username, f"Akun baru '{username}' ({display_name}) sukses terdaftar via web portal")
+
+                resp = {
+                    "type": "access_token",
+                    "access_token": access_token,
+                    "user": {
+                        "name": username,
+                        "username": username,
+                        "display_name": display_name,
+                        "avatar": "",
+                        "email": email,
+                        "note": "Audira Registered Member",
+                        "status": 1,
+                        "is_admin": False
+                    }
+                }
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps(resp).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Server error: {str(e)}"}).encode())
                 return
 
         # 5. CURRENT USER (POST /api/currentUser)
