@@ -6,11 +6,20 @@
 
 function checkAdminAuth() {
   const token = localStorage.getItem('audira_access_token');
-  const user = localStorage.getItem('audira_user');
-  if (!token || !user) {
+  const userStr = localStorage.getItem('audira_user');
+  if (!token || !userStr) {
     window.location.replace('index.html?login=1');
     return false;
   }
+  try {
+    const u = JSON.parse(userStr);
+    const isStaff = u.is_owner || u.is_admin || u.role === 'owner' || u.role === 'admin';
+    if (!isStaff) {
+      alert('Akses Ditolak: Halaman Admin Fleet Control khusus untuk Administrator & Owner. Anda akan dialihkan ke dashboard pengguna.');
+      window.location.replace('index.html');
+      return false;
+    }
+  } catch (_) {}
   return true;
 }
 
@@ -41,14 +50,162 @@ async function authFetch(url, options = {}) {
 }
 
 function handleAdminSignOut() {
+  const token = localStorage.getItem('audira_access_token');
+  if (token) {
+    try {
+      fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+    } catch (_) {}
+  }
   localStorage.removeItem('audira_access_token');
   localStorage.removeItem('audira_user');
   sessionStorage.removeItem('audira_logged_in');
   window.location.replace('index.html');
 }
 
+// ==========================================================================
+// SESSION INACTIVITY TIMEOUT CONTROLLER (15 Minutes)
+// ==========================================================================
+const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const SESSION_WARNING_MS = 60 * 1000;      // 60 seconds warning countdown
+let sessionInactivityTimer = null;
+let sessionWarningInterval = null;
+let lastInteractionTimestamp = Date.now();
+let lastThrottledTouch = 0;
+
+function resetSessionActivityTimer(silent = false) {
+  lastInteractionTimestamp = Date.now();
+  try {
+    localStorage.setItem('audira_last_active', String(lastInteractionTimestamp));
+  } catch (_) {}
+
+  const warningModal = document.getElementById('modalSessionTimeoutWarning');
+  if (warningModal && warningModal.style.display !== 'none') {
+    warningModal.style.display = 'none';
+    if (!silent) {
+      showToast('Sesi panel admin diperpanjang.', 'success');
+      authFetch('/api/health').catch(() => {});
+    }
+  }
+
+  if (sessionWarningInterval) {
+    clearInterval(sessionWarningInterval);
+    sessionWarningInterval = null;
+  }
+
+  if (sessionInactivityTimer) {
+    clearTimeout(sessionInactivityTimer);
+    sessionInactivityTimer = null;
+  }
+
+  scheduleSessionTimeoutCheck();
+}
+
+function scheduleSessionTimeoutCheck() {
+  const elapsed = Date.now() - lastInteractionTimestamp;
+  const timeUntilWarning = (SESSION_TIMEOUT_MS - SESSION_WARNING_MS) - elapsed;
+
+  if (timeUntilWarning <= 0) {
+    showSessionTimeoutWarning();
+  } else {
+    sessionInactivityTimer = setTimeout(() => {
+      showSessionTimeoutWarning();
+    }, timeUntilWarning);
+  }
+}
+
+function showSessionTimeoutWarning() {
+  const warningModal = document.getElementById('modalSessionTimeoutWarning');
+  const countdownEl = document.getElementById('sessionCountdownDisplay');
+  if (!warningModal) return;
+
+  warningModal.style.display = 'flex';
+
+  let remainingSec = Math.max(1, Math.round((SESSION_TIMEOUT_MS - (Date.now() - lastInteractionTimestamp)) / 1000));
+  if (countdownEl) countdownEl.textContent = `${remainingSec}s`;
+
+  if (sessionWarningInterval) clearInterval(sessionWarningInterval);
+
+  sessionWarningInterval = setInterval(() => {
+    try {
+      const extTime = parseInt(localStorage.getItem('audira_last_active') || '0', 10);
+      if (extTime > lastInteractionTimestamp) {
+        lastInteractionTimestamp = extTime;
+        resetSessionActivityTimer(true);
+        return;
+      }
+    } catch (_) {}
+
+    remainingSec = Math.round((SESSION_TIMEOUT_MS - (Date.now() - lastInteractionTimestamp)) / 1000);
+    if (remainingSec <= 0) {
+      clearInterval(sessionWarningInterval);
+      sessionWarningInterval = null;
+      handleSessionTimeoutLogout();
+    } else {
+      if (countdownEl) countdownEl.textContent = `${remainingSec}s`;
+    }
+  }, 1000);
+}
+
+function handleSessionTimeoutLogout() {
+  const token = localStorage.getItem('audira_access_token');
+  if (token) {
+    try {
+      fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+    } catch (_) {}
+  }
+
+  localStorage.removeItem('audira_access_token');
+  localStorage.removeItem('audira_user');
+  sessionStorage.removeItem('audira_logged_in');
+  sessionStorage.setItem('audira_session_timeout', '1');
+
+  window.location.replace('index.html?timeout=1');
+}
+
+function initSessionTimeoutManager() {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'audira_last_active' && e.newValue) {
+      const extTime = parseInt(e.newValue, 10);
+      if (extTime > lastInteractionTimestamp) {
+        lastInteractionTimestamp = extTime;
+        resetSessionActivityTimer(true);
+      }
+    }
+  });
+
+  const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+  const handleUserActivity = () => {
+    const now = Date.now();
+    if (now - lastThrottledTouch > 10000) {
+      lastThrottledTouch = now;
+      const warningModal = document.getElementById('modalSessionTimeoutWarning');
+      if (warningModal && warningModal.style.display !== 'none') {
+        resetSessionActivityTimer(false);
+      } else {
+        lastInteractionTimestamp = now;
+        try {
+          localStorage.setItem('audira_last_active', String(now));
+        } catch (_) {}
+      }
+    }
+  };
+
+  activityEvents.forEach(evt => {
+    window.addEventListener(evt, handleUserActivity, { passive: true });
+  });
+
+  resetSessionActivityTimer(true);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!checkAdminAuth()) return;
+  initSessionTimeoutManager();
   initAdminTheme();
   initAdminLanguage();
   initAdminNavigation();
@@ -88,9 +245,20 @@ function initLiveFleetSync() {
 // ==========================================================================
 // Theme & Language Initialization
 // ==========================================================================
+function updateAdminThemeIcon(theme) {
+  const icon = document.getElementById('adminThemeIcon');
+  if (!icon) return;
+  if (theme === 'light') {
+    icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+  } else {
+    icon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+  }
+}
+
 function initAdminTheme() {
   const savedTheme = localStorage.getItem('audira_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
+  updateAdminThemeIcon(savedTheme);
 
   const toggleBtn = document.getElementById('adminThemeToggle');
   if (toggleBtn) {
@@ -99,6 +267,7 @@ function initAdminTheme() {
       const next = current === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('audira_theme', next);
+      updateAdminThemeIcon(next);
       showToast(`Mode visual diubah ke: ${next.toUpperCase()}`, 'info');
     });
   }
@@ -123,18 +292,34 @@ function initAdminLanguage() {
 
 function checkOperatorSession() {
   const operatorEl = document.getElementById('adminTopbarOperatorName');
+  const avatarEl = document.getElementById('adminTopbarAvatar');
   const storedUser = localStorage.getItem('audira_user');
   if (storedUser) {
     try {
       const u = JSON.parse(storedUser);
-      if (operatorEl && (u.display_name || u.name)) {
-        operatorEl.textContent = `${u.display_name || u.name} (@${u.name})`;
+      const dName = u.display_name || u.name || 'Admin';
+      const uname = u.username || u.name || 'audira';
+      const isOwner = u.is_owner || u.role === 'owner' || uname.toLowerCase() === 'audira';
+      const badgeTag = isOwner ? '👑 OWNER' : '🛡️ ADMIN';
+      const badgeStyle = isOwner 
+        ? 'background:rgba(245,158,11,0.2); color:#f59e0b; border:1px solid rgba(245,158,11,0.4);' 
+        : 'background:rgba(2,132,199,0.2); color:#38bdf8; border:1px solid rgba(2,132,199,0.4);';
+
+      if (avatarEl) {
+        avatarEl.textContent = (uname || 'AO').slice(0, 2).toUpperCase();
+        if (isOwner) {
+          avatarEl.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+          avatarEl.style.color = '#ffffff';
+        }
+      }
+      if (operatorEl) {
+        operatorEl.innerHTML = `<span style="font-weight:700;">${escapeHtml(dName)}</span> <span style="font-size:0.72rem; padding:0.15rem 0.5rem; border-radius:4px; font-weight:800; margin-left:6px; ${badgeStyle}">${badgeTag}</span>`;
         return;
       }
     } catch (_) {}
   }
   if (operatorEl) {
-    operatorEl.textContent = 'Admin Operator (SecOps)';
+    operatorEl.innerHTML = '<span>Admin Operator</span> <span class="nav-badge-pill" style="margin-left:0.25rem;">OPERATOR</span>';
   }
 }
 
@@ -213,10 +398,38 @@ function renderAccountsView(accounts) {
     return;
   }
 
+  let viewerUser = {};
+  try {
+    viewerUser = JSON.parse(localStorage.getItem('audira_user') || '{}');
+  } catch (_) {}
+  const viewerIsOwner = viewerUser.is_owner || viewerUser.role === 'owner' || (viewerUser.username && viewerUser.username.toLowerCase() === 'audira');
+
   container.innerHTML = accounts.map(u => {
     const initials = (u.username || 'AU').slice(0, 2).toUpperCase();
-    const isAdmin = u.is_admin === true;
+    const isOwner = u.is_owner === true || u.role === 'owner' || u.username.toLowerCase() === 'audira';
+    const isAdmin = !isOwner && (u.is_admin === true || u.role === 'admin');
+    const isUser = !isOwner && !isAdmin;
     const devices = u.devices || [];
+
+    // Distinct badges
+    let roleBadgeHtml = '';
+    if (isOwner) {
+      roleBadgeHtml = `<span class="nav-badge-pill" style="background:rgba(245,158,11,0.2); color:#f59e0b; border:1px solid rgba(245,158,11,0.4); font-weight:800; font-size:0.72rem; padding:0.2rem 0.55rem;">👑 OWNER (SUPERADMIN)</span>`;
+    } else if (isAdmin) {
+      roleBadgeHtml = `<span class="nav-badge-pill" style="background:rgba(2,132,199,0.2); color:#38bdf8; border:1px solid rgba(2,132,199,0.4); font-weight:800; font-size:0.72rem; padding:0.2rem 0.55rem;">🛡️ ADMIN OPERATOR</span>`;
+    } else {
+      roleBadgeHtml = `<span class="nav-badge-pill" style="background:rgba(148,163,184,0.12); color:#94a3b8; border:1px solid rgba(148,163,184,0.25); font-weight:700; font-size:0.72rem; padding:0.2rem 0.55rem;">👤 USER / CLIENT</span>`;
+    }
+
+    // Role toggle action button for Owner
+    let roleActionBtn = '';
+    if (viewerIsOwner && !isOwner) {
+      if (isAdmin) {
+        roleActionBtn = `<button class="btn btn-secondary btn-sm" onclick="setUserRole('${escapeHtml(u.username)}', 'user')" style="font-size:0.72rem; padding:0.25rem 0.6rem; color:#f87171; border-color:rgba(239,68,68,0.3);" title="Turunkan hak akses ke Pengguna Biasa">Demosi ke User</button>`;
+      } else {
+        roleActionBtn = `<button class="btn btn-secondary btn-sm" onclick="setUserRole('${escapeHtml(u.username)}', 'admin')" style="font-size:0.72rem; padding:0.25rem 0.6rem; color:#38bdf8; border-color:rgba(2,132,199,0.3);" title="Jadikan Administrator Fleet">Promosikan ke Admin</button>`;
+      }
+    }
 
     let devicesHtml = '';
     if (devices.length === 0) {
@@ -283,17 +496,18 @@ function renderAccountsView(accounts) {
           <div class="account-user-meta">
             <div class="account-user-avatar">${initials}</div>
             <div>
-              <div style="display:flex; align-items:center; gap:0.5rem;">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                 <span style="font-weight:800; font-size:1.05rem; color:var(--color-text-heading);">${escapeHtml(u.display_name || u.username)}</span>
                 <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--color-text-dim);">@${escapeHtml(u.username)}</span>
-                ${isAdmin ? '<span class="nav-badge-pill" style="background:rgba(0,240,255,0.15); color:var(--color-primary); border-color:rgba(0,240,255,0.3);">ADMIN</span>' : '<span class="nav-badge-pill">USER</span>'}
+                ${roleBadgeHtml}
               </div>
               <div style="font-size:0.75rem; color:var(--color-text-dim); margin-top:2px;">
                 ${escapeHtml(u.email || '-')} &bull; Terdaftar: ${escapeHtml(u.created_at || 'Baru')}
               </div>
             </div>
           </div>
-          <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            ${roleActionBtn}
             <div style="font-size:0.8rem; font-weight:700; color:var(--color-emerald); background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); padding:0.3rem 0.65rem; border-radius:var(--radius-xs);">
               ${devices.length} Perangkat Terhubung (${u.online_devices || 0} Online)
             </div>
@@ -303,6 +517,28 @@ function renderAccountsView(accounts) {
       </div>
     `;
   }).join('');
+}
+
+async function setUserRole(username, targetRole) {
+  const roleLabel = targetRole === 'admin' ? 'Administrator' : 'Pengguna Biasa (Member)';
+  if (!confirm(`Ubah role akun '${username}' menjadi '${roleLabel}'?`)) return;
+
+  try {
+    const res = await authFetch('/api/accounts/set-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, role: targetRole })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(`Hak akses akun '${username}' berhasil diubah ke ${roleLabel}!`, 'success');
+      fetchAccountsData();
+    } else {
+      showToast(data.error || 'Gagal mengubah role akun.', 'warning');
+    }
+  } catch (err) {
+    showToast('Gagal menghubungi server.', 'error');
+  }
 }
 
 // Modal: Create New Account

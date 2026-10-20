@@ -252,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPricingCards();
   handleUrlRouting();
   initModalDismiss();
+  initClientSessionTimeout();
 });
 
 // Theme Management (OLED Dark Default / Swiss Monochrome)
@@ -516,7 +517,18 @@ function initAuthModal() {
     const token = localStorage.getItem('audira_access_token');
     const user = localStorage.getItem('audira_user');
     if (token && user) {
-      window.location.href = 'admin.html';
+      try {
+        const u = JSON.parse(user);
+        if (u.is_owner || u.is_admin || u.role === 'owner' || u.role === 'admin') {
+          window.location.href = 'admin.html';
+          return;
+        }
+      } catch (_) {}
+      showLoggedInState();
+      if (modal) {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
       return;
     }
     if (modal) {
@@ -556,6 +568,8 @@ function initAuthModal() {
   // Tab switching (Login, Register, SSO, Token)
   document.querySelectorAll('.modal-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      setFormAlert('regAlert', null);
+      setFormAlert('loginAlert', null);
       document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
 
@@ -594,7 +608,47 @@ function initAuthModal() {
   }
 }
 
+function setFormAlert(alertId, message, type = 'error') {
+  const alertEl = document.getElementById(alertId);
+  if (!alertEl) return;
+  if (!message) {
+    alertEl.style.display = 'none';
+    alertEl.innerHTML = '';
+    return;
+  }
+  let bg = 'rgba(239, 68, 68, 0.12)';
+  let border = '#ef4444';
+  let color = '#f87171';
+  let icon = '❌';
+
+  if (type === 'success') {
+    bg = 'rgba(16, 185, 129, 0.12)';
+    border = '#10b981';
+    color = '#34d399';
+    icon = '✅';
+  } else if (type === 'warning') {
+    bg = 'rgba(245, 158, 11, 0.12)';
+    border = '#f59e0b';
+    color = '#fbbf24';
+    icon = '⚠️';
+  }
+
+  alertEl.style.display = 'block';
+  alertEl.style.background = bg;
+  alertEl.style.border = `1px solid ${border}`;
+  alertEl.style.color = color;
+  alertEl.style.padding = '0.75rem 1rem';
+  alertEl.style.borderRadius = '8px';
+  alertEl.style.marginBottom = '1.25rem';
+  alertEl.style.fontSize = '0.85rem';
+  alertEl.style.fontWeight = '600';
+  alertEl.style.lineHeight = '1.4';
+  alertEl.innerHTML = `<div style="display:flex; align-items:flex-start; gap:0.5rem;"><span>${icon}</span><span>${message}</span></div>`;
+}
+
 function switchToRegister() {
+  setFormAlert('regAlert', null);
+  setFormAlert('loginAlert', null);
   document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
 
@@ -609,6 +663,8 @@ function switchToRegister() {
 }
 
 function switchToLogin() {
+  setFormAlert('regAlert', null);
+  setFormAlert('loginAlert', null);
   document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
 
@@ -623,6 +679,7 @@ function switchToLogin() {
 }
 
 async function handleAdminLogin() {
+  setFormAlert('loginAlert', null);
   const submitBtn = document.getElementById('adminLoginSubmitBtn');
   const label = document.getElementById('loginBtnLabel');
   const emailInput = document.getElementById('adminEmail');
@@ -631,7 +688,9 @@ async function handleAdminLogin() {
   const password = passwordInput ? passwordInput.value : '';
 
   if (!username || !password) {
-    showToast('Username/Email dan kata sandi tidak boleh kosong.', 'warning');
+    const msg = 'Username/Email dan kata sandi tidak boleh kosong.';
+    setFormAlert('loginAlert', msg, 'warning');
+    showToast(msg, 'warning');
     if (!username && emailInput) emailInput.focus();
     else if (passwordInput) passwordInput.focus();
     return;
@@ -656,16 +715,29 @@ async function handleAdminLogin() {
       localStorage.setItem('audira_user', JSON.stringify(data.user));
       sessionStorage.setItem('audira_logged_in', 'true');
       showLoggedInState(data.user);
-      showToast(`Login berhasil! Selamat datang, ${data.user.display_name || data.user.name}.`, 'success');
-      setTimeout(() => {
-        navigateToFleet();
-      }, 750);
+      initClientSessionTimeout();
+
+      const isStaff = data.user.role === 'owner' || data.user.role === 'admin' || data.user.is_admin;
+      if (isStaff) {
+        setFormAlert('loginAlert', `Login berhasil sebagai ${data.user.role_title || 'Administrator'}. Mengalihkan ke Admin Console...`, 'success');
+        showToast(`Login berhasil sebagai ${data.user.role_title || 'Administrator'}.`, 'success');
+        setTimeout(() => {
+          navigateToFleet();
+        }, 750);
+      } else {
+        setFormAlert('loginAlert', `Login berhasil! Selamat datang, ${data.user.display_name || data.user.name}.`, 'success');
+        showToast(`Selamat datang di Audira Desk, ${data.user.display_name || data.user.name}!`, 'success');
+      }
     } else {
-      showToast(data.error || 'Autentikasi gagal. Periksa username dan kata sandi.', 'error');
+      const errMsg = data.error || 'Autentikasi gagal. Periksa username dan kata sandi.';
+      setFormAlert('loginAlert', errMsg, 'error');
+      showToast(errMsg, 'error');
     }
   } catch (err) {
     console.error('Login error:', err);
-    showToast('Gagal menghubungi server API autentikasi. Pastikan koneksi server aktif.', 'error');
+    const errMsg = 'Gagal menghubungi server API autentikasi. Pastikan koneksi server aktif.';
+    setFormAlert('loginAlert', errMsg, 'error');
+    showToast(errMsg, 'error');
   } finally {
     if (submitBtn) submitBtn.disabled = false;
     if (label) label.textContent = 'Masuk ke Fleet Control';
@@ -673,6 +745,7 @@ async function handleAdminLogin() {
 }
 
 async function handleAdminRegister() {
+  setFormAlert('regAlert', null);
   const submitBtn = document.getElementById('regSubmitBtn');
   const label = document.getElementById('regBtnLabel');
   const usernameInput = document.getElementById('regUsername');
@@ -688,22 +761,30 @@ async function handleAdminRegister() {
   const passwordConfirm = pwConfirmInput ? pwConfirmInput.value : '';
 
   if (!username || username.length < 3) {
-    showToast('Username harus minimal 3 karakter.', 'warning');
+    const msg = 'Username harus minimal 3 karakter.';
+    setFormAlert('regAlert', msg, 'warning');
+    showToast(msg, 'warning');
     if (usernameInput) usernameInput.focus();
     return;
   }
   if (!email || !email.includes('@')) {
-    showToast('Alamat email tidak valid.', 'warning');
+    const msg = 'Alamat email tidak valid.';
+    setFormAlert('regAlert', msg, 'warning');
+    showToast(msg, 'warning');
     if (emailInput) emailInput.focus();
     return;
   }
   if (!password || password.length < 6) {
-    showToast('Kata sandi harus minimal 6 karakter.', 'warning');
+    const msg = 'Kata sandi harus minimal 6 karakter.';
+    setFormAlert('regAlert', msg, 'warning');
+    showToast(msg, 'warning');
     if (pwInput) pwInput.focus();
     return;
   }
   if (password !== passwordConfirm) {
-    showToast('Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.', 'warning');
+    const msg = 'Konfirmasi kata sandi tidak cocok. Silakan periksa kembali.';
+    setFormAlert('regAlert', msg, 'warning');
+    showToast(msg, 'warning');
     if (pwConfirmInput) pwConfirmInput.focus();
     return;
   }
@@ -728,16 +809,19 @@ async function handleAdminRegister() {
       localStorage.setItem('audira_user', JSON.stringify(data.user));
       sessionStorage.setItem('audira_logged_in', 'true');
       showLoggedInState(data.user);
-      showToast(`Pendaftaran berhasil! Akun '${data.user.username}' siap digunakan.`, 'success');
-      setTimeout(() => {
-        navigateToFleet();
-      }, 750);
+      initClientSessionTimeout();
+      setFormAlert('regAlert', `Pendaftaran berhasil! Akun '${data.user.username}' telah dibuat.`, 'success');
+      showToast(`Pendaftaran berhasil! Selamat datang di Audira Desk, ${data.user.display_name || data.user.username}.`, 'success');
     } else {
-      showToast(data.error || 'Pendaftaran gagal. Silakan periksa data Anda.', 'error');
+      const errMsg = data.error || 'Pendaftaran gagal. Silakan periksa data Anda.';
+      setFormAlert('regAlert', errMsg, 'error');
+      showToast(errMsg, 'error');
     }
   } catch (err) {
     console.error('Registration error:', err);
-    showToast('Gagal menghubungi server API saat mendaftar.', 'error');
+    const errMsg = 'Gagal menghubungi server API saat mendaftar. Pastikan koneksi server aktif.';
+    setFormAlert('regAlert', errMsg, 'error');
+    showToast(errMsg, 'error');
   } finally {
     if (submitBtn) submitBtn.disabled = false;
     if (label) label.textContent = 'Daftar Akun Sekarang';
@@ -781,9 +865,12 @@ async function showLoggedInState(user) {
     } catch (e) {}
   }
 
-  const displayName = (user && (user.display_name || user.name)) || 'Agus Dwi Rianto';
-  const username = (user && (user.username || user.name)) || 'audira';
+  const displayName = (user && (user.display_name || user.name)) || 'User';
+  const username = (user && (user.username || user.name)) || 'user';
   const email = (user && user.email) || `${username}@audira.my.id`;
+  const role = (user && user.role) || (user && user.is_admin ? 'admin' : 'user');
+  const isOwner = role === 'owner' || (user && user.is_owner);
+  const isAdmin = isOwner || role === 'admin' || (user && user.is_admin);
 
   const openBtn = document.getElementById('openLoginBtn');
   if (openBtn) {
@@ -807,49 +894,88 @@ async function showLoggedInState(user) {
     avatarEl.textContent = initials || 'AD';
   }
 
-  // Asynchronously query live accounts and active licenses
+  // Update Role Badge & Admin panel button
+  const badgeEl = document.getElementById('profileRoleBadge');
+  const adminPanelLink = document.getElementById('profileAdminPanelLink');
+  const noticeTitle = document.getElementById('accountNoticeTitle');
+  const noticeDesc = document.getElementById('accountNoticeDesc');
+
+  if (badgeEl) {
+    if (isOwner) {
+      badgeEl.innerHTML = '👑 Owner (Superadmin)';
+      badgeEl.style.background = 'rgba(245, 158, 11, 0.15)';
+      badgeEl.style.color = '#f59e0b';
+      badgeEl.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+    } else if (isAdmin) {
+      badgeEl.innerHTML = '🛡️ Administrator';
+      badgeEl.style.background = 'rgba(2, 132, 199, 0.15)';
+      badgeEl.style.color = '#38bdf8';
+      badgeEl.style.border = '1px solid rgba(2, 132, 199, 0.3)';
+    } else {
+      badgeEl.innerHTML = '👤 Pengguna Klien (Member)';
+      badgeEl.style.background = 'rgba(148, 163, 184, 0.15)';
+      badgeEl.style.color = 'var(--color-text-dim)';
+      badgeEl.style.border = '1px solid rgba(148, 163, 184, 0.3)';
+    }
+  }
+
+  if (adminPanelLink) {
+    adminPanelLink.style.display = isAdmin ? 'flex' : 'none';
+  }
+
+  if (noticeTitle && noticeDesc) {
+    if (isOwner) {
+      noticeTitle.textContent = 'Akses Penuh Owner (Superadmin)';
+      noticeDesc.textContent = 'Anda memiliki kontrol penuh atas infrastruktur cluster, relay hbbr/hbbs, manajemen role akun, dan audit security.';
+    } else if (isAdmin) {
+      noticeTitle.textContent = 'Akses Administrator Fleet';
+      noticeDesc.textContent = 'Anda memiliki akses untuk memonitor seluruh endpoint fleet, memutus sesi aktif, dan mengelola perangkat.';
+    } else {
+      noticeTitle.textContent = 'Akun Pengguna Klien (Member)';
+      noticeDesc.textContent = 'Akun Anda aktif untuk sinkronisasi perangkat pribadi. Masuk dengan akun ini pada aplikasi Audira Desk di komputer atau HP Anda untuk manajemen multi-device otomatis.';
+    }
+  }
+
+  // Query live personal user profile & devices (/api/user/me)
   try {
     const token = localStorage.getItem('audira_access_token');
     const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
-    const [accRes, licRes] = await Promise.all([
-      fetch('/api/accounts', { headers: authHeaders }).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/licenses', { headers: authHeaders }).then(r => r.ok ? r.json() : null).catch(() => null)
-    ]);
-
-    if (accRes && accRes.accounts && accRes.accounts.length > 0) {
-      const acc = accRes.accounts.find(a => a.username === username) || accRes.accounts[0];
-      if (acc && acc.devices && acc.devices.length > 0) {
+    const res = await fetch('/api/user/me', { headers: authHeaders });
+    if (res.ok) {
+      const myData = await res.json();
+      if (myData.user) {
+        const u = myData.user;
+        const devices = u.devices || [];
         const countEl = document.getElementById('profileDeviceCount');
-        if (countEl) countEl.textContent = acc.devices.length;
+        if (countEl) countEl.textContent = devices.length;
 
         const devListEl = document.getElementById('profileLinkedDevicesList');
         if (devListEl) {
-          devListEl.innerHTML = acc.devices.map(d => `
-            <div style="background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span style="width:8px; height:8px; background:${d.is_online ? '#10b981' : 'var(--color-text-dim)'}; border-radius:50%; ${d.is_online ? 'box-shadow:0 0 6px #10b981;' : ''}"></span>
-                <div>
-                  <div style="font-size:0.82rem; font-weight:700; color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname || 'Device')}</div>
-                  <div style="font-size:0.7rem; color:var(--color-text-dim); font-family:var(--font-mono);">ID: ${escapeHtml(d.id)} &bull; ${escapeHtml(d.os || 'Windows')}</div>
-                </div>
+          if (devices.length === 0) {
+            devListEl.innerHTML = `
+              <div style="text-align:center; padding:1.25rem 0.5rem; background:var(--color-bg-subtle); border:1px dashed var(--color-border); border-radius:8px; font-size:0.8rem; color:var(--color-text-dim);">
+                Belum ada PC/HP terhubung. Login pada aplikasi Audira Desk di perangkat Anda untuk menghubungkannya.
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="quickConnect('${escapeHtml(d.id)}'); document.getElementById('loginModal')?.classList.remove('open');" style="padding:0.25rem 0.6rem; font-size:0.72rem;">Remote</button>
-            </div>
-          `).join('');
+            `;
+          } else {
+            devListEl.innerHTML = devices.map(d => `
+              <div style="background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:0.6rem;">
+                  <span style="width:8px; height:8px; background:${d.is_online ? '#10b981' : 'var(--color-text-dim)'}; border-radius:50%; ${d.is_online ? 'box-shadow:0 0 6px #10b981;' : ''}"></span>
+                  <div>
+                    <div style="font-size:0.82rem; font-weight:700; color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname || 'Device')}</div>
+                    <div style="font-size:0.7rem; color:var(--color-text-dim); font-family:var(--font-mono);">ID: ${escapeHtml(d.id)} &bull; ${escapeHtml(d.os || 'Windows')}</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickConnect('${escapeHtml(d.id)}'); document.getElementById('loginModal')?.classList.remove('open');" style="padding:0.25rem 0.6rem; font-size:0.72rem;">Remote</button>
+              </div>
+            `).join('');
+          }
         }
       }
     }
-
-    if (licRes && licRes.licenses && licRes.licenses.length > 0) {
-      const lic = licRes.licenses[0];
-      const keyEl = document.getElementById('profileLicenseKey');
-      if (keyEl && lic.license_key) keyEl.textContent = lic.license_key;
-
-      const planBadge = document.getElementById('profilePlanBadge');
-      if (planBadge && lic.plan_name) planBadge.textContent = lic.plan_name;
-    }
   } catch (e) {
-    console.warn('Could not populate extended profile data:', e);
+    console.warn('Could not populate /api/user/me:', e);
   }
 }
 
@@ -879,24 +1005,113 @@ function copyProfileLicenseKey() {
   }
 }
 
-
-
-function handleSignOut() {
+function handleSignOut(silent = false) {
+  const token = localStorage.getItem('audira_access_token');
+  if (token) {
+    try {
+      fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+    } catch (_) {}
+  }
+  localStorage.removeItem('audira_access_token');
+  localStorage.removeItem('audira_user');
   sessionStorage.removeItem('audira_logged_in');
-  document.getElementById('authViewLoggedIn').classList.remove('active');
+  const loggedInView = document.getElementById('authViewLoggedIn');
+  if (loggedInView) loggedInView.classList.remove('active');
   const tabs = document.querySelector('.modal-tabs');
   if (tabs) tabs.style.display = 'flex';
-  document.getElementById('authViewCredentials').classList.add('active');
+  const credView = document.getElementById('authViewCredentials');
+  if (credView) credView.classList.add('active');
 
   const openBtn = document.getElementById('openLoginBtn');
   if (openBtn) {
     openBtn.innerHTML = `
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-      <span>Console Login</span>
+      <span>Masuk / Daftar</span>
     `;
     openBtn.style.borderColor = '';
   }
-  showToast('Signed out of fleet console session', 'info');
+  if (!silent) {
+    showToast('Berhasil keluar dari akun.', 'info');
+  }
+}
+
+// ==========================================================================
+// User Portal Session Inactivity Timeout (15 Minutes)
+// ==========================================================================
+const CLIENT_SESSION_TIMEOUT_MS = 15 * 60 * 1000;
+let clientLastActivity = Date.now();
+let clientTimeoutCheckTimer = null;
+let lastClientThrottledTouch = 0;
+
+function resetClientActivityTimer() {
+  clientLastActivity = Date.now();
+  try {
+    localStorage.setItem('audira_last_active', String(clientLastActivity));
+  } catch (_) {}
+}
+
+function initClientSessionTimeout() {
+  const token = localStorage.getItem('audira_access_token');
+  if (!token) return;
+
+  clientLastActivity = Date.now();
+  try {
+    localStorage.setItem('audira_last_active', String(clientLastActivity));
+  } catch (_) {}
+
+  const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+  const onActivity = () => {
+    const now = Date.now();
+    if (now - lastClientThrottledTouch > 10000) {
+      lastClientThrottledTouch = now;
+      clientLastActivity = now;
+      try {
+        localStorage.setItem('audira_last_active', String(now));
+      } catch (_) {}
+    }
+  };
+
+  activityEvents.forEach(evt => {
+    window.addEventListener(evt, onActivity, { passive: true });
+  });
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'audira_last_active' && e.newValue) {
+      const extTime = parseInt(e.newValue, 10);
+      if (extTime > clientLastActivity) {
+        clientLastActivity = extTime;
+      }
+    }
+  });
+
+  if (clientTimeoutCheckTimer) clearInterval(clientTimeoutCheckTimer);
+  clientTimeoutCheckTimer = setInterval(() => {
+    const currentToken = localStorage.getItem('audira_access_token');
+    if (!currentToken) return;
+
+    if (Date.now() - clientLastActivity > CLIENT_SESSION_TIMEOUT_MS) {
+      handleClientSessionTimeout();
+    }
+  }, 10000);
+}
+
+function handleClientSessionTimeout() {
+  handleSignOut(true);
+  const modal = document.getElementById('loginModal');
+  if (modal) {
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+  setFormAlert('loginAlert', 'Sesi Anda telah berakhir secara otomatis karena tidak ada aktivitas selama 15 menit. Silakan masuk kembali.', 'warning');
+  showToast('Sesi Anda telah berakhir karena tidak ada aktivitas.', 'warning');
+}
+
+function closeAuthModal() {
+  const modal = document.getElementById('loginModal');
+  if (modal) modal.classList.remove('open');
 }
 
 function navigateToFleet() {
@@ -1430,6 +1645,20 @@ function handleWhatsAppOrderAssistance() {
 // Direct URL routing for upgrade plans & parameters
 function handleUrlRouting() {
   const urlParams = new URLSearchParams(window.location.search);
+
+  if (urlParams.get('timeout') === '1' || sessionStorage.getItem('audira_session_timeout') === '1') {
+    sessionStorage.removeItem('audira_session_timeout');
+    setTimeout(() => {
+      const modal = document.getElementById('loginModal');
+      if (modal) {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      setFormAlert('loginAlert', 'Sesi Anda telah berakhir secara otomatis karena tidak ada aktivitas selama 15 menit. Silakan masuk kembali.', 'warning');
+      window.history.replaceState({}, document.title, window.location.pathname + (window.location.hash || ''));
+    }, 250);
+    return;
+  }
 
   if (urlParams.get('login') === '1') {
     setTimeout(() => {

@@ -12,6 +12,7 @@
   --color-bg-card-hover: #171d2b;
   --color-bg-card-active: #1c2334;
   --color-bg-header: rgba(8, 9, 13, 0.88);
+  --color-bg-elevated: #161f30;
   --color-bg-input: #0a0d14;
   --color-bg-code: #05070a;
 
@@ -71,6 +72,7 @@
   --color-bg-card-hover: #f8fafc;
   --color-bg-card-active: #e2e8f0;
   --color-bg-header: rgba(248, 250, 252, 0.88);
+  --color-bg-elevated: #ffffff;
   --color-bg-input: #ffffff;
   --color-bg-code: #0f172a;
 
@@ -1345,7 +1347,7 @@ code, kbd, samp, pre {
   font-size: 0.8125rem;
   font-weight: 600;
   box-shadow: var(--shadow-lg);
-  z-index: 1000;
+  z-index: 999999;
   display: flex;
   align-items: center;
   gap: 0.5rem;

@@ -35,6 +35,48 @@ SESSION_HISTORY = []
 ACCOUNTS_LOCK = threading.Lock()
 AUDIT_LOCK = threading.Lock()
 ORDERS_LOCK = threading.Lock()
+TELEGRAM_CONFIG_PATH = os.path.join(DATA_DIR, "telegram_apps_config.json")
+
+# Inactivity session timeout: 30 minutes (1800s) server-side revocation
+SESSION_TIMEOUT_SECONDS = 1800
+TOKEN_ACTIVITY_LOCK = threading.Lock()
+TOKEN_LAST_ACTIVITY = {}
+
+def send_telegram_alert(text_html):
+    """Dispatches real-time security, registration, and login alerts to Telegram bot in background thread"""
+    def _worker():
+        try:
+            if not os.path.exists(TELEGRAM_CONFIG_PATH):
+                return
+            with open(TELEGRAM_CONFIG_PATH, "r", encoding="utf-8") as f:
+                cfg = json.load(f)
+            token = cfg.get("bot_token")
+            chat_id = cfg.get("chat_id")
+            thread_id = cfg.get("thread_id")
+            if not token or not chat_id:
+                return
+
+            import urllib.request
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {
+                "chat_id": chat_id,
+                "text": text_html,
+                "parse_mode": "HTML"
+            }
+            if thread_id is not None:
+                payload["message_thread_id"] = thread_id
+
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                pass
+        except Exception as e:
+            print(f"[!] Telegram dispatch error: {e}")
+
+    threading.Thread(target=_worker, daemon=True).start()
 
 def get_default_audit_logs():
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -297,19 +339,63 @@ def find_user_by_token(auth_header):
     token = auth_header.split(" ", 1)[1].strip()
     if not token:
         return None, None
+
+    now = time.time()
+    with TOKEN_ACTIVITY_LOCK:
+        last_act = TOKEN_LAST_ACTIVITY.get(token)
+        if last_act is not None and (now - last_act) > SESSION_TIMEOUT_SECONDS:
+            # Token expired due to inactivity
+            TOKEN_LAST_ACTIVITY.pop(token, None)
+            with ACCOUNTS_LOCK:
+                accounts = load_accounts()
+                changed = False
+                for uname, u in accounts.items():
+                    if "tokens" in u and token in u["tokens"]:
+                        del u["tokens"][token]
+                        changed = True
+                        break
+                if changed:
+                    save_accounts(accounts)
+            return None, None
+
     with ACCOUNTS_LOCK:
         accounts = load_accounts()
         for uname, u in accounts.items():
             tokens = u.get("tokens", {})
             if token in tokens:
+                with TOKEN_ACTIVITY_LOCK:
+                    TOKEN_LAST_ACTIVITY[token] = now
                 return uname, u
     return None, None
+
+def get_account_role(username, u=None):
+    uname = str(username).lower()
+    if uname == "audira":
+        return "owner"
+    if u is None:
+        with ACCOUNTS_LOCK:
+            accounts = load_accounts()
+            u = accounts.get(username, {})
+    if u.get("is_owner") or u.get("role") == "owner":
+        return "owner"
+    if u.get("is_admin") or u.get("role") == "admin":
+        return "admin"
+    return "user"
 
 def is_authenticated_request(client_ip, auth_header):
     uname, u = find_user_by_token(auth_header)
     if uname:
         return True, uname
     return False, None
+
+def is_admin_request(client_ip, auth_header):
+    uname, u = find_user_by_token(auth_header)
+    if not uname or not u:
+        return False, None, None
+    role = get_account_role(uname, u)
+    if role in ["owner", "admin"]:
+        return True, uname, u
+    return False, uname, u
 
 def build_fleet_devices():
     meta = load_meta()
@@ -388,21 +474,76 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         auth_header = self.headers.get("Authorization", "")
         client_ip = (self.headers.get("X-Real-IP") or self.client_address[0]).replace("::ffff:", "")
 
-        # Protected Admin & Fleet Endpoints Guard
-        protected_get_paths = (
-            "/api/users", "/api/accounts", "/api/fleet", "/api/devices",
-            "/api/metrics", "/api/sessions", "/api/audit_logs",
-            "/api/orders", "/api/licenses", "/api/sysinfo"
-        )
-        if path in protected_get_paths:
-            is_auth, req_user = is_authenticated_request(client_ip, auth_header)
-            if not is_auth:
+        # 0. User Profile & Personal Devices endpoint (Accessible by all logged in users)
+        if path == "/api/user/me":
+            uname, u = find_user_by_token(auth_header)
+            if not uname or not u:
                 self.send_response(401)
                 self.send_cors_headers()
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid atau telah berakhir. Silakan login kembali."}).encode())
+                return
+
+            role = get_account_role(uname, u)
+            is_owner = role == "owner"
+            is_admin = role in ["owner", "admin"]
+            role_title = "Pemilik Sistem (Owner)" if is_owner else ("Administrator" if is_admin else "Pengguna Terdaftar (Member)")
+
+            reachable_ips = get_reachable_ips()
+            devices_data = []
+            for clean_id, d in u.get("devices", {}).items():
+                online = is_device_online(clean_id, d.get("ip", ""), reachable_ips)
+                devices_data.append({
+                    "raw_id": clean_id,
+                    "id": format_id(clean_id),
+                    "hostname": d.get("hostname", ""),
+                    "alias": d.get("alias") or d.get("hostname", ""),
+                    "os": d.get("os", "Windows"),
+                    "ip": d.get("ip", ""),
+                    "tags": d.get("tags", ["My Devices"]),
+                    "last_login": d.get("last_login", ""),
+                    "is_online": online,
+                    "status": "online" if online else "offline"
+                })
+
+            resp = {
+                "success": True,
+                "user": {
+                    "username": uname,
+                    "name": uname,
+                    "display_name": u.get("display_name", uname),
+                    "email": u.get("email", ""),
+                    "role": role,
+                    "role_title": role_title,
+                    "is_admin": is_admin,
+                    "is_owner": is_owner,
+                    "created_at": u.get("created_at", ""),
+                    "devices": devices_data
+                }
+            }
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp).encode())
+            return
+
+        # Protected Admin & Fleet Endpoints Guard (Strictly Owner and Admin only)
+        protected_get_paths = (
+            "/api/users", "/api/accounts", "/api/fleet", "/api/devices",
+            "/api/metrics", "/api/sessions", "/api/audit_logs",
+            "/api/orders", "/api/licenses"
+        )
+        if path in protected_get_paths:
+            is_adm, req_user, u_obj = is_admin_request(client_ip, auth_header)
+            if not is_adm:
+                self.send_response(403)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
                 self.wfile.write(json.dumps({
-                    "error": "Unauthorized: Autentikasi Administrator diperlukan untuk mengakses data armada & telemetri privat."
+                    "error": "Forbidden: Akses ditolak. Halaman & endpoint ini khusus untuk Administrator dan Owner."
                 }).encode())
                 return
 
@@ -542,19 +683,29 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             "status": "online" if online else "offline"
                         })
 
-                    online_count = sum(1 for x in devices_data if x["is_online"])
+                    role = get_account_role(uname, u)
+                    is_owner = role == "owner"
+                    is_admin = role in ["owner", "admin"]
+                    role_title = "Pemilik Sistem (Owner)" if is_owner else ("Administrator" if is_admin else "Pengguna Terdaftar (Member)")
+                    online_count = sum(1 for d in devices_data if d.get("is_online"))
+
                     accounts_data.append({
                         "username": uname,
                         "display_name": u.get("display_name", uname),
                         "email": u.get("email", f"{uname}@audira.my.id"),
                         "note": u.get("note", "Audira Member"),
-                        "is_admin": u.get("is_admin", False),
+                        "role": role,
+                        "role_title": role_title,
+                        "is_owner": is_owner,
+                        "is_admin": is_admin,
                         "status": u.get("status", 1),
                         "created_at": u.get("created_at", ""),
                         "total_devices": len(devices_data),
                         "online_devices": online_count,
                         "devices": devices_data
                     })
+
+                accounts_data.sort(key=lambda x: (not x["is_owner"], not x["is_admin"], x["username"]))
 
             self.send_response(200)
             self.send_cors_headers()
@@ -688,21 +839,21 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else ""
         client_ip = (self.headers.get("X-Real-IP") or self.client_address[0]).replace("::ffff:", "")
 
-        # Protected Admin Actions Guard
+        # Protected Admin Actions Guard (Strictly Owner and Admin only)
         protected_post_paths = (
             "/api/devices/alias", "/api/accounts/create", "/api/accounts/delete-device",
-            "/api/accounts/change-password", "/api/audit_logs/clear",
+            "/api/accounts/change-password", "/api/accounts/set-role", "/api/audit_logs/clear",
             "/api/orders/approve", "/api/orders/delete", "/api/sessions/terminate"
         )
         if path in protected_post_paths:
-            is_auth, req_user = is_authenticated_request(client_ip, auth_header)
-            if not is_auth:
-                self.send_response(401)
+            is_adm, req_user, u_obj = is_admin_request(client_ip, auth_header)
+            if not is_adm:
+                self.send_response(403)
                 self.send_cors_headers()
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({
-                    "error": "Unauthorized: Autentikasi Administrator diperlukan."
+                    "error": "Forbidden: Akses ditolak. Tindakan ini hanya diizinkan untuk Administrator dan Owner."
                 }).encode())
                 return
 
@@ -845,6 +996,15 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
                     if target_user.get("password") and target_user.get("password") != password:
                         add_audit_log("LOGIN_FAILED", device_id or "WEB", client_ip, raw_identity, f"Percobaan login gagal untuk '{raw_identity}': Kata sandi salah")
+                        waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                        send_telegram_alert(
+                            f"⚠️ <b>[AUDIRA SEC-OPS] Percobaan Login Gagal</b>\n"
+                            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                            f"👤 <b>Target:</b> <code>{raw_identity}</code>\n"
+                            f"❌ <b>Alasan:</b> Kata sandi tidak cocok\n"
+                            f"🌐 <b>IP:</b> <code>{client_ip}</code>\n"
+                            f"🕒 <b>Waktu:</b> {waktu_str} WIB"
+                        )
                         self.send_response(401)
                         self.send_cors_headers()
                         self.send_header("Content-Type", "application/json")
@@ -863,6 +1023,8 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         "device_id": device_id,
                         "client_ip": client_ip
                     }
+                    with TOKEN_ACTIVITY_LOCK:
+                        TOKEN_LAST_ACTIVITY[access_token] = time.time()
 
                     # Link device to user's account if sent from desktop/mobile client
                     if device_id:
@@ -910,6 +1072,23 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
                 add_audit_log("LOGIN_SUCCESS", device_id or "WEB", client_ip, username, f"Login berhasil untuk pengguna '{username}' ({user.get('display_name')})")
 
+                waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                send_telegram_alert(
+                    f"🔐 <b>[AUDIRA AUTH] Sesi Login Berhasil</b>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"👤 <b>Username:</b> <code>{username}</code>\n"
+                    f"📛 <b>Nama:</b> {user.get('display_name')}\n"
+                    f"📧 <b>Email:</b> {user.get('email')}\n"
+                    f"🌐 <b>IP Client:</b> <code>{client_ip}</code>\n"
+                    f"🕒 <b>Waktu:</b> {waktu_str} WIB\n"
+                    f"💻 <b>Device:</b> {device_id or 'Web Portal'}"
+                )
+
+                role = get_account_role(username, user)
+                is_owner = role == "owner"
+                is_admin = role in ["owner", "admin"]
+                role_title = "Pemilik Sistem (Owner)" if is_owner else ("Administrator" if is_admin else "Pengguna Terdaftar (Member)")
+
                 # Return Flutter & Web LoginResponse
                 resp = {
                     "type": "access_token",
@@ -921,8 +1100,11 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         "avatar": "",
                         "email": user.get("email", f"{user['username']}@audira.my.id"),
                         "note": user.get("note", "Audira Certified Member"),
+                        "role": role,
+                        "role_title": role_title,
                         "status": user.get("status", 1),
-                        "is_admin": user.get("is_admin", False)
+                        "is_admin": is_admin,
+                        "is_owner": is_owner
                     }
                 }
 
@@ -985,15 +1167,35 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                     accounts = load_accounts()
 
                     if username in accounts:
+                        waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                        send_telegram_alert(
+                            f"⚠️ <b>[AUDIRA SEC-OPS] Percobaan Pendaftaran Ditolak</b>\n"
+                            f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                            f"👤 <b>Username:</b> <code>{username}</code>\n"
+                            f"📧 <b>Email:</b> <code>{email}</code>\n"
+                            f"❌ <b>Alasan:</b> Username sudah terdaftar di database server\n"
+                            f"🕒 <b>Waktu:</b> {waktu_str} WIB\n"
+                            f"🌐 <b>IP:</b> <code>{client_ip}</code>"
+                        )
                         self.send_response(400)
                         self.send_cors_headers()
                         self.send_header("Content-Type", "application/json")
                         self.end_headers()
-                        self.wfile.write(json.dumps({"error": f"Username '{username}' sudah terdaftar. Silakan pilih username lain."}).encode())
+                        self.wfile.write(json.dumps({"error": f"Username '{username}' sudah terdaftar. Silakan pilih username lain atau gunakan menu Masuk."}).encode())
                         return
 
                     for u in accounts.values():
                         if u.get("email", "").lower() == email:
+                            waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                            send_telegram_alert(
+                                f"⚠️ <b>[AUDIRA SEC-OPS] Percobaan Pendaftaran Ditolak</b>\n"
+                                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                                f"👤 <b>Username:</b> <code>{username}</code>\n"
+                                f"📧 <b>Email:</b> <code>{email}</code>\n"
+                                f"❌ <b>Alasan:</b> Email sudah terdaftar pada akun lain\n"
+                                f"🕒 <b>Waktu:</b> {waktu_str} WIB\n"
+                                f"🌐 <b>IP:</b> <code>{client_ip}</code>"
+                            )
                             self.send_response(400)
                             self.send_cors_headers()
                             self.send_header("Content-Type", "application/json")
@@ -1001,14 +1203,17 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             self.wfile.write(json.dumps({"error": f"Email '{email}' sudah terdaftar pada akun lain. Silakan gunakan menu Masuk."}).encode())
                             return
 
-                    # Create new production user
+                    # Create new production user (Strictly role: user, NOT admin or owner)
                     new_user = {
                         "username": username,
                         "password": password,
                         "display_name": display_name,
                         "email": email,
-                        "note": "Audira Registered Member (Production)",
+                        "role": "user",
+                        "role_title": "Pengguna Terdaftar (Member)",
                         "is_admin": False,
+                        "is_owner": False,
+                        "note": "Audira Registered Member (Client)",
                         "status": 1,
                         "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "tokens": {},
@@ -1022,10 +1227,27 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         "created_at": time.time(),
                         "client_ip": client_ip
                     }
+                    with TOKEN_ACTIVITY_LOCK:
+                        TOKEN_LAST_ACTIVITY[access_token] = time.time()
                     accounts[username] = new_user
                     save_accounts(accounts)
 
-                add_audit_log("USER_REGISTER", "WEB", client_ip, username, f"Akun baru '{username}' ({display_name}) sukses terdaftar via web portal")
+                add_audit_log("USER_REGISTER", "WEB", client_ip, username, f"Akun pengguna baru '{username}' ({display_name}) sukses terdaftar via web portal")
+
+                # Send real-time Telegram alert
+                waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                send_telegram_alert(
+                    f"🎉 <b>[AUDIRA ACCOUNT] Pendaftaran Pengguna Berhasil</b>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"👤 <b>Username:</b> <code>{username}</code>\n"
+                    f"📛 <b>Nama Lengkap:</b> {display_name}\n"
+                    f"📧 <b>Email:</b> <code>{email}</code>\n"
+                    f"🛡️ <b>Role Akun:</b> 👤 Member / Pengguna Biasa\n"
+                    f"🕒 <b>Waktu:</b> {waktu_str} WIB\n"
+                    f"🌐 <b>IP Pendaftar:</b> <code>{client_ip}</code>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"💡 <i>Pengguna baru siap menghubungkan perangkat PC pribadi via Audira Desk.</i>"
+                )
 
                 resp = {
                     "type": "access_token",
@@ -1037,8 +1259,11 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         "avatar": "",
                         "email": email,
                         "note": "Audira Registered Member",
+                        "role": "user",
+                        "role_title": "Pengguna Terdaftar (Member)",
                         "status": 1,
-                        "is_admin": False
+                        "is_admin": False,
+                        "is_owner": False
                     }
                 }
 
@@ -1081,14 +1306,23 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             except Exception:
                 pass
 
+            role = get_account_role(user["username"], user)
+            is_owner = role == "owner"
+            is_admin = role in ["owner", "admin"]
+            role_title = "Pemilik Sistem (Owner)" if is_owner else ("Administrator" if is_admin else "Pengguna Terdaftar (Member)")
+
             resp = {
                 "name": user["username"],
+                "username": user["username"],
                 "display_name": user.get("display_name", user["username"]),
                 "avatar": "",
                 "email": user.get("email", f"{user['username']}@audira.my.id"),
-                "note": user.get("note", "Audira Certified Member"),
+                "note": user.get("note", "Audira Member"),
                 "status": user.get("status", 1),
-                "is_admin": user.get("is_admin", True)
+                "role": role,
+                "role_title": role_title,
+                "is_admin": is_admin,
+                "is_owner": is_owner
             }
 
             self.send_response(200)
@@ -1102,6 +1336,8 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         if path == "/api/logout":
             token = auth_header.split(" ", 1)[1].strip() if auth_header.startswith("Bearer ") else ""
             if token:
+                with TOKEN_ACTIVITY_LOCK:
+                    TOKEN_LAST_ACTIVITY.pop(token, None)
                 with ACCOUNTS_LOCK:
                     accounts = load_accounts()
                     for u in accounts.values():
@@ -1363,6 +1599,97 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({"success": True, "message": "Kata sandi berhasil diperbarui"}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 14. ACCOUNT ROLE MANAGEMENT: Set User Role (/api/accounts/set-role) - OWNER ONLY
+        if path == "/api/accounts/set-role":
+            try:
+                # Strictly verify requesting operator is Owner (Superadmin)
+                uname_op, u_op = find_user_by_token(auth_header)
+                if not uname_op or get_account_role(uname_op, u_op) != "owner":
+                    self.send_response(403)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Forbidden: Hanya Owner / Superadmin yang berhak mengubah hak akses (Role) pengguna."}).encode())
+                    return
+
+                data = json.loads(body) if body else {}
+                target_username = str(data.get("username", "")).strip().lower()
+                target_role = str(data.get("role", "")).strip().lower()
+
+                if not target_username or target_role not in ["admin", "user"]:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Parameter username dan role ('admin' atau 'user') harus valid."}).encode())
+                    return
+
+                if target_username == "audira":
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Role akun Owner 'audira' bersifat permanen dan tidak dapat diubah."}).encode())
+                    return
+
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if target_username not in accounts:
+                        self.send_response(404)
+                        self.send_cors_headers()
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": f"Akun pengguna '{target_username}' tidak ditemukan."}).encode())
+                        return
+
+                    target_user = accounts[target_username]
+                    is_admin_flag = (target_role == "admin")
+                    target_user["role"] = target_role
+                    target_user["is_admin"] = is_admin_flag
+                    target_user["role_title"] = "Administrator (Operator)" if is_admin_flag else "Pengguna Terdaftar (Member)"
+                    save_accounts(accounts)
+
+                action_label = "PROMOSI_ADMIN" if is_admin_flag else "DEMOSI_USER"
+                add_audit_log(
+                    event_type=action_label,
+                    peer_id=target_username,
+                    peer_ip=client_ip,
+                    operator=uname_op,
+                    details=f"Owner '{uname_op}' mengubah role pengguna '{target_username}' menjadi '{target_role.upper()}'"
+                )
+
+                waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                send_telegram_alert(
+                    f"👑 <b>[AUDIRA RBAC] Pembaruan Hak Akses Pengguna</b>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"👤 <b>Pengguna Target:</b> <code>{target_username}</code>\n"
+                    f"🏷️ <b>Role Baru:</b> <b>{target_user['role_title']}</b>\n"
+                    f"🛡️ <b>Diubah Oleh:</b> <code>{uname_op}</code> (Owner)\n"
+                    f"🕒 <b>Waktu:</b> {waktu_str} WIB"
+                )
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "message": f"Role pengguna '{target_username}' berhasil diubah menjadi '{target_role.upper()}'",
+                    "user": {
+                        "username": target_username,
+                        "role": target_role,
+                        "role_title": target_user["role_title"],
+                        "is_admin": is_admin_flag
+                    }
+                }).encode())
                 return
             except Exception as e:
                 self.send_response(500)
