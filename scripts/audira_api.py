@@ -305,6 +305,12 @@ def find_user_by_token(auth_header):
                 return uname, u
     return None, None
 
+def is_authenticated_request(client_ip, auth_header):
+    uname, u = find_user_by_token(auth_header)
+    if uname:
+        return True, uname
+    return False, None
+
 def build_fleet_devices():
     meta = load_meta()
     sqlite_peers = get_sqlite_peers()
@@ -380,6 +386,25 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         auth_header = self.headers.get("Authorization", "")
+        client_ip = (self.headers.get("X-Real-IP") or self.client_address[0]).replace("::ffff:", "")
+
+        # Protected Admin & Fleet Endpoints Guard
+        protected_get_paths = (
+            "/api/users", "/api/accounts", "/api/fleet", "/api/devices",
+            "/api/metrics", "/api/sessions", "/api/audit_logs",
+            "/api/orders", "/api/licenses", "/api/sysinfo"
+        )
+        if path in protected_get_paths:
+            is_auth, req_user = is_authenticated_request(client_ip, auth_header)
+            if not is_auth:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "Unauthorized: Autentikasi Administrator diperlukan untuk mengakses data armada & telemetri privat."
+                }).encode())
+                return
 
         # 1. Health check
         if path == "/api/health" or path == "/health":
@@ -661,7 +686,25 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
         content_len = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else ""
-        client_ip = self.client_address[0].replace("::ffff:", "")
+        client_ip = (self.headers.get("X-Real-IP") or self.client_address[0]).replace("::ffff:", "")
+
+        # Protected Admin Actions Guard
+        protected_post_paths = (
+            "/api/devices/alias", "/api/accounts/create", "/api/accounts/delete-device",
+            "/api/accounts/change-password", "/api/audit_logs/clear",
+            "/api/orders/approve", "/api/orders/delete", "/api/sessions/terminate"
+        )
+        if path in protected_post_paths:
+            is_auth, req_user = is_authenticated_request(client_ip, auth_header)
+            if not is_auth:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "Unauthorized: Autentikasi Administrator diperlukan."
+                }).encode())
+                return
 
         # 1. SYSINFO_VER
         if path == "/api/sysinfo_ver":

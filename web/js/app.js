@@ -30,7 +30,7 @@ const i18n = {
     simYourId: "This Device ID",
     simOneTimePw: "One-Time Password",
     simRemoteControl: "Control Remote Desktop",
-    simInputPlaceholder: "Enter 9-digit Remote ID (e.g. 512 884 901)",
+    simInputPlaceholder: "Enter 9-digit Remote ID (e.g. 100 200 300)",
     btnConnect: "Connect",
     btnFileTransfer: "File Transfer",
     simRecentSessions: "Verified Target Endpoints",
@@ -145,7 +145,7 @@ const i18n = {
     simYourId: "ID Perangkat Ini",
     simOneTimePw: "Kata Sandi Sekali Pakai",
     simRemoteControl: "Kendalikan Desktop Jarak Jauh",
-    simInputPlaceholder: "Masukkan 9-digit Remote ID (misal: 512 884 901)",
+    simInputPlaceholder: "Masukkan 9-digit Remote ID (misal: 100 200 300)",
     btnConnect: "Hubungkan",
     btnFileTransfer: "Transfer File",
     simRecentSessions: "Target Komputer Terverifikasi",
@@ -247,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initCopyActions();
   initFaqAccordion();
   initAuthModal();
-  initFleetFilter();
   initLatencyBenchmark();
   initPricingToggle();
   initPricingCards();
@@ -360,7 +359,11 @@ function initSimulator() {
 
   if (copyIdBtn) {
     copyIdBtn.addEventListener('click', () => {
-      const code = copyIdBtn.getAttribute('data-code') || '849203118';
+      const code = copyIdBtn.getAttribute('data-code') || '';
+      if (!code) {
+        showToast('ID Perangkat tersedia setelah aplikasi desktop dijalankan.', 'info');
+        return;
+      }
       navigator.clipboard.writeText(code).then(() => {
         copyIdBtn.textContent = 'Copied';
         setTimeout(() => { copyIdBtn.textContent = 'Copy'; }, 1800);
@@ -401,7 +404,7 @@ function initSimulator() {
 
   if (fileTransferBtn && targetIdInput) {
     fileTransferBtn.addEventListener('click', () => {
-      const id = targetIdInput.value.trim() || '512 884 901';
+      const id = targetIdInput.value.trim() || '100 200 300';
       openFileTransferModal(id);
     });
   }
@@ -511,15 +514,22 @@ function initAuthModal() {
   const adminPassword = document.getElementById('adminPassword');
 
   const openModal = () => {
+    const token = localStorage.getItem('audira_access_token');
+    const user = localStorage.getItem('audira_user');
+    if (token && user) {
+      window.location.href = 'admin.html';
+      return;
+    }
     if (modal) {
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       const emailInput = document.getElementById('adminEmail');
-      if (emailInput && !sessionStorage.getItem('audira_logged_in')) {
+      if (emailInput) {
         setTimeout(() => emailInput.focus(), 150);
       }
     }
   };
+  window.openLoginModal = openModal;
 
   const closeModal = () => {
     if (modal) {
@@ -800,9 +810,11 @@ async function showLoggedInState(user) {
 
   // Asynchronously query live accounts and active licenses
   try {
+    const token = localStorage.getItem('audira_access_token');
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
     const [accRes, licRes] = await Promise.all([
-      fetch('/api/accounts').then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/licenses').then(r => r.ok ? r.json() : null).catch(() => null)
+      fetch('/api/accounts', { headers: authHeaders }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/licenses', { headers: authHeaders }).then(r => r.ok ? r.json() : null).catch(() => null)
     ]);
 
     if (accRes && accRes.accounts && accRes.accounts.length > 0) {
@@ -945,95 +957,6 @@ function navigateToFleet() {
   const modal = document.getElementById('loginModal');
   if (modal) modal.classList.remove('open');
   window.location.href = 'admin.html';
-}
-
-// ==========================================================================
-// Fleet Filter & Search + Dynamic Live Sync
-// ==========================================================================
-async function fetchLandingFleet() {
-  try {
-    const res = await fetch('/api/fleet');
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data.success && Array.isArray(data.devices) && data.devices.length > 0) {
-      const tbody = document.getElementById('fleetTableBody');
-      if (!tbody) return;
-      tbody.innerHTML = data.devices.slice(0, 10).map(d => {
-        const isOnline = d.is_online;
-        const osName = d.os || 'Windows 11 Pro';
-        const tag = (d.tags && d.tags[0]) || 'Fleet Node';
-        const latency = isOnline ? (d.latency_ms || 2) + ' ms' : 'Offline';
-        const latencyColor = isOnline ? 'var(--color-emerald)' : 'var(--color-text-dim)';
-        return `
-          <tr>
-            <td>
-              <div class="mgmt-node-cell">
-                <span class="mgmt-node-status ${isOnline ? 'online' : 'offline'}" title="${isOnline ? 'Online' : 'Offline'}"></span>
-                <strong style="color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname || 'Device')}</strong>
-              </div>
-            </td>
-            <td><code>${escapeHtml(d.id)}</code></td>
-            <td>${escapeHtml(osName)}</td>
-            <td><span class="mgmt-tag-pill">${escapeHtml(tag)}</span></td>
-            <td style="color:${latencyColor}; font-family:var(--font-mono); font-weight:700;">${latency}</td>
-            <td><span style="color:var(--color-primary); font-size:0.75rem;">X25519 E2EE</span></td>
-            <td>
-              <button class="mgmt-action-btn" onclick="quickConnect('${escapeHtml(d.id)}')">Connect</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-  } catch (err) {
-    console.debug('Using cached fleet table rows');
-  }
-}
-
-function initFleetFilter() {
-  fetchLandingFleet();
-  const tabs = document.querySelectorAll('.console-tab-pill');
-  const searchInput = document.getElementById('fleetSearchInput');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const filter = tab.getAttribute('data-filter');
-      applyFleetFilter(filter, searchInput ? searchInput.value : '');
-    });
-  });
-
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      const activeTab = document.querySelector('.console-tab-pill.active');
-      const filter = activeTab ? activeTab.getAttribute('data-filter') : 'all';
-      applyFleetFilter(filter, e.target.value);
-    });
-  }
-
-  function applyFleetFilter(category, query) {
-    const rows = document.querySelectorAll('#fleetTableBody tr');
-    const q = query.toLowerCase().trim();
-    rows.forEach(row => {
-      const text = row.textContent.toLowerCase();
-      let matchCat = true;
-      if (category === 'windows') {
-        matchCat = text.includes('windows');
-      } else if (category === 'linux') {
-        matchCat = text.includes('ubuntu') || text.includes('debian');
-      } else if (category === 'macos') {
-        matchCat = text.includes('macos');
-      }
-
-      const matchQuery = !q || text.includes(q);
-
-      if (matchCat && matchQuery) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    });
-  }
 }
 
 // ==========================================================================
@@ -1562,6 +1485,14 @@ function handleWhatsAppOrderAssistance() {
 function handleUrlRouting() {
   const urlParams = new URLSearchParams(window.location.search);
 
+  if (urlParams.get('login') === '1') {
+    setTimeout(() => {
+      if (window.openLoginModal) window.openLoginModal();
+      window.history.replaceState({}, document.title, window.location.pathname + (window.location.hash || ''));
+    }, 250);
+    return;
+  }
+
   if (urlParams.get('upgrade') === '1' || urlParams.has('plan')) {
     const plan = urlParams.get('plan') || 'pro';
     setTimeout(() => {
@@ -1644,7 +1575,7 @@ function simulateTgApprove() {
     statusEl.style.alignItems = 'center';
     statusEl.style.gap = '6px';
     statusEl.style.color = '#10b981';
-    statusEl.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span><b>Sesi Disetujui!</b> Sesi remote P2P <code>512 884 901</code> dibuka seketika dengan proteksi E2EE.</span>';
+    statusEl.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span><b>Sesi Disetujui!</b> Sesi remote P2P dibuka seketika dengan proteksi E2EE.</span>';
   }
   if (btnApprove) btnApprove.disabled = true;
   if (btnReject) btnReject.disabled = true;
@@ -1652,7 +1583,7 @@ function simulateTgApprove() {
 
   const simInput = document.getElementById('simTargetId');
   const simConnectBtn = document.getElementById('simConnectBtn');
-  if (simInput) simInput.value = '512 884 901';
+  if (simInput && !simInput.value) simInput.value = '100 200 300';
   if (simConnectBtn) {
     setTimeout(() => {
       simConnectBtn.click();
@@ -1681,10 +1612,10 @@ function simulateTgReject() {
 // Skill Reference: flutter-desktop-ui & AUDIRA UI/UX Pro Max
 // ==========================================================================
 let sessionTickerInterval = null;
-let currentSessionId = '512 884 901';
+let currentSessionId = 'Active-Session';
 
 function openRemoteSession(targetId) {
-  currentSessionId = targetId || '512 884 901';
+  currentSessionId = targetId || 'Active-Session';
   const modal = document.getElementById('remoteSessionModal');
   const targetDisplay = document.getElementById('sessionTargetIdDisplay');
   const ftTargetDisplay = document.getElementById('ftTargetIdDisplay');
@@ -1841,9 +1772,9 @@ function executeRemoteCommand(cmd) {
   } else if (cmdLower.startsWith('ping')) {
     outDiv.innerHTML = `
       Pinging target relay <code>desk.audira.my.id</code> with 32 bytes of data:<br>
-      Reply from 192.168.100.175: bytes=32 time=1ms TTL=64<br>
-      Reply from 192.168.100.175: bytes=32 time=1ms TTL=64<br>
-      Reply from 192.168.100.175: bytes=32 time=1ms TTL=64<br>
+      Reply from desk.audira.my.id: bytes=32 time=1ms TTL=64<br>
+      Reply from desk.audira.my.id: bytes=32 time=1ms TTL=64<br>
+      Reply from desk.audira.my.id: bytes=32 time=1ms TTL=64<br>
       Ping statistics: Packets: Sent = 3, Received = 3, Lost = 0 (0% loss)
     `;
   } else if (cmdLower === 'systeminfo' || cmdLower === 'sys') {
@@ -1944,9 +1875,9 @@ function closeMobilePairModal() {
 }
 
 function copyMobilePairUri() {
-  const uri = 'audira://connect?id=849203118&relay=desk.audira.my.id';
+  const uri = 'audira://relay?host=desk.audira.my.id';
   navigator.clipboard.writeText(uri).then(() => {
-    showToast('Mobile Pairing URI berhasil disalin!', 'success');
+    showToast('Mobile Relay URI berhasil disalin!', 'success');
   }).catch(() => {
     showToast('URI: ' + uri, 'info');
   });

@@ -4,7 +4,51 @@
  * Author: Audira Core Development Team
  */
 
+function checkAdminAuth() {
+  const token = localStorage.getItem('audira_access_token');
+  const user = localStorage.getItem('audira_user');
+  if (!token || !user) {
+    window.location.replace('index.html?login=1');
+    return false;
+  }
+  return true;
+}
+
+function getAuthHeaders() {
+  const token = localStorage.getItem('audira_access_token') || '';
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : ''
+  };
+}
+
+async function authFetch(url, options = {}) {
+  const headers = Object.assign(getAuthHeaders(), options.headers || {});
+  try {
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+      localStorage.removeItem('audira_access_token');
+      localStorage.removeItem('audira_user');
+      sessionStorage.removeItem('audira_logged_in');
+      window.location.replace('index.html?login=1');
+      return res;
+    }
+    return res;
+  } catch (err) {
+    console.debug('authFetch network error:', err);
+    throw err;
+  }
+}
+
+function handleAdminSignOut() {
+  localStorage.removeItem('audira_access_token');
+  localStorage.removeItem('audira_user');
+  sessionStorage.removeItem('audira_logged_in');
+  window.location.replace('index.html');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  if (!checkAdminAuth()) return;
   initAdminTheme();
   initAdminLanguage();
   initAdminNavigation();
@@ -125,7 +169,7 @@ function initAdminNavigation() {
 // ==========================================================================
 async function fetchAccountsData(showToastFeedback = false) {
   try {
-    const res = await fetch('/api/accounts');
+    const res = await authFetch('/api/accounts');
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.success && Array.isArray(data.accounts)) {
@@ -289,7 +333,7 @@ async function submitCreateAccount(e) {
   }
 
   try {
-    const res = await fetch('/api/accounts/create', {
+    const res = await authFetch('/api/accounts/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -317,7 +361,7 @@ async function unlinkDevice(username, rawId) {
   if (!confirm(`Putus hubungan perangkat ID ${rawId} dari akun ${username}?`)) return;
 
   try {
-    const res = await fetch('/api/accounts/delete-device', {
+    const res = await authFetch('/api/accounts/delete-device', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: username, device_id: rawId })
@@ -336,7 +380,7 @@ async function unlinkDevice(username, rawId) {
 // ==========================================================================
 async function fetchFleetData() {
   try {
-    const res = await fetch('/api/fleet');
+    const res = await authFetch('/api/fleet');
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.success && Array.isArray(data.devices)) {
@@ -350,7 +394,7 @@ async function fetchFleetData() {
 
 async function fetchMetricsData() {
   try {
-    const res = await fetch('/api/metrics');
+    const res = await authFetch('/api/metrics');
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.success) {
@@ -363,7 +407,7 @@ async function fetchMetricsData() {
 
 async function fetchSessionsData() {
   try {
-    const res = await fetch('/api/sessions');
+    const res = await authFetch('/api/sessions');
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.success && Array.isArray(data.sessions)) {
@@ -480,7 +524,7 @@ async function editDeviceAlias(rawId, currentAlias) {
   if (!newAlias || newAlias.trim() === currentAlias) return;
 
   try {
-    const res = await fetch('/api/devices/alias', {
+    const res = await authFetch('/api/devices/alias', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: rawId, alias: newAlias.trim() })
@@ -506,7 +550,7 @@ async function terminateSession(remoteId) {
   const cleanId = remoteId.replace(/\s+/g, '');
   if (confirm(`Terminate remote session with ${remoteId}?`)) {
     try {
-      await fetch('/api/sessions/terminate', {
+      await authFetch('/api/sessions/terminate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: cleanId })
@@ -799,7 +843,7 @@ function copyClusterKey() {
 // ==========================================================================
 async function fetchOrdersData(showToastFeedback = false) {
   try {
-    const res = await fetch('/api/orders');
+    const res = await authFetch('/api/orders');
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.success && Array.isArray(data.orders)) {
@@ -903,7 +947,7 @@ function renderOrdersTable(orders) {
 
 async function approveOrder(orderId) {
   try {
-    const res = await fetch('/api/orders/approve', {
+    const res = await authFetch('/api/orders/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ order_id: orderId })
@@ -923,7 +967,7 @@ async function approveOrder(orderId) {
 async function deleteOrder(orderId) {
   if (!confirm(`Hapus catatan transaksi ${orderId}?`)) return;
   try {
-    const res = await fetch('/api/orders/delete', {
+    const res = await authFetch('/api/orders/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ order_id: orderId })
@@ -965,7 +1009,7 @@ async function submitManualLicense(e) {
   }
 
   try {
-    const res = await fetch('/api/orders/create', {
+    const res = await authFetch('/api/orders/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
