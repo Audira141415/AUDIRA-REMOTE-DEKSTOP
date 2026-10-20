@@ -2873,6 +2873,26 @@ impl Connection {
         }
         // After handling CloseReason messages, proceed to process other message types
         if let Some(message::Union::LoginRequest(lr)) = msg.union {
+            // Version compatibility handshake gate:
+            // Both host and remote peer must use the same distributed version family
+            let client_ver = lr.version.trim();
+            let host_ver = crate::VERSION.trim();
+            let client_ver_num = hbb_common::get_version_number(client_ver);
+            let host_ver_num = hbb_common::get_version_number(host_ver);
+            let is_compatible = !client_ver.is_empty()
+                && (client_ver == host_ver || (client_ver_num / 1000) == (host_ver_num / 1000));
+
+            if !is_compatible {
+                let err_msg = format!(
+                    "Versi Audira Desk Tidak Cocok!\nKedua perangkat harus menggunakan versi yang sama (v{host_ver}) untuk mencegah kegagalan sesi remote.\n\nHost: v{host_ver}\nRemote: v{}\n\nSilakan perbarui kedua PC ke versi yang sama.",
+                    if client_ver.is_empty() { "Legacy/Unknown" } else { client_ver }
+                );
+                log::warn!("Rejected remote connection from mismatched version (Host: {}, Remote: {})", host_ver, client_ver);
+                self.send_login_error(&err_msg).await;
+                sleep(1.).await;
+                return false;
+            }
+
             if !self.check_login_scope(&lr).await {
                 return false;
             }

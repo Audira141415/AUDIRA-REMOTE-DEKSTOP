@@ -85,6 +85,25 @@ class SessionHudBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
 
+                // Version Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'v1.5.3',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+
                 // Quick Whiteboard Toggle
                 _hudIconButton(
                   icon: Icons.draw_outlined,

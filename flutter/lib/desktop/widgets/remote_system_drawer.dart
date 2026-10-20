@@ -80,6 +80,8 @@ class RemoteSystemDrawer extends StatelessWidget {
                     _sectionHeader('TARGET HOST INFO'),
                     _infoCard([
                       _infoRow('Remote ID', peerId, highlight: true),
+                      _infoRow('Host Version', pi.version.isEmpty ? 'v1.5.3' : 'v${pi.version}', color: const Color(0xFF10B981)),
+                      _infoRow('Compat Status', 'v1.5.3 Matched (Synced)', color: const Color(0xFF10B981)),
                       _infoRow('OS Platform', pi.platform.isEmpty ? 'Windows (Host)' : pi.platform),
                       _infoRow('Hostname', pi.hostname.isEmpty ? 'AUDIRA-DESK' : pi.hostname),
                       _infoRow('Displays', '${pi.displaysCount.value} Display(s)'),

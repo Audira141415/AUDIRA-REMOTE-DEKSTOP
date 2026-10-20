@@ -14,8 +14,8 @@ fn main() {
             .set("ProductName", "AUDIRA Remote Desktop")
             .set("LegalCopyright", "Copyright (C) 2026 Agus Dwi R (Audira). All rights reserved.")
             .set("Comments", "Developed by Agus Dwi R (Audira). Enterprise Encrypted Remote Desktop.")
-            .set("ProductVersion", "1.5.0")
-            .set("FileVersion", "1.5.0.0")
+            .set("ProductVersion", "1.5.3")
+            .set("FileVersion", "1.5.3.0")
             .set("OriginalFilename", "AudiraDesk.exe");
         match res.compile() {
             Err(e) => {

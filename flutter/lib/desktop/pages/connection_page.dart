@@ -159,6 +159,28 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
             // ready && public
             // No need to show the guide if is custom client.
             if (!isIncomingOnly) setupServerWidget(),
+            const Spacer(),
+            FutureBuilder<String>(
+              future: bind.mainGetVersion(),
+              builder: (ctx, snap) => Container(
+                margin: EdgeInsets.only(right: em),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.white.withOpacity(0.12)),
+                ),
+                child: Text(
+                  'v${snap.data ?? "1.5.3"}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                  ),
+                ),
+              ),
+            ),
           ],
         );
 

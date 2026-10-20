@@ -5,20 +5,28 @@
 
 ## 1. Log Riwayat Rilis & Arsitektur
 
-### Versi v1.5.3 (Production Web Auth & Account Registration Engine) — 2026-10-20
+### Versi v1.5.3 (Production Web Auth & Version Handshake Gate) — 2026-10-20
+- **Penetapan Versi Tunggal SSOT (Single Source of Truth) v1.5.3**:
+  - `src/version.rs`: `VERSION = "1.5.3"`, `BUILD_DATE = "2026-10-20 18:30"` (dikeluarkan dari `.gitignore` agar tersinkronisasi permanen).
+  - `Cargo.toml`: `version = "1.5.3"`.
+  - `flutter/pubspec.yaml`: `version: 1.5.3+69`.
+  - `libs/portable/Cargo.toml` & `build.rs`: `version = "1.5.3"`, `ProductVersion = "1.5.3"`, `FileVersion = "1.5.3.0"`.
+- **Visibilitas Versi Jelas di Seluruh Antarmuka Pengguna (UI)**:
+  - **Desktop Home Page (`desktop_home_page.dart`)**: Badge elegan `v1.5.3 Enterprise` lengkap dengan indikator titik hijau tepat di bawah logo aplikasi.
+  - **Status Bar Koneksi (`connection_page.dart`)**: Badge versi status `v1.5.3` di bagian bawah panel kanan.
+  - **Floating Session HUD (`session_hud_bar.dart`)**: Pill versi `v1.5.3` tersemat di toolbar mengambang saat sesi remote berlangsung.
+  - **Diagnostics Drawer (`remote_system_drawer.dart`)**: Baris telemetry Host Version `v1.5.3` dan status `Compat Status: v1.5.3 Matched (Synced)`.
+  - **System Info Dialog (`system_info_dialog.dart`)**: Spesifikasi aplikasi resmi `v1.5.3 Enterprise Build`.
+  - **Web Portal (`web/index.html` & `web/admin.html`)**: Badge pengumuman resmi dan status core tertera `v1.5.3`.
+- **Enforcement Handshake Gate: Proteksi Ketidakcocokan Versi Remote**:
+  - `src/server/connection.rs`: Pada saat `LoginRequest`, sistem memvalidasi versi klien (`lr.version`) terhadap versi host (`crate::VERSION`). Jika versi berbeda atau versi lama/legacy, koneksi otomatis ditolak dengan pesan dialog resmi: *"Versi Audira Desk Tidak Cocok! Kedua perangkat harus menggunakan versi yang sama (v1.5.3) untuk mencegah kegagalan sesi remote."*.
 - **Penghapusan Total Mock Data & Demo UI**:
   - Menghapus banner `Demo Operator (audira@audira.my.id)` dan tombol autofill palsu pada portal web (`web/index.html`).
   - Menghilangkan fallback *fake offline mock login* pada `web/js/app.js`, digantikan penanganan error nyata dari server API.
 - **Implementasi Fitur Registrasi & Login Produksi**:
-  - **Backend API (`scripts/audira_api.py`)**:
-    - Endpoint baru `POST /api/register`: Validasi username unik (min 3 karakter, alfanumerik), validasi format email, validasi password (min 6 karakter), penyimpanan aman tersinkronisasi (`ACCOUNTS_LOCK`) ke `accounts.json`, pencatatan audit log `USER_REGISTER`, dan penerbitan token sesi UUID nyata.
-    - Pembaruan `POST /api/login`: Mendukung login dengan username atau email, verifikasi kata sandi ketat (menolak sandi salah dengan 401 dan akun tidak ada dengan 400), pencatatan audit log `LOGIN_SUCCESS` dan `LOGIN_FAILED`.
-  - **Portal Frontend (`web/index.html` & `web/js/app.js`)**:
-    - Antarmuka dual-tab: **Masuk** dan **Daftar Akun Baru** dengan navigasi instan antar tab.
-    - Form registrasi lengkap: Username, Nama Lengkap (Display Name), Email, Password, dan Konfirmasi Password.
-    - Fungsi `handleAdminRegister()` dan `handleAdminLogin()` dengan validasi real-time dan notifikasi toast profesional.
-  - **Pengujian & Verifikasi**:
-    - Dibuat dan dijalankan script tes otomasi `scripts/test_auth_api.py` yang memvalidasi seluruh siklus registrasi, persistensi token, pencegahan duplikasi, dan audit log (100% lulus).
+  - **Backend API (`scripts/audira_api.py`)**: Endpoint baru `POST /api/register` dan penyempurnaan `POST /api/login`.
+  - **Portal Frontend (`web/index.html` & `web/js/app.js`)**: Antarmuka dual-tab Masuk & Daftar Akun Baru.
+  - **Pengujian & Verifikasi**: `scripts/test_auth_api.py` 100% lulus.
 
 ### Versi v1.5.1 (Complete Rebranding "Audira Desk" & Standalone Packaging) — 2026-10-18
 - **Core Engine & Windows Platform Rebranding**:

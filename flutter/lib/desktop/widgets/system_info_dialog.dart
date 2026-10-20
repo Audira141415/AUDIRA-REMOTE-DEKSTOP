@@ -30,7 +30,7 @@ void showSystemInfoDialog(BuildContext context, {OverlayDialogManager? dialogMan
 - **Rendezvous Server:** $srv
 - **Enkripsi:** E2EE ChaCha20-Poly1305 + Curve25519
 - **Status Layanan:** ${stateGlobal.svcStatus.value == SvcStatus.ready ? 'Siap & Online' : 'Menghubungkan'}
-- **Versi Aplikasi:** 1.5.0 Enterprise
+- **Versi Aplikasi:** 1.5.3 Enterprise Official Release
 ''';
       Clipboard.setData(ClipboardData(text: text));
       showToast(translate('Copied'));
@@ -114,7 +114,7 @@ void showSystemInfoDialog(BuildContext context, {OverlayDialogManager? dialogMan
               const SizedBox(height: 8),
               buildInfoRow('Protokol Enkripsi', 'E2EE ChaCha20-Poly1305 (Libsodium)', Icons.lock_outline_rounded),
               const SizedBox(height: 8),
-              buildInfoRow('Versi Software', 'v1.5.0 Enterprise Build (Audira Studio)', Icons.verified_user_outlined),
+              buildInfoRow('Versi Software', 'v1.5.3 Enterprise Build (Audira Studio)', Icons.verified_user_outlined),
             ],
           ),
         ),

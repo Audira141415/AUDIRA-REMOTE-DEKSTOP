@@ -91,6 +91,45 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         alignment: Alignment.center,
         child: loadLogo(),
       ),
+      // Clear Application Version Badge
+      Align(
+        alignment: Alignment.center,
+        child: Container(
+          margin: const EdgeInsets.only(top: 4, bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          decoration: BoxDecoration(
+            color: MyTheme.accent.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: MyTheme.accent.withOpacity(0.3)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 7,
+                height: 7,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF10B981),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              FutureBuilder<String>(
+                future: bind.mainGetVersion(),
+                builder: (ctx, snap) => Text(
+                  'v${snap.data ?? "1.5.3"} Enterprise',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                    color: MyTheme.accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       buildTip(context),
       if (!isOutgoingOnly) buildIDBoard(context),
       if (!isOutgoingOnly) buildPasswordBoard(context),
