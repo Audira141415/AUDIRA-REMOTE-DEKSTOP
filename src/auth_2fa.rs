@@ -3,7 +3,9 @@ use hbb_common::{
     bail,
     config::Config,
     get_time,
+    log,
     password_security::{decrypt_vec_or_original, encrypt_vec_or_original},
+    tokio,
     ResultType,
 };
 use serde_derive::{Deserialize, Serialize};
@@ -415,7 +417,7 @@ pub fn start_telegram_bot_service() {
                                         } else if text_trim == "/pass" || text_trim == "/id" || text_trim == "/password" {
                                             let my_id = Config::get_id();
                                             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-                                            let pwd = crate::ui_interface::get_temporary_password();
+                                            let pwd = crate::ui_interface::temporary_password();
                                             #[cfg(any(target_os = "android", target_os = "ios"))]
                                             let pwd = "".to_string();
                                             let hostname = crate::common::hostname();

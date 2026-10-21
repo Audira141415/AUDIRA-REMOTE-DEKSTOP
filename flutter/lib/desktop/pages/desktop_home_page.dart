@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
@@ -24,7 +23,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart' as window_size;
 import 'package:flutter_hbb/common/widgets/dialog.dart';
-import '../widgets/button.dart';
+import 'package:flutter_hbb/utils/http_service.dart' as http;
 import '../widgets/system_info_dialog.dart';
 
 class DesktopHomePage extends StatefulWidget {
@@ -167,11 +166,20 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       ]);
     }
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
       child: Container(
-        width: isIncomingOnly ? 280.0 : 240.0,
-        color: Theme.of(context).colorScheme.background,
+        width: isIncomingOnly ? 280.0 : 246.0,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(
+            right: BorderSide(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+          ),
+        ),
         child: Stack(
           children: [
             Column(
@@ -227,121 +235,125 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   buildIDBoard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final model = gFFI.serverModel;
     return Container(
-      margin: const EdgeInsets.only(left: 20, right: 11),
-      height: 57,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(12, 10, 10, 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 2,
-            decoration: const BoxDecoration(color: MyTheme.accent),
-          ).marginOnly(top: 5),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 7),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    height: 25,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          translate("ID"),
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.color
-                                  ?.withOpacity(0.5)),
-                        ).marginOnly(top: 5),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Tooltip(
-                              message: 'Spesifikasi Sistem Host',
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(15),
-                                onTap: () => showSystemInfoDialog(context),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Icon(
-                                    Icons.info_outline_rounded,
-                                    size: 17,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.color
-                                        ?.withOpacity(0.5),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            buildPopupMenu(context),
-                          ],
-                        )
-                      ],
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF38BDF8),
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  Flexible(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onDoubleTap: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: model.serverId.text));
-                              showToast(translate("Copied"));
-                            },
-                            child: TextFormField(
-                              controller: model.serverId,
-                              readOnly: true,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                contentPadding:
-                                    EdgeInsets.only(top: 10, bottom: 10),
-                              ),
-                              style: const TextStyle(
-                                fontSize: 22,
-                              ),
-                            ).workaroundFreezeLinuxMint(),
-                          ),
-                        ),
-                        Tooltip(
-                          message: translate("Copy"),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(15),
-                            onTap: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: model.serverId.text));
-                              showToast(translate("Copied"));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Icon(
-                                Icons.copy_rounded,
-                                size: 18,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.color
-                                    ?.withOpacity(0.5),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(width: 6),
+                  Text(
+                    translate("ID"),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
-                  )
+                  ),
                 ],
               ),
-            ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Tooltip(
+                    message: 'Spesifikasi Sistem Host',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => showSystemInfoDialog(context),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          size: 16,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ),
+                  buildPopupMenu(context),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onDoubleTap: () {
+                    Clipboard.setData(ClipboardData(text: model.serverId.text));
+                    showToast(translate("Copied"));
+                  },
+                  child: TextFormField(
+                    controller: model.serverId,
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 4),
+                    ),
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                      fontFamily: 'monospace',
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ).workaroundFreezeLinuxMint(),
+                ),
+              ),
+              Tooltip(
+                message: translate("Copy"),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: model.serverId.text));
+                    showToast(translate("Copied"));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2F6),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.copy_rounded,
+                      size: 14,
+                      color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -350,6 +362,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   Widget buildPopupMenu(BuildContext context) {
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     RxBool hover = false.obs;
     return InkWell(
       onTap: DesktopTabPage.onAddSetting,
@@ -357,14 +370,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         message: translate('Settings'),
         child: Obx(
           () => CircleAvatar(
-            radius: 15,
+            radius: 13,
             backgroundColor: hover.value
-                ? Theme.of(context).scaffoldBackgroundColor
-                : Theme.of(context).colorScheme.background,
+                ? (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))
+                : Colors.transparent,
             child: Icon(
               Icons.more_vert_outlined,
-              size: 20,
-              color: hover.value ? textColor : textColor?.withOpacity(0.5),
+              size: 18,
+              color: hover.value ? textColor : textColor?.withValues(alpha: 0.6),
             ),
           ),
         ),
@@ -384,122 +397,151 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   buildPasswordBoard2(BuildContext context, ServerModel model) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     RxBool refreshHover = false.obs;
     RxBool editHover = false.obs;
-    final textColor = Theme.of(context).textTheme.titleLarge?.color;
     final showOneTime = model.approveMode != 'click' &&
         model.verificationMethod != kUsePermanentPassword;
     return Container(
-      margin: EdgeInsets.only(left: 20.0, right: 16, top: 13, bottom: 13),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.baseline,
-        textBaseline: TextBaseline.alphabetic,
+      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(12, 10, 10, 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 2,
-            height: 52,
-            decoration: BoxDecoration(color: MyTheme.accent),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 7),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  AutoSizeText(
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF10B981),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
                     translate("One-time Password"),
                     style: TextStyle(
-                        fontSize: 14, color: textColor?.withOpacity(0.5)),
-                    maxLines: 1,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onDoubleTap: () {
-                            if (showOneTime) {
-                              Clipboard.setData(
-                                  ClipboardData(text: model.serverPasswd.text));
-                              showToast(translate("Copied"));
-                            }
-                          },
-                          child: TextFormField(
-                            controller: model.serverPasswd,
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              contentPadding:
-                                  EdgeInsets.only(top: 14, bottom: 10),
-                            ),
-                            style: TextStyle(fontSize: 15),
-                          ).workaroundFreezeLinuxMint(),
-                        ),
-                      ),
-                      if (showOneTime)
-                        AnimatedRotationWidget(
-                          onPressed: () => bind.mainUpdateTemporaryPassword(),
-                          child: Tooltip(
-                            message: translate('Refresh Password'),
-                            child: Obx(() => RotatedBox(
-                                quarterTurns: 2,
-                                child: Icon(
-                                  Icons.refresh,
-                                  color: refreshHover.value
-                                      ? textColor
-                                      : Color(0xFFDDDDDD),
-                                  size: 22,
-                                ))),
-                          ),
-                          onHover: (value) => refreshHover.value = value,
-                        ).marginOnly(right: 8, top: 4),
-                      if (!bind.isDisableSettings())
-                        InkWell(
-                          child: Tooltip(
-                            message: translate('Change Password'),
-                            child: Obx(
-                              () => Icon(
-                                Icons.edit,
-                                color: editHover.value
-                                    ? textColor
-                                    : Color(0xFFDDDDDD),
-                                size: 22,
-                              ).marginOnly(right: 8, top: 4),
-                            ),
-                          ),
-                          onTap: () => DesktopSettingPage.switch2page(
-                              SettingsTabKey.safety),
-                          onHover: (value) => editHover.value = value,
-                        ),
-                      InkWell(
-                        child: Tooltip(
-                          message: 'Kirim ID & Password ke Telegram Bot',
-                          child: Icon(
-                            Icons.send_rounded,
-                            color: const Color(0xFF0088CC),
-                            size: 20,
-                          ).marginOnly(right: 8, top: 4),
-                        ),
-                        onTap: () async {
-                          if (bind.mainHasValidBotSync()) {
-                            await bind.mainSetOption(
-                                key: 'send-telegram-password', value: 'Y');
-                            showToast('ID & Password berhasil dikirim ke Telegram!');
-                          } else {
-                            changeBot(callback: () {
-                              if (bind.mainHasValidBotSync()) {
-                                bind.mainSetOption(
-                                    key: 'send-telegram-password', value: 'Y');
-                                showToast('Bot terhubung! ID & Password dikirim ke Telegram.');
-                              }
-                            });
-                          }
-                        },
-                      ),
-                    ],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
                   ),
                 ],
               ),
-            ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onDoubleTap: () {
+                    if (showOneTime) {
+                      Clipboard.setData(
+                          ClipboardData(text: model.serverPasswd.text));
+                      showToast(translate("Copied"));
+                    }
+                  },
+                  child: TextFormField(
+                    controller: model.serverPasswd,
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 4),
+                    ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.0,
+                      fontFamily: 'monospace',
+                      color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                    ),
+                  ).workaroundFreezeLinuxMint(),
+                ),
+              ),
+              if (showOneTime)
+                AnimatedRotationWidget(
+                  onPressed: () => bind.mainUpdateTemporaryPassword(),
+                  child: Tooltip(
+                    message: translate('Refresh Password'),
+                    child: Obx(() => RotatedBox(
+                        quarterTurns: 2,
+                        child: Icon(
+                          Icons.refresh_rounded,
+                          color: refreshHover.value
+                              ? (isDark ? Colors.white : Colors.black87)
+                              : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                          size: 19,
+                        ))),
+                  ),
+                  onHover: (value) => refreshHover.value = value,
+                ).marginOnly(right: 6),
+              if (!bind.isDisableSettings())
+                InkWell(
+                  child: Tooltip(
+                    message: translate('Change Password'),
+                    child: Obx(
+                      () => Icon(
+                        Icons.edit_outlined,
+                        color: editHover.value
+                            ? (isDark ? Colors.white : Colors.black87)
+                            : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                        size: 18,
+                      ).marginOnly(right: 6),
+                    ),
+                  ),
+                  onTap: () => DesktopSettingPage.switch2page(
+                      SettingsTabKey.safety),
+                  onHover: (value) => editHover.value = value,
+                ),
+              InkWell(
+                child: Tooltip(
+                  message: 'Kirim ID & Password ke Telegram Bot',
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0088CC).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.send_rounded,
+                      color: Color(0xFF0088CC),
+                      size: 16,
+                    ),
+                  ),
+                ),
+                onTap: () async {
+                  if (bind.mainHasValidBotSync()) {
+                    await bind.mainSetOption(
+                        key: 'send-telegram-password', value: 'Y');
+                    showToast('ID & Password berhasil dikirim ke Telegram!');
+                  } else {
+                    changeBot(callback: () {
+                      if (bind.mainHasValidBotSync()) {
+                        bind.mainSetOption(
+                            key: 'send-telegram-password', value: 'Y');
+                        showToast('Bot terhubung! ID & Password dikirim ke Telegram.');
+                      }
+                    });
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -508,39 +550,41 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   buildTip(BuildContext context) {
     final isOutgoingOnly = bind.isOutgoingOnly();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding:
-          const EdgeInsets.only(left: 20.0, right: 16, top: 16.0, bottom: 5),
+          const EdgeInsets.only(left: 16.0, right: 16, top: 16.0, bottom: 8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              if (!isOutgoingOnly)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    translate("Your Desktop"),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(
-            height: 10.0,
-          ),
+          if (!isOutgoingOnly)
+            Text(
+              translate("Your Desktop"),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          const SizedBox(height: 4.0),
           if (!isOutgoingOnly)
             Text(
               translate("desk_tip"),
               overflow: TextOverflow.clip,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: TextStyle(
+                fontSize: 11.5,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
             ),
           if (isOutgoingOnly)
             Text(
               translate("outgoing_only_desk_tip"),
               overflow: TextOverflow.clip,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: TextStyle(
+                fontSize: 11.5,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
             ),
         ],
       ),
@@ -721,44 +765,56 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Stack(
       children: [
         Container(
           margin: EdgeInsets.fromLTRB(
               0, marginTop, 0, bind.isIncomingOnly() ? marginTop : 0),
           child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF2563EB),
-                      Color(0xFF1D4ED8),
-                    ],
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFBFDBFE),
+                    width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.3),
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.25)
+                          : const Color(0xFF2563EB).withValues(alpha: 0.08),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     )
                   ]),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: (title.isNotEmpty
                           ? <Widget>[
-                              Center(
-                                  child: Text(
-                                translate(title),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15),
-                              ).marginOnly(bottom: 6)),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF38BDF8),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    translate(title),
+                                    style: TextStyle(
+                                        color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13),
+                                  ),
+                                ],
+                              ).marginOnly(bottom: 6),
                             ]
                           : <Widget>[]) +
                       <Widget>[
@@ -766,27 +822,46 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                           Text(
                             translate(content),
                             style: TextStyle(
-                                height: 1.5,
-                                color: Colors.white,
+                                height: 1.4,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                                 fontWeight: FontWeight.normal,
-                                fontSize: 13),
-                          ).marginOnly(bottom: 20)
+                                fontSize: 11.5),
+                          ).marginOnly(bottom: 12)
                       ] +
                       (btnText.isNotEmpty
                           ? <Widget>[
                               Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    FixedWidthButton(
-                                      width: 150,
-                                      padding: 8,
-                                      isOutline: true,
-                                      text: translate(btnText),
-                                      textColor: Colors.white,
-                                      borderColor: Colors.white,
-                                      textSize: 20,
-                                      radius: 10,
+                                    InkWell(
+                                      borderRadius: BorderRadius.circular(8),
                                       onTap: onPressed,
+                                      child: Container(
+                                        width: 160,
+                                        padding: const EdgeInsets.symmetric(vertical: 7),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF2563EB), Color(0xFF0284C7)],
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          translate(btnText),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
                                     )
                                   ])
                             ]
@@ -800,25 +875,29 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                       child: Text(
                                         translate(help),
                                         style: TextStyle(
-                                            decoration:
-                                                TextDecoration.underline,
-                                            color: Colors.white,
-                                            fontSize: 12),
-                                      )).marginOnly(top: 6)),
+                                            decoration: TextDecoration.underline,
+                                            color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF2563EB),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500),
+                                      )).marginOnly(top: 8)),
                             ]
                           : <Widget>[]))),
         ),
         if (closeButton != null && closeButton == true)
           Positioned(
-            top: 18,
-            right: 0,
-            child: IconButton(
-              icon: Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 20,
+            top: 22,
+            right: 18,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: closeCard,
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Icon(
+                  Icons.close,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  size: 16,
+                ),
               ),
-              onPressed: closeCard,
             ),
           ),
       ],
@@ -1082,6 +1161,24 @@ void setPasswordDialog({VoidCallback? notEmptyCallback}) async {
       }
       if (pass.isNotEmpty) {
         notEmptyCallback?.call();
+        // Sync permanent/unattended password to Audira account fleet
+        if (gFFI.userModel.isLogin) {
+          try {
+            () async {
+              final myId = (await bind.mainGetMyId()).replaceAll(' ', '');
+              final api =
+                  "${await bind.mainGetApiServer()}/api/user/device-credential";
+              await http.post(
+                Uri.parse(api),
+                headers: getHttpHeaders(),
+                body: jsonEncode({
+                  'device_id': myId,
+                  'password': pass,
+                }),
+              );
+            }();
+          } catch (_) {}
+        }
       }
       close();
     }

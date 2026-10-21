@@ -110,10 +110,10 @@ class _PeerTabPageState extends State<PeerTabPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() => SizedBox(
-              height: 32,
+              height: 36,
               child: Container(
                 padding: stateGlobal.isPortrait.isTrue
-                    ? EdgeInsets.symmetric(horizontal: 2)
+                    ? const EdgeInsets.symmetric(horizontal: 2)
                     : null,
                 child: selectionWrap(Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,41 +137,42 @@ class _PeerTabPageState extends State<PeerTabPage>
   Widget _createSwitchBar(BuildContext context) {
     final model = Provider.of<PeerTabModel>(context);
     var counter = -1;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ReorderableListView(
         buildDefaultDragHandles: false,
         onReorder: model.reorder,
         scrollDirection: Axis.horizontal,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         children: model.visibleEnabledOrderedIndexs.map((t) {
           final selected = model.currentTab == t;
-          final color = selected
-              ? MyTheme.tabbar(context).selectedTextColor
-              : MyTheme.tabbar(context).unSelectedTextColor
-            ?..withOpacity(0.5);
+          final selectedBg = isDark
+              ? const Color(0xFF2563EB)
+              : MyTheme.accent;
+          final unselectedBg = isDark
+              ? const Color(0xFF1E293B)
+              : const Color(0xFFF1F5F9);
+          final hoverBg = isDark
+              ? const Color(0xFF334155)
+              : const Color(0xFFE2E8F0);
+          final selectedTextColor = Colors.white;
+          final unselectedTextColor = isDark
+              ? const Color(0xFF94A3B8)
+              : const Color(0xFF64748B);
+
           final hover = false.obs;
-          final deco = BoxDecoration(
-              color: Theme.of(context).colorScheme.background,
-              borderRadius: BorderRadius.circular(6));
-          final decoBorder = BoxDecoration(
-              border: Border(
-            bottom: BorderSide(width: 2, color: color!),
-          ));
           counter += 1;
           return ReorderableDragStartListener(
               key: ValueKey(t),
               index: counter,
-              child: Obx(() => Tooltip(
+              child: Obx(() {
+                final isHov = hover.value;
+                return Tooltip(
                     preferBelow: false,
                     message: model.tabTooltip(t),
                     onTriggered: isMobile ? mobileShowTabVisibilityMenu : null,
                     child: InkWell(
-                      child: Container(
-                        decoration: (hover.value
-                            ? (selected ? decoBorder : deco)
-                            : (selected ? decoBorder : null)),
-                        child: Icon(model.tabIcon(t), color: color)
-                            .paddingSymmetric(horizontal: 4),
-                      ).paddingSymmetric(horizontal: 4),
+                      borderRadius: BorderRadius.circular(20),
                       onTap: isOptionFixed(kOptionPeerTabIndex)
                           ? null
                           : () async {
@@ -180,8 +181,51 @@ class _PeerTabPageState extends State<PeerTabPage>
                                   k: kOptionPeerTabIndex, v: t.toString());
                             },
                       onHover: (value) => hover.value = value,
-                    ),
-                  )));
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: selected ? selectedBg : (isHov ? hoverBg : unselectedBg),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: selected
+                                ? (isDark ? const Color(0xFF60A5FA) : Colors.transparent)
+                                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                            width: 1,
+                          ),
+                          boxShadow: selected
+                              ? [
+                                  BoxShadow(
+                                    color: selectedBg.withValues(alpha: 0.35),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              model.tabIcon(t),
+                              size: 15,
+                              color: selected ? selectedTextColor : unselectedTextColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              model.tabTooltip(t),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                                color: selected ? selectedTextColor : unselectedTextColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ));
+              }));
         }).toList());
   }
 

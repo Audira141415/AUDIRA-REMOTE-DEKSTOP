@@ -2152,7 +2152,14 @@ async fn key_exchange(conn: &mut Stream, key: &str, log_on_success: bool) -> Res
     let Some(rs_pk) = rs_pk else {
         bail!("Handshake failed: invalid public key from rendezvous server");
     };
-    match timeout(READ_TIMEOUT, conn.next()).await? {
+    // The server sends KeyExchange immediately upon connection if supported.
+    // If the server does not support key exchange (legacy hbbs), it sends nothing,
+    // so we timeout quickly and treat it as a legacy server (returning Ok(false)).
+    let res = match timeout(1500, conn.next()).await {
+        Ok(res) => res,
+        Err(_) => return Ok(false),
+    };
+    match res {
         Some(Ok(bytes)) => {
             if let Ok(msg_in) = RendezvousMessage::parse_from_bytes(&bytes) {
                 match msg_in.union {

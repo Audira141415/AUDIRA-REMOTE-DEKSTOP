@@ -14,6 +14,9 @@ import sqlite3
 import datetime
 import threading
 import socket
+import hmac
+import hashlib
+import base64
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -25,6 +28,7 @@ META_PATH = os.path.join(DATA_DIR, "devices_meta.json")
 ACCOUNTS_PATH = os.path.join(DATA_DIR, "accounts.json")
 AUDIT_PATH = os.path.join(DATA_DIR, "audit_logs.json")
 ORDERS_PATH = os.path.join(DATA_DIR, "orders.json")
+MASTER_KEY_PATH = os.path.join(DATA_DIR, "server_master.key")
 
 # In-memory tracking
 PEERS_LOCK = threading.Lock()
@@ -37,10 +41,209 @@ AUDIT_LOCK = threading.Lock()
 ORDERS_LOCK = threading.Lock()
 TELEGRAM_CONFIG_PATH = os.path.join(DATA_DIR, "telegram_apps_config.json")
 
-# Inactivity session timeout: 30 minutes (1800s) server-side revocation
-SESSION_TIMEOUT_SECONDS = 1800
+# Session timeout: 30 days (2,592,000s) default; persistent for desktop clients and remembered sessions
+SESSION_TIMEOUT_SECONDS = 30 * 86400
 TOKEN_ACTIVITY_LOCK = threading.Lock()
 TOKEN_LAST_ACTIVITY = {}
+
+# In-Memory IP Rate Limiter & Anti-Brute Force Protection
+RATE_LIMIT_LOCK = threading.Lock()
+LOGIN_FAILURES = {}   # client_ip -> [timestamp, ...]
+IP_BAN_LIST = {}      # client_ip -> ban_expire_ts
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_WINDOW_SECONDS = 600       # 10 minutes window
+BAN_DURATION_SECONDS = 900       # 15 minutes ban
+
+_MASTER_KEY = None
+
+def get_or_create_master_key():
+    global _MASTER_KEY
+    if _MASTER_KEY is not None:
+        return _MASTER_KEY
+    os.makedirs(DATA_DIR, exist_ok=True)
+    if os.path.exists(MASTER_KEY_PATH):
+        try:
+            with open(MASTER_KEY_PATH, "rb") as f:
+                _MASTER_KEY = f.read().strip()
+                if _MASTER_KEY:
+                    return _MASTER_KEY
+        except Exception as e:
+            print(f"[!] Error reading master key: {e}")
+    # Generate new Fernet-compatible key (32 random bytes urlsafe base64)
+    try:
+        from cryptography.fernet import Fernet
+        key = Fernet.generate_key()
+    except Exception:
+        key = base64.urlsafe_b64encode(os.urandom(32))
+    try:
+        with open(MASTER_KEY_PATH, "wb") as f:
+            f.write(key)
+        try:
+            os.chmod(MASTER_KEY_PATH, 0o600)
+        except Exception:
+            pass
+        _MASTER_KEY = key
+        print("[+] Created new server_master.key with 0600 permissions.")
+    except Exception as e:
+        print(f"[!] Error saving master key: {e}")
+        _MASTER_KEY = key
+    return _MASTER_KEY
+
+def encrypt_credential(plaintext):
+    """Encrypts unattended device credentials at rest using Fernet / AES-256-GCM"""
+    if not plaintext:
+        return ""
+    if isinstance(plaintext, str) and (plaintext.startswith("enc:v1:") or plaintext.startswith("enc:v1-fb:")):
+        return plaintext
+    try:
+        from cryptography.fernet import Fernet
+        key = get_or_create_master_key()
+        f = Fernet(key)
+        token = f.encrypt(str(plaintext).encode("utf-8"))
+        return f"enc:v1:{token.decode('utf-8')}"
+    except Exception as e:
+        # Cryptographic stream fallback (HMAC-SHA256 authenticated XOR stream)
+        try:
+            key = get_or_create_master_key()
+            salt = os.urandom(16)
+            stream_key = hashlib.pbkdf2_hmac('sha256', key, salt, 10000)
+            raw = str(plaintext).encode("utf-8")
+            keystream = hashlib.sha256(stream_key).digest()
+            while len(keystream) < len(raw):
+                keystream += hashlib.sha256(keystream).digest()
+            xored = bytes(a ^ b for a, b in zip(raw, keystream[:len(raw)]))
+            tag = hmac.new(stream_key, salt + xored, hashlib.sha256).digest()[:16]
+            payload = base64.b64encode(salt + tag + xored).decode("ascii")
+            return f"enc:v1-fb:{payload}"
+        except Exception as ex:
+            print(f"[!] Encryption error: {ex}")
+            return str(plaintext)
+
+def decrypt_credential(ciphertext):
+    """Decrypts unattended device credentials into memory for authenticated owner"""
+    if not ciphertext or not isinstance(ciphertext, str):
+        return ""
+    if not ciphertext.startswith("enc:v1:"):
+        if ciphertext.startswith("enc:v1-fb:"):
+            try:
+                key = get_or_create_master_key()
+                raw_b64 = ciphertext[len("enc:v1-fb:"):]
+                data = base64.b64decode(raw_b64.encode("ascii"))
+                salt = data[:16]
+                tag = data[16:32]
+                xored = data[32:]
+                stream_key = hashlib.pbkdf2_hmac('sha256', key, salt, 10000)
+                expected_tag = hmac.new(stream_key, salt + xored, hashlib.sha256).digest()[:16]
+                if not hmac.compare_digest(tag, expected_tag):
+                    return ""
+                keystream = hashlib.sha256(stream_key).digest()
+                while len(keystream) < len(xored):
+                    keystream += hashlib.sha256(keystream).digest()
+                raw = bytes(a ^ b for a, b in zip(xored, keystream[:len(xored)]))
+                return raw.decode("utf-8")
+            except Exception:
+                return ""
+        # Legacy plaintext stored before hardening
+        return ciphertext
+    try:
+        from cryptography.fernet import Fernet
+        key = get_or_create_master_key()
+        f = Fernet(key)
+        token = ciphertext[len("enc:v1:"):].encode("utf-8")
+        dec = f.decrypt(token)
+        return dec.decode("utf-8")
+    except Exception as e:
+        print(f"[!] Decryption error: {e}")
+        return ""
+
+def hash_password(plaintext):
+    """One-way salted password hashing using PBKDF2-HMAC-SHA256 (100,000 rounds)"""
+    if not plaintext:
+        return ""
+    if isinstance(plaintext, str) and plaintext.startswith("pbkdf2:sha256:"):
+        return plaintext
+    salt = os.urandom(16)
+    dk = hashlib.pbkdf2_hmac('sha256', str(plaintext).encode('utf-8'), salt, 100000)
+    return f"pbkdf2:sha256:100000${salt.hex()}${dk.hex()}"
+
+def verify_password(stored_val, candidate_pwd):
+    """
+    Verifies candidate password against stored value.
+    Returns (is_valid: bool, needs_rehash: bool)
+    """
+    if not stored_val or not candidate_pwd:
+        return False, False
+    stored_str = str(stored_val).strip()
+    candidate_str = str(candidate_pwd).strip()
+
+    if stored_str.startswith("pbkdf2:sha256:"):
+        try:
+            parts = stored_str.split("$")
+            if len(parts) == 3:
+                rounds_spec = parts[0] # "pbkdf2:sha256:100000"
+                rounds = int(rounds_spec.split(":")[-1])
+                salt = bytes.fromhex(parts[1])
+                expected_dk = bytes.fromhex(parts[2])
+                actual_dk = hashlib.pbkdf2_hmac('sha256', candidate_str.encode('utf-8'), salt, rounds)
+                is_match = hmac.compare_digest(actual_dk, expected_dk)
+                return is_match, False
+        except Exception as e:
+            print(f"[!] Error verifying hashed password: {e}")
+            return False, False
+
+    # Legacy plaintext password fallback
+    is_match = hmac.compare_digest(stored_str, candidate_str)
+    return is_match, is_match  # if matches legacy, flag needs_rehash=True
+
+def is_ip_banned(client_ip):
+    now = time.time()
+    with RATE_LIMIT_LOCK:
+        ban_until = IP_BAN_LIST.get(client_ip)
+        if ban_until:
+            if now < ban_until:
+                remaining = int(ban_until - now)
+                return True, remaining
+            else:
+                del IP_BAN_LIST[client_ip]
+        return False, 0
+
+def record_login_failure(client_ip, target_identity):
+    now = time.time()
+    with RATE_LIMIT_LOCK:
+        attempts = LOGIN_FAILURES.get(client_ip, [])
+        attempts = [t for t in attempts if (now - t) < LOGIN_WINDOW_SECONDS]
+        attempts.append(now)
+        LOGIN_FAILURES[client_ip] = attempts
+
+        if len(attempts) >= MAX_LOGIN_ATTEMPTS:
+            ban_until = now + BAN_DURATION_SECONDS
+            IP_BAN_LIST[client_ip] = ban_until
+            LOGIN_FAILURES.pop(client_ip, None)
+            
+            # Dispatch urgent security alert
+            waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+            add_audit_log(
+                "IP_AUTO_BANNED",
+                "SECURITY_GUARD",
+                client_ip,
+                target_identity or "ANONYMOUS",
+                f"IP {client_ip} diblokir otomatis selama 15 menit (terlalu banyak percobaan login gagal: {len(attempts)}x)"
+            )
+            send_telegram_alert(
+                f"🚨 <b>[AUDIRA SEC-OPS] IP TERBLOKIR OTOMATIS (BRUTE-FORCE DETECTED)</b>\n"
+                f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"🌐 <b>IP Penyerang:</b> <code>{client_ip}</code>\n"
+                f"🎯 <b>Target Akun:</b> <code>{target_identity}</code>\n"
+                f"❌ <b>Percobaan Gagal:</b> {len(attempts)} kali berturut-turut\n"
+                f"⛔ <b>Tindakan:</b> Diblokir otomatis selama 15 menit (HTTP 429)\n"
+                f"🕒 <b>Waktu Deteksi:</b> {waktu_str} WIB"
+            )
+            return True, BAN_DURATION_SECONDS
+        return False, 0
+
+def clear_login_failure(client_ip):
+    with RATE_LIMIT_LOCK:
+        LOGIN_FAILURES.pop(client_ip, None)
 
 def send_telegram_alert(text_html):
     """Dispatches real-time security, registration, and login alerts to Telegram bot in background thread"""
@@ -245,10 +448,30 @@ def load_accounts():
 def save_accounts(accounts):
     try:
         os.makedirs(DATA_DIR, exist_ok=True)
+        # Ensure passwords and device unattended credentials are encrypted/hashed before disk write
+        for uname, u in accounts.items():
+            if isinstance(u, dict):
+                raw_pwd = u.get("password")
+                if raw_pwd and not str(raw_pwd).startswith("pbkdf2:sha256:"):
+                    u["password"] = hash_password(raw_pwd)
+                devs = u.get("devices", {})
+                for did, d in devs.items():
+                    if isinstance(d, dict):
+                        dp = d.get("password")
+                        if dp and not str(dp).startswith("enc:v1:"):
+                            d["password"] = encrypt_credential(dp)
+                        dup = d.get("unattended_password")
+                        if dup and not str(dup).startswith("enc:v1:"):
+                            d["unattended_password"] = encrypt_credential(dup)
+
         temp_path = ACCOUNTS_PATH + ".tmp"
         with open(temp_path, "w", encoding="utf-8") as f:
             json.dump(accounts, f, indent=2)
         os.replace(temp_path, ACCOUNTS_PATH)
+        try:
+            os.chmod(ACCOUNTS_PATH, 0o600)
+        except Exception:
+            pass
     except Exception as e:
         print(f"[!] Error saving accounts.json: {e}")
 
@@ -341,28 +564,24 @@ def find_user_by_token(auth_header):
         return None, None
 
     now = time.time()
-    with TOKEN_ACTIVITY_LOCK:
-        last_act = TOKEN_LAST_ACTIVITY.get(token)
-        if last_act is not None and (now - last_act) > SESSION_TIMEOUT_SECONDS:
-            # Token expired due to inactivity
-            TOKEN_LAST_ACTIVITY.pop(token, None)
-            with ACCOUNTS_LOCK:
-                accounts = load_accounts()
-                changed = False
-                for uname, u in accounts.items():
-                    if "tokens" in u and token in u["tokens"]:
-                        del u["tokens"][token]
-                        changed = True
-                        break
-                if changed:
-                    save_accounts(accounts)
-            return None, None
-
     with ACCOUNTS_LOCK:
         accounts = load_accounts()
         for uname, u in accounts.items():
             tokens = u.get("tokens", {})
             if token in tokens:
+                token_meta = tokens[token] if isinstance(tokens[token], dict) else {}
+                is_persistent = token_meta.get("persistent", True) or bool(token_meta.get("device_id"))
+                
+                # Check inactivity timeout only for non-persistent sessions
+                if not is_persistent:
+                    with TOKEN_ACTIVITY_LOCK:
+                        last_act = TOKEN_LAST_ACTIVITY.get(token)
+                        if last_act is not None and (now - last_act) > SESSION_TIMEOUT_SECONDS:
+                            TOKEN_LAST_ACTIVITY.pop(token, None)
+                            del u["tokens"][token]
+                            save_accounts(accounts)
+                            return None, None
+
                 with TOKEN_ACTIVITY_LOCK:
                     TOKEN_LAST_ACTIVITY[token] = now
                 return uname, u
@@ -462,6 +681,10 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept-Encoding, X-Requested-With, Cache-Control")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("X-XSS-Protection", "1; mode=block")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -622,6 +845,10 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 hostname = lp.get("hostname") or d.get("hostname") or (f"Phone-{clean_id[-4:]}" if is_mobile_dev else f"PC-{clean_id[-4:]}")
                 username = lp.get("username") or d.get("username") or ("Mobile User" if is_mobile_dev else "User")
 
+                dev_pwd = d.get("unattended_password") or d.get("password", "")
+                if dev_pwd:
+                    dev_pwd = decrypt_credential(dev_pwd)
+                dev_hash = d.get("hash", "")
                 peers_list.append({
                     "id": clean_id,
                     "alias": alias,
@@ -631,8 +858,8 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                     "tags": d.get("tags", ["My Devices"]),
                     "same_server": True,
                     "online": is_online,
-                    "hash": d.get("hash", ""),
-                    "password": d.get("password", ""),
+                    "hash": dev_hash,
+                    "password": dev_pwd,
                     "note": d.get("note", f"Akun: {uname}")
                 })
 
@@ -675,6 +902,86 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"total": len(user_list), "data": user_list}).encode())
+            return
+
+        # 4b. Accessible Device Groups endpoint (/api/device-group/accessible) for Audira client Group tab
+        if path == "/api/device-group/accessible":
+            uname, u = find_user_by_token(auth_header)
+            groups = [{"name": "Default"}, {"name": "Local Fleet"}]
+            if u:
+                tags = u.get("tags", [])
+                for t in tags:
+                    if t and not any(g["name"] == t for g in groups):
+                        groups.append({"name": t})
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"total": len(groups), "data": groups}).encode())
+            return
+
+        # 4c. Accessible Peers endpoint (/api/peers) for Audira client Group tab
+        if path == "/api/peers":
+            uname, u = find_user_by_token(auth_header)
+            fleet = build_fleet_devices()
+            peer_list = []
+
+            role = get_account_role(uname, u) if u else "user"
+            is_admin = role in ["owner", "admin"] if u else False
+
+            with ACCOUNTS_LOCK:
+                accounts = load_accounts()
+
+            for dev in fleet:
+                rid = dev.get("raw_id") or dev.get("id") or ""
+                clean_id = str(rid).replace(" ", "")
+                # If authenticated user is not admin, only show devices linked to their account
+                if u and not is_admin:
+                    if clean_id not in u.get("devices", {}):
+                        continue
+
+                # Find which account owns this device (if any)
+                dev_owner = uname or "audira"
+                dev_owner_display = u.get("display_name", dev_owner) if u else "Agus Dwi Rianto"
+                dev_rec = {}
+                for acct_name, acct in accounts.items():
+                    if clean_id in acct.get("devices", {}):
+                        dev_owner = acct_name
+                        dev_owner_display = acct.get("display_name", acct_name)
+                        dev_rec = acct["devices"][clean_id]
+                        break
+
+                is_owner_or_admin = (dev_owner == uname) or is_admin
+                dev_pwd = dev_rec.get("unattended_password") or dev_rec.get("password") or ""
+                if dev_pwd:
+                    dev_pwd = decrypt_credential(dev_pwd)
+                dev_hash = dev_rec.get("hash") or ""
+
+                peer_list.append({
+                    "id": clean_id,
+                    "info": {
+                        "device_name": dev.get("hostname") or dev.get("alias") or f"PC-{clean_id[-4:]}",
+                        "username": dev.get("username") or "User",
+                        "os": dev.get("os") or "Windows",
+                        "ip": dev.get("ip", ""),
+                        "password": dev_pwd if is_owner_or_admin else "",
+                        "hash": dev_hash if is_owner_or_admin else "",
+                        "unattended_ready": bool(dev_pwd or dev_hash) if is_owner_or_admin else False,
+                    },
+                    "password": dev_pwd if is_owner_or_admin else "",
+                    "hash": dev_hash if is_owner_or_admin else "",
+                    "status": 1,
+                    "user": dev_owner,
+                    "user_name": dev_owner_display,
+                    "device_group_name": dev.get("group") or "Default",
+                    "note": dev.get("alias") or ""
+                })
+
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"total": len(peer_list), "data": peer_list}).encode())
             return
 
         # 5. Accounts & Linked Devices endpoint (/api/accounts) for Web Admin Console
@@ -1018,6 +1325,59 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True, "message": "Semua sesi lain berhasil diputuskan."}).encode())
             return
 
+        # 0E. USER SELF-SERVICE: Set Device Unattended Credential (/api/user/device-credential)
+        if path == "/api/user/device-credential":
+            uname, u = find_user_by_token(auth_header)
+            if not uname or not u:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                dev_id = str(data.get("device_id", "")).replace(" ", "").strip()
+                pwd = str(data.get("password", "")).strip()
+                if not dev_id:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "ID perangkat tidak boleh kosong."}).encode())
+                    return
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if uname in accounts:
+                        if "devices" not in accounts[uname]:
+                            accounts[uname]["devices"] = {}
+                        if dev_id not in accounts[uname]["devices"]:
+                            accounts[uname]["devices"][dev_id] = {
+                                "id": dev_id,
+                                "alias": f"PC-{dev_id[-4:]}",
+                                "hostname": f"PC-{dev_id[-4:]}",
+                                "username": "User",
+                                "os": "Windows Desktop",
+                                "ip": client_ip,
+                                "tags": ["My Devices"],
+                                "last_seen_ts": time.time(),
+                            }
+                        enc_pwd = encrypt_credential(pwd)
+                        accounts[uname]["devices"][dev_id]["password"] = enc_pwd
+                        accounts[uname]["devices"][dev_id]["unattended_password"] = enc_pwd
+                        save_accounts(accounts)
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": "Password akses mandiri berhasil disimpan."}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
         # 1. SYSINFO_VER
         if path == "/api/sysinfo_ver":
             self.send_response(200)
@@ -1119,6 +1479,19 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
         # 4. USER AUTHENTICATION: LOGIN (POST /api/login)
         if path == "/api/login":
+            banned, rem_sec = is_ip_banned(client_ip)
+            if banned:
+                rem_min = max(1, rem_sec // 60)
+                self.send_response(429)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Retry-After", str(rem_sec))
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": f"Terlalu banyak percobaan login gagal dari IP ini. IP Anda diblokir sementara selama {rem_min} menit demi keamanan."
+                }).encode())
+                return
+
             try:
                 data = json.loads(body) if body else {}
                 raw_identity = str(data.get("username", "")).strip()
@@ -1148,6 +1521,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             break
 
                     if not target_user:
+                        record_login_failure(client_ip, raw_identity)
                         self.send_response(400)
                         self.send_cors_headers()
                         self.send_header("Content-Type", "application/json")
@@ -1155,7 +1529,10 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         self.wfile.write(json.dumps({"error": "Akun tidak terdaftar. Silakan lakukan registrasi terlebih dahulu."}).encode())
                         return
 
-                    if target_user.get("password") and target_user.get("password") != password:
+                    stored_pwd = target_user.get("password") or ""
+                    is_valid, needs_rehash = verify_password(stored_pwd, password)
+                    if not is_valid:
+                        record_login_failure(client_ip, raw_identity)
                         add_audit_log("LOGIN_FAILED", device_id or "WEB", client_ip, raw_identity, f"Percobaan login gagal untuk '{raw_identity}': Kata sandi salah")
                         waktu_str = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
                         send_telegram_alert(
@@ -1173,16 +1550,25 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         self.wfile.write(json.dumps({"error": "Kata sandi salah / Invalid password."}).encode())
                         return
 
+                    # Successful login resets failure counter for this IP
+                    clear_login_failure(client_ip)
+
+                    # Seamless auto-migration of legacy plaintext password to salted PBKDF2 hash
+                    if needs_rehash:
+                        target_user["password"] = hash_password(password)
+
                     user = target_user
                     username = target_username
 
                     # Generate new session access token
+                    remember = data.get("remember", True) or data.get("autoLogin", True)
                     access_token = uuid.uuid4().hex
                     if "tokens" not in user: user["tokens"] = {}
                     user["tokens"][access_token] = {
                         "created_at": time.time(),
                         "device_id": device_id,
-                        "client_ip": client_ip
+                        "client_ip": client_ip,
+                        "persistent": bool(remember or device_id)
                     }
                     with TOKEN_ACTIVITY_LOCK:
                         TOKEN_LAST_ACTIVITY[access_token] = time.time()
@@ -1367,7 +1753,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                     # Create new production user (Strictly role: user, NOT admin or owner)
                     new_user = {
                         "username": username,
-                        "password": password,
+                        "password": hash_password(password),
                         "display_name": display_name,
                         "email": email,
                         "role": "user",
@@ -1544,13 +1930,19 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                             except Exception:
                                 pass
 
-                        # Update aliases and tags for devices
+                        # Update aliases, tags and unattended credentials for devices
                         for p in peers:
                             pid = str(p.get("id", "")).replace(" ", "")
                             if pid in u.get("devices", {}):
                                 if "alias" in p: u["devices"][pid]["alias"] = p["alias"]
                                 if "tags" in p: u["devices"][pid]["tags"] = p["tags"]
                                 if "note" in p: u["devices"][pid]["note"] = p["note"]
+                                if "password" in p and p["password"]:
+                                    enc_pwd = encrypt_credential(p["password"])
+                                    u["devices"][pid]["password"] = enc_pwd
+                                    u["devices"][pid]["unattended_password"] = enc_pwd
+                                if "hash" in p and p["hash"]:
+                                    u["devices"][pid]["hash"] = p["hash"]
 
                         save_accounts(accounts)
             except Exception as e:
@@ -1655,7 +2047,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
 
                     accounts[uname] = {
                         "username": uname,
-                        "password": pwd,
+                        "password": hash_password(pwd),
                         "display_name": dname,
                         "email": email,
                         "note": "Audira Managed User",
@@ -1762,15 +2154,17 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                         return
 
                     u = accounts[username]
-                    if old_pwd and u.get("password") and u.get("password") != old_pwd:
-                        self.send_response(400)
-                        self.send_cors_headers()
-                        self.send_header("Content-Type", "application/json")
-                        self.end_headers()
-                        self.wfile.write(json.dumps({"error": "Password lama tidak sesuai"}).encode())
-                        return
+                    if old_pwd and u.get("password"):
+                        is_valid, _ = verify_password(u.get("password"), old_pwd)
+                        if not is_valid:
+                            self.send_response(400)
+                            self.send_cors_headers()
+                            self.send_header("Content-Type", "application/json")
+                            self.end_headers()
+                            self.wfile.write(json.dumps({"error": "Password lama tidak sesuai"}).encode())
+                            return
 
-                    u["password"] = new_pwd
+                    u["password"] = hash_password(new_pwd)
                     save_accounts(accounts)
 
                 add_audit_log(

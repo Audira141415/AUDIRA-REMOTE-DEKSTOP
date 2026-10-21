@@ -2689,6 +2689,151 @@ void setSharedAbPasswordDialog(String abName, Peer peer) {
   });
 }
 
+void setUnattendedPasswordDialog(Peer peer, {VoidCallback? onSuccess}) async {
+  final currentPass = peer.password.isNotEmpty
+      ? peer.password
+      : await bind.mainGetPeerOption(id: peer.id, key: 'unattended_password');
+  TextEditingController controller = TextEditingController(text: currentPass);
+  RxBool isInProgress = false.obs;
+  RxBool isInputEmpty = (currentPass.isEmpty).obs;
+  bool passwordVisible = false;
+  controller.addListener(() {
+    isInputEmpty.value = controller.text.trim().isEmpty;
+  });
+
+  gFFI.dialogManager.show((setState, close, context) {
+    savePassword(String pass) async {
+      isInProgress.value = true;
+      final cleanPass = pass.trim();
+      // 1. Save to local PeerConfig
+      await bind.mainSetPeerOption(
+          id: peer.id, key: 'unattended_password', value: cleanPass);
+      peer.password = cleanPass;
+
+      // 2. If logged in, sync credential to Audira central API server
+      if (gFFI.userModel.isLogin) {
+        try {
+          final api =
+              "${await bind.mainGetApiServer()}/api/user/device-credential";
+          await http.post(
+            Uri.parse(api),
+            headers: getHttpHeaders(),
+            body: jsonEncode({
+              'device_id': peer.id,
+              'password': cleanPass,
+            }),
+          );
+        } catch (e) {
+          debugPrint("Failed to sync unattended password to server: $e");
+        }
+      }
+
+      // 3. Update in memory across models
+      final gp =
+          gFFI.groupModel.peers.firstWhereOrNull((p) => p.id == peer.id);
+      if (gp != null) gp.password = cleanPass;
+      final ap =
+          gFFI.abModel.current.peers.firstWhereOrNull((p) => p.id == peer.id);
+      if (ap != null) ap.password = cleanPass;
+
+      isInProgress.value = false;
+      showToast(cleanPass.isEmpty
+          ? translate('Password cleared')
+          : translate(
+              'Unattended access configured (1-Click Connect Ready)'));
+      onSuccess?.call();
+      close();
+    }
+
+    cancel() {
+      close();
+    }
+
+    final devName = peer.alias.isNotEmpty ? peer.alias : peer.id;
+
+    return CustomAlertDialog(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.shield_outlined, color: Colors.green),
+          Text(translate('Unattended Access (1-Click Connect)'))
+              .paddingOnly(left: 10),
+        ],
+      ),
+      content: Obx(() => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${translate('Enter private/permanent password for')} $devName ${translate('to enable 1-click connect without password prompts:')}',
+                style: const TextStyle(fontSize: 13),
+              ).marginOnly(bottom: 12),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                obscureText: !passwordVisible,
+                decoration: InputDecoration(
+                  labelText: translate('Private Password'),
+                  hintText: translate('Enter password'),
+                  prefixIcon: const Icon(Icons.key),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                        passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: MyTheme.lightTheme.primaryColor),
+                    onPressed: () {
+                      setState(() {
+                        passwordVisible = !passwordVisible;
+                      });
+                    },
+                  ),
+                ),
+              ).workaroundFreezeLinuxMint(),
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_outline,
+                          color: Colors.green, size: 16)
+                      .marginOnly(right: 6),
+                  Expanded(
+                    child: Text(
+                      translate(
+                          'When set, clicking Connect will log in automatically like AnyDesk.'),
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ),
+                ],
+              ).marginOnly(top: 10),
+              isInProgress.value
+                  ? const LinearProgressIndicator().marginOnly(top: 10)
+                  : const Offstage()
+            ],
+          )),
+      actions: [
+        if (currentPass.isNotEmpty)
+          dialogButton(
+            "Clear",
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            onPressed: () => savePassword(''),
+            isOutline: true,
+          ),
+        dialogButton(
+          "Cancel",
+          icon: const Icon(Icons.close_rounded),
+          onPressed: cancel,
+          isOutline: true,
+        ),
+        dialogButton(
+          "Save",
+          icon: const Icon(Icons.done_rounded),
+          onPressed: () => savePassword(controller.text),
+        ),
+      ],
+      onSubmit: () => savePassword(controller.text),
+      onCancel: cancel,
+    );
+  });
+}
+
 void CommonConfirmDialog(OverlayDialogManager dialogManager, String content,
     VoidCallback onConfirm) {
   dialogManager.show((setState, close, context) {

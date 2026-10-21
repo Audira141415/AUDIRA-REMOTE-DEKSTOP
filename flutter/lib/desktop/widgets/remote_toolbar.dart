@@ -375,11 +375,19 @@ class _ToolbarTheme {
       BuildContext context, Widget child, BorderRadius borderRadius) {
     return Container(
       decoration: BoxDecoration(
+        color: const Color(0xE60F172A),
         border: Border.all(
-          color: borderColor(context),
+          color: const Color(0xFF334155),
           width: 1,
         ),
         borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: child,
     );
@@ -851,7 +859,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
     }
     if (!isWeb) toolbarItems.add(_RecordMenu());
     toolbarItems.add(_CloseMenu(id: widget.id, ffi: widget.ffi));
-    final toolbarBorderRadius = BorderRadius.all(Radius.circular(4.0));
+    final toolbarBorderRadius = BorderRadius.all(Radius.circular(10.0));
     // innerAxis: how the toolbar icons themselves flow.
     // outerAxis: how the toolbar block and the handle stack against each other
     // (perpendicular to the dock edge, so the handle hangs off the interior face).
@@ -861,14 +869,10 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
         ? SizedBox(width: _ToolbarTheme.buttonHMargin * 2)
         : SizedBox(height: _ToolbarTheme.buttonHMargin * 2);
     final toolbarMaterial = Material(
-      elevation: _ToolbarTheme.elevation,
+      elevation: 6,
       shadowColor: MyTheme.color(context).shadow,
       borderRadius: toolbarBorderRadius,
-      color: Theme.of(context)
-          .menuBarTheme
-          .style
-          ?.backgroundColor
-          ?.resolve(MaterialState.values.toSet()),
+      color: Colors.transparent,
       child: SingleChildScrollView(
         scrollDirection: innerAxis,
         child: Theme(

@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common/widgets/connection_page_title.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/widgets/popup_menu.dart';
@@ -390,25 +391,61 @@ class _ConnectionPageState extends State<ConnectionPage>
   /// UI for the remote ID TextField.
   /// Search for a peer.
   Widget _buildRemoteIDTextField(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     var w = Container(
       constraints: const BoxConstraints(maxWidth: 580),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
       decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: isDark ? const Color(0xFF1E293B) : Theme.of(context).cardColor,
           borderRadius: const BorderRadius.all(Radius.circular(16)),
           border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.5)),
+              color: isDark ? const Color(0xFF334155) : Theme.of(context).dividerColor.withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
+              color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.04),
+              blurRadius: 16,
               offset: const Offset(0, 4),
             )
           ]),
       child: Ink(
         child: Column(
           children: [
-            getConnectionPageTitle(context, false).marginOnly(bottom: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                getConnectionPageTitle(context, false),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF10B981),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      const Text(
+                        "P2P Cluster Siap",
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF10B981),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ).marginOnly(bottom: 14),
             Row(
               children: [
                 Expanded(
@@ -440,7 +477,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                           textEditingValue.text.replaceAll(" ", "");
                       if (int.tryParse(textWithoutSpaces) != null) {
                         textEditingValue = TextEditingValue(
-                          text: textWithoutSpaces,
+                           text: textWithoutSpaces,
                           selection: textEditingValue.selection,
                         );
                       }
@@ -477,20 +514,60 @@ class _ConnectionPageState extends State<ConnectionPage>
                           focusNode: fieldFocusNode,
                           style: const TextStyle(
                             fontFamily: 'WorkSans',
-                            fontSize: 22,
+                            fontSize: 20,
+                            letterSpacing: 0.8,
+                            fontWeight: FontWeight.w600,
                             height: 1.4,
                           ),
                           maxLines: 1,
                           cursorColor:
                               Theme.of(context).textTheme.titleLarge?.color,
                           decoration: InputDecoration(
-                              filled: false,
+                              filled: true,
+                              fillColor: isDark ? const Color(0xFF0B1120) : const Color(0xFFF8FAFC),
                               counterText: '',
                               hintText: _idInputFocused.value
                                   ? null
                                   : translate('Enter Remote ID'),
+                              hintStyle: TextStyle(
+                                color: isDark ? const Color(0xFF64748B) : Colors.grey[400],
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.desktop_windows_outlined,
+                                color: isDark ? const Color(0xFF38BDF8) : MyTheme.accent,
+                                size: 22,
+                              ),
+                              suffixIcon: IconButton(
+                                tooltip: 'Tempel ID dari Clipboard',
+                                icon: Icon(
+                                  Icons.content_paste_rounded,
+                                  size: 18,
+                                  color: isDark ? const Color(0xFF94A3B8) : Colors.grey,
+                                ),
+                                onPressed: () async {
+                                  final data = await Clipboard.getData('text/plain');
+                                  if (data?.text != null && data!.text!.isNotEmpty) {
+                                    _idController.id = data.text!;
+                                  }
+                                },
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFF38BDF8),
+                                  width: 1.5,
+                                ),
+                              ),
                               contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 13)),
+                                  horizontal: 16, vertical: 14)),
                           controller: fieldTextEditingController,
                           inputFormatters: [IDTextInputFormatter()],
                           onChanged: (v) {
@@ -572,47 +649,69 @@ class _ConnectionPageState extends State<ConnectionPage>
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 13.0),
+              padding: const EdgeInsets.only(top: 14.0),
               child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                 SizedBox(
-                  height: 32.0,
+                  height: 36.0,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      side: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-                    icon: const Icon(Icons.folder_shared_outlined, size: 15),
+                    icon: const Icon(Icons.folder_shared_outlined, size: 16),
                     onPressed: () {
                       onConnect(isFileTransfer: true);
                     },
                     label: Text(translate("Transfer file")),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 SizedBox(
-                  height: 32.0,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      backgroundColor: MyTheme.accent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                  height: 36.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2563EB), Color(0xFF0284C7)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2563EB).withOpacity(0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
                     ),
-                    onPressed: () {
-                      onConnect();
-                    },
-                    child: Text(translate("Connect")),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.bolt, size: 18),
+                      onPressed: () {
+                        onConnect();
+                      },
+                      label: Text(
+                        translate("Connect"),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  height: 32.0,
-                  width: 32.0,
+                  height: 36.0,
+                  width: 36.0,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(8),
+                    color: isDark ? const Color(0xFF1E293B) : Colors.transparent,
+                    border: Border.all(color: isDark ? const Color(0xFF334155) : Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: StatefulBuilder(

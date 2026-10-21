@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
@@ -471,48 +470,59 @@ class MyTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: false,
     brightness: Brightness.dark,
-    hoverColor: Color.fromARGB(255, 45, 46, 53),
-    scaffoldBackgroundColor: Color(0xFF18191E),
-    dialogBackgroundColor: Color(0xFF18191E),
-    appBarTheme: AppBarTheme(
+    hoverColor: const Color(0xFF334155),
+    scaffoldBackgroundColor: const Color(0xFF0F172A),
+    dialogBackgroundColor: const Color(0xFF1E293B),
+    dividerColor: const Color(0xFF334155),
+    appBarTheme: const AppBarTheme(
       shadowColor: Colors.transparent,
+      backgroundColor: Color(0xFF0F172A),
     ),
     dialogTheme: DialogThemeData(
       elevation: 15,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18.0),
-        side: BorderSide(
+        side: const BorderSide(
           width: 1,
-          color: Color(0xFF24252B),
+          color: Color(0xFF334155),
         ),
       ),
     ),
     scrollbarTheme: scrollbarThemeDark,
     inputDecorationTheme: (isDesktop || isWebDesktop)
         ? InputDecorationTheme(
-            fillColor: Color(0xFF24252B),
+            fillColor: const Color(0xFF0B1120),
             filled: true,
             isDense: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF334155)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF334155)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF38BDF8), width: 1.5),
             ),
           )
         : null,
     textTheme: const TextTheme(
-      titleLarge: TextStyle(fontSize: 19),
-      titleSmall: TextStyle(fontSize: 14),
-      bodySmall: TextStyle(fontSize: 12, height: 1.25),
-      bodyMedium: TextStyle(fontSize: 14, height: 1.25),
+      titleLarge: TextStyle(fontSize: 19, color: Color(0xFFF8FAFC)),
+      titleSmall: TextStyle(fontSize: 14, color: Color(0xFFF8FAFC)),
+      bodySmall: TextStyle(fontSize: 12, height: 1.25, color: Color(0xFF94A3B8)),
+      bodyMedium: TextStyle(fontSize: 14, height: 1.25, color: Color(0xFFE2E8F0)),
       labelLarge: TextStyle(
         fontSize: 16.0,
         fontWeight: FontWeight.bold,
         color: accent80,
       ),
     ),
-    cardColor: Color(0xFF24252B),
+    cardColor: const Color(0xFF1E293B),
     visualDensity: VisualDensity.adaptivePlatformDensity,
     tabBarTheme: const TabBarThemeData(
-      labelColor: Colors.white70,
+      labelColor: Colors.white,
     ),
     tooltipTheme: tooltipTheme(),
     splashColor: (isDesktop || isWebDesktop) ? Colors.transparent : null,
@@ -543,10 +553,10 @@ class MyTheme {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Color(0xFF24252B),
-        side: BorderSide(color: Colors.white12, width: 0.5),
-        disabledForegroundColor: Colors.white70,
-        foregroundColor: Colors.white70,
+        backgroundColor: const Color(0xFF1E293B),
+        side: const BorderSide(color: Color(0xFF334155), width: 1),
+        disabledForegroundColor: Colors.white38,
+        foregroundColor: const Color(0xFFE2E8F0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -556,17 +566,18 @@ class MyTheme {
     radioTheme: radioTheme(),
     checkboxTheme: checkboxTheme,
     listTileTheme: listTileTheme,
-    menuBarTheme: MenuBarThemeData(
+    menuBarTheme: const MenuBarThemeData(
         style: MenuStyle(
-            backgroundColor: MaterialStatePropertyAll(Color(0xFF121212)))),
-    colorScheme: ColorScheme.dark(
-      primary: Colors.blue,
-      secondary: accent,
-      background: Color(0xFF24252B),
+            backgroundColor: MaterialStatePropertyAll(Color(0xFF0F172A)))),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFF2563EB),
+      secondary: Color(0xFF38BDF8),
+      background: Color(0xFF0F172A),
+      surface: Color(0xFF1E293B),
     ),
-    popupMenuTheme: PopupMenuThemeData(
+    popupMenuTheme: const PopupMenuThemeData(
         shape: RoundedRectangleBorder(
-      side: BorderSide(color: Colors.white24),
+      side: BorderSide(color: Color(0xFF334155)),
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
     )),
   ).copyWith(
@@ -577,7 +588,11 @@ class MyTheme {
   );
 
   static ThemeMode getThemeModePreference() {
-    return themeModeFromString(bind.mainGetLocalOption(key: kCommConfKeyTheme));
+    final v = bind.mainGetLocalOption(key: kCommConfKeyTheme);
+    if (v.isEmpty) {
+      return ThemeMode.dark; // Default to Modern Dark Enterprise!
+    }
+    return themeModeFromString(v);
   }
 
   static Future<void> changeDarkMode(ThemeMode mode) async {
@@ -1935,10 +1950,10 @@ Future<Size> _adjustRestoreMainWindowSize(double? width, double? height) async {
   const double maxHeight = 6480;
 
   final defaultWidth =
-      ((isDesktop || isWebDesktop) ? 1280 : kMobileDefaultDisplayWidth)
+      ((isDesktop || isWebDesktop) ? 980 : kMobileDefaultDisplayWidth)
           .toDouble();
   final defaultHeight =
-      ((isDesktop || isWebDesktop) ? 720 : kMobileDefaultDisplayHeight)
+      ((isDesktop || isWebDesktop) ? 680 : kMobileDefaultDisplayHeight)
           .toDouble();
   double restoreWidth = width ?? defaultWidth;
   double restoreHeight = height ?? defaultHeight;
@@ -2059,6 +2074,7 @@ Future<bool> restoreWindowPosition(WindowType type,
       case WindowType.Main:
         // Center the main window only if no position is saved (on first run).
         if (isWindows || isLinux) {
+          await windowManager.setSize(const Size(980, 680));
           await windowManager.center();
         }
         // For MacOS, the window is already centered by default.
@@ -2596,6 +2612,32 @@ connect(BuildContext context, String id,
   final oldId = id;
   id = await bind.mainHandleRelayId(id: id);
   forceRelay = id != oldId || forceRelay;
+
+  // Unattended 1-Click: auto-resolve password if not explicitly supplied
+  if (password == null || password.isEmpty) {
+    try {
+      final localUnattended =
+          await bind.mainGetPeerOption(id: id, key: 'unattended_password');
+      if (localUnattended.isNotEmpty) {
+        password = localUnattended;
+        isSharedPassword = true;
+      } else {
+        final gpList = gFFI.groupModel.peers.where((p) => p.id == id);
+        if (gpList.isNotEmpty && gpList.first.password.isNotEmpty) {
+          password = gpList.first.password;
+          isSharedPassword = true;
+        } else {
+          final apList =
+              gFFI.abModel.current.peers.where((p) => p.id == id);
+          if (apList.isNotEmpty && apList.first.password.isNotEmpty) {
+            password = apList.first.password;
+            isSharedPassword = true;
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
   assert(!(isFileTransfer && isTcpTunneling && isRDP),
       "more than one connect type");
 

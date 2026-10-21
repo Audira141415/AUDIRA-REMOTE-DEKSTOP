@@ -22,7 +22,10 @@ const i18n = {
     heroBadge: "P2P NAT Traversal • Hardware AV1/VP9 Codec • 100% Data Sovereignty",
     heroTitle: "High-Performance <span>Remote Desktop</span>. Zero Cloud Relays.",
     heroSubtitle: "Direct peer-to-peer UDP streaming at 60 FPS with hardware AV1/VP9 encoding and end-to-end encryption. Run your own private relay cluster in minutes.",
-    btnHeroWin: "Download AudiraDesk-Full-Installer.exe (Windows 64-bit)",
+    btnHeroWin: "Download for Windows (25.1 MB)",
+    btnWinInstaller: "Download Windows Installer",
+    descWinInstaller: "Official full installer with Windows UAC Service, unattended background access, and verified code signature.",
+    btnSimDownload: "Download Client (25.1 MB)",
     btnHeroConsole: "Access Web Console",
     specPortable: "Zero-Installation Portable (Single Binary)",
     specCrypto: "Libsodium X25519-ChaCha20-Poly1305",
@@ -119,7 +122,34 @@ const i18n = {
     noteEnt: "Tailored capacity & dedicated relay",
     btnEnt: "Contact Enterprise",
     matrixTitle: "Feature Comparison Across Editions",
-    colFeature: "CORE CAPABILITY"
+    colFeature: "CORE CAPABILITY",
+    navFeatures: "Features",
+    bentoTgTitle: "Telegram Bot 2FA & Remote Approval",
+    bentoTgDesc: "Native Telegram bot integration for real-time connection alerts, 2FA authorization codes, and unattended remote approval right from your smartphone.",
+    bentoTgTag: "TELEGRAM 2FA INTEGRATED",
+    bentoTgReqTitle: "Session Authorization Request",
+    bentoTgTarget: "Target Endpoint",
+    bentoTgRequestor: "Requestor Identity",
+    bentoTgSecurity: "Handshake Security",
+    bentoTgTotp: "One-Time 2FA TOTP",
+    bentoTgApproveBtn: "Approve Connection",
+    bentoTgDenyBtn: "Deny",
+    bentoTgApprovedMsg: "Session authorized via Webhook. P2P tunnel established.",
+    bentoClusterTag: "Dedicated Cluster Deployment",
+    bentoClusterTitle: "Private Relay Cluster & Infrastructure Sovereignty Architecture",
+    bentoClusterPill: "HIGH-AVAILABILITY CLUSTER",
+    bentoClusterS1Tag: "P2P SIGNAL COORDINATOR",
+    bentoClusterS1Title: "Rendezvous Mediator",
+    bentoClusterS1Desc: "Facilitates public IP discovery and instant UDP NAT hole punching between firewalls.",
+    bentoClusterS2Tag: "ZERO-TRUST RELAY",
+    bentoClusterS2Title: "Encrypted High-Speed Relay",
+    bentoClusterS2Desc: "High-throughput fallback route when symmetric firewalls prevent direct P2P connection.",
+    bentoClusterS3Tag: "ADMIN PORTAL & API",
+    bentoClusterS3Title: "Web Management Console",
+    bentoClusterS3Desc: "Private authenticated control panel for fleet inventory, live telemetry, and webhook alerts.",
+    bentoClusterS4Tag: "CRYPTOGRAPHIC SECURITY",
+    bentoClusterS4Title: "Libsodium Asymmetric",
+    bentoClusterS4Desc: "X25519 key exchange and ChaCha20-Poly1305 symmetric encryption for all remote sessions.",
   },
   id: {
     bannerText: "Rilis Resmi: Audira Desk v1.5.3 Full Installer dengan keamanan zero-trust kini telah tersedia.",
@@ -137,7 +167,10 @@ const i18n = {
     heroBadge: "NAT Traversal P2P • Codec Hardware AV1/VP9 • Kedaulatan Data 100%",
     heroTitle: "Infrastruktur <span>Remote Desktop</span> Cepat. Tanpa Perantara Cloud.",
     heroSubtitle: "Koneksi langsung peer-to-peer UDP 60 FPS dengan akselerasi hardware AV1/VP9 dan enkripsi end-to-end. Jalankan cluster relay privat Anda dalam hitungan menit.",
-    btnHeroWin: "Unduh AudiraDesk-Full-Installer.exe (Windows 64-bit)",
+    btnHeroWin: "Unduh untuk Windows (25.1 MB)",
+    btnWinInstaller: "Unduh Installer Windows",
+    descWinInstaller: "Paket instalasi lengkap dengan Layanan Windows UAC, akses background tanpa pengawas, dan sertifikat resmi terverifikasi.",
+    btnSimDownload: "Unduh Client (25.1 MB)",
     btnHeroConsole: "Masuk Konsol Web",
     specPortable: "Portabel Tanpa Install (File Tunggal)",
     specCrypto: "Enkripsi Libsodium X25519-ChaCha20",
@@ -213,6 +246,33 @@ const i18n = {
     btnEnt: "Hubungi Enterprise",
     matrixTitle: "Tabel Perbandingan Fitur Seluruh Paket",
     colFeature: "KEMAMPUAN UTAMA",
+    navFeatures: "Fitur",
+    bentoTgTitle: "Integrasi Bot Telegram 2FA & Akses Remote",
+    bentoTgDesc: "Integrasi langsung bot Telegram untuk notifikasi koneksi, kode 2FA otomatis, dan persetujuan akses jarak jauh langsung dari smartphone Anda tanpa perantara cloud pihak ketiga.",
+    bentoTgTag: "TERINTEGRASI TELEGRAM 2FA",
+    bentoTgReqTitle: "Permintaan Otorisasi Sesi",
+    bentoTgTarget: "Target Endpoint",
+    bentoTgRequestor: "Identitas Pemohon",
+    bentoTgSecurity: "Keamanan Handshake",
+    bentoTgTotp: "Kode Sekali Pakai 2FA",
+    bentoTgApproveBtn: "Setujui Koneksi",
+    bentoTgDenyBtn: "Tolak",
+    bentoTgApprovedMsg: "Sesi disetujui via Webhook. Terowongan P2P berhasil dibuat.",
+    bentoClusterTag: "Penerapan Kluster Mandiri",
+    bentoClusterTitle: "Arsitektur Kluster Relay Privat & Kedaulatan Infrastruktur",
+    bentoClusterPill: "KLUSTER AKTIF KETERSEDIAAN TINGGI",
+    bentoClusterS1Tag: "KOORDINATOR SINYAL P2P",
+    bentoClusterS1Title: "Rendezvous Mediator",
+    bentoClusterS1Desc: "Memfasilitasi penemuan alamat IP publik dan proses pembukaan firewall UDP NAT secara instan.",
+    bentoClusterS2Tag: "RELAY TERENKRIPSI ZERO-TRUST",
+    bentoClusterS2Title: "Relay Berkecepatan Tinggi",
+    bentoClusterS2Desc: "Jalur cadangan throughput tinggi saat kedua firewall berada di balik symmetric NAT yang ketat.",
+    bentoClusterS3Tag: "PORTAL ADMIN & API",
+    bentoClusterS3Title: "Konsol Manajemen Web",
+    bentoClusterS3Desc: "Panel kontrol privat terotentikasi untuk inventaris armada, telemetri live, dan integrasi webhook bot.",
+    bentoClusterS4Tag: "KEAMANAN KRIPTOGRAFI",
+    bentoClusterS4Title: "Kriptografi Libsodium",
+    bentoClusterS4Desc: "Pertukaran kunci X25519 dan enkripsi simetris ChaCha20-Poly1305 di setiap sesi remote tanpa perantara.",
     tagDownloads: "Paket Platform",
     titleDownloads: "Unduh Audira Desk untuk Komputer & Mobile",
     descDownloads: "Dikompilasi dengan Rust dan Flutter. Kendali jarak jauh berdefinisi tinggi untuk Windows, Linux, macOS, dan Android.",
@@ -603,7 +663,9 @@ function initAuthModal() {
   }
 
   // Check existing session
-  if (sessionStorage.getItem('audira_logged_in') === 'true') {
+  const hasSession = sessionStorage.getItem('audira_logged_in') === 'true' || 
+                     (localStorage.getItem('audira_remember') === 'true' && localStorage.getItem('audira_access_token'));
+  if (hasSession) {
     showLoggedInState();
   }
 }
@@ -684,6 +746,8 @@ async function handleAdminLogin() {
   const label = document.getElementById('loginBtnLabel');
   const emailInput = document.getElementById('adminEmail');
   const passwordInput = document.getElementById('adminPassword');
+  const rememberCheckbox = document.getElementById('rememberSession');
+  const isRemember = rememberCheckbox ? rememberCheckbox.checked : true;
   const username = emailInput ? emailInput.value.trim() : '';
   const password = passwordInput ? passwordInput.value : '';
 
@@ -706,16 +770,24 @@ async function handleAdminLogin() {
       body: JSON.stringify({
         username: username,
         password: password,
-        type: 'account'
+        type: 'account',
+        remember: isRemember
       })
     });
     const data = await res.json();
     if (res.ok && data.access_token) {
       localStorage.setItem('audira_access_token', data.access_token);
       localStorage.setItem('audira_user', JSON.stringify(data.user));
+      if (isRemember) {
+        localStorage.setItem('audira_remember', 'true');
+      } else {
+        localStorage.removeItem('audira_remember');
+      }
       sessionStorage.setItem('audira_logged_in', 'true');
       showLoggedInState(data.user);
-      initClientSessionTimeout();
+      if (!isRemember) {
+        initClientSessionTimeout();
+      }
 
       const isStaff = data.user.role === 'owner' || data.user.role === 'admin' || data.user.is_admin;
       if (isStaff) {
@@ -1316,6 +1388,7 @@ function handleSignOut(silent = false) {
   }
   localStorage.removeItem('audira_access_token');
   localStorage.removeItem('audira_user');
+  localStorage.removeItem('audira_remember');
   sessionStorage.removeItem('audira_logged_in');
   document.querySelector('#loginModal .modal-dialog')?.classList.remove('profile-expanded');
   const titleEl = document.getElementById('modalTitle');
@@ -1356,6 +1429,9 @@ function resetClientActivityTimer() {
 }
 
 function initClientSessionTimeout() {
+  if (localStorage.getItem('audira_remember') === 'true') {
+    return; // Remembered session persists without forced inactivity timeout
+  }
   const token = localStorage.getItem('audira_access_token');
   if (!token) return;
 
@@ -2111,3 +2187,14 @@ function copyMobilePairUri() {
 }
 
 
+
+
+// Global Endpoint Quick Select for Interactive Simulator
+window.selectSimTarget = function(id, name) {
+  const targetInput = document.getElementById('simTargetId');
+  if (targetInput) {
+    targetInput.value = id;
+    targetInput.focus();
+    showToast('Target selected: ' + (name || id), 'info');
+  }
+};

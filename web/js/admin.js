@@ -61,6 +61,7 @@ function handleAdminSignOut() {
   }
   localStorage.removeItem('audira_access_token');
   localStorage.removeItem('audira_user');
+  localStorage.removeItem('audira_remember');
   sessionStorage.removeItem('audira_logged_in');
   window.location.replace('index.html');
 }
@@ -104,6 +105,9 @@ function resetSessionActivityTimer(silent = false) {
 }
 
 function scheduleSessionTimeoutCheck() {
+  if (localStorage.getItem('audira_remember') === 'true') {
+    return; // Remembered operator session does not expire by inactivity
+  }
   const elapsed = Date.now() - lastInteractionTimestamp;
   const timeUntilWarning = (SESSION_TIMEOUT_MS - SESSION_WARNING_MS) - elapsed;
 

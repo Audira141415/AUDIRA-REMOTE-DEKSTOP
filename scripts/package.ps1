@@ -43,6 +43,18 @@ if (-not $needRebuild) {
     if (Test-Path $payloadDir) { Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue }
     New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
     
+    if ($Rebuild -or (-not (Test-Path $runnerExe))) {
+        Write-Host "[BUILD] Mengompilasi Flutter UI release terbaru (Modern Dark Enterprise)..." -ForegroundColor Cyan
+        Push-Location (Join-Path $rootDir "flutter")
+        try {
+            & flutter build windows --release
+        } catch {
+            Write-Host "[WARN] flutter build windows gagal atau dilewati: $_" -ForegroundColor Yellow
+        } finally {
+            Pop-Location
+        }
+    }
+
     if (Test-Path $runnerReleaseDir) {
         Copy-Item -Path "$runnerReleaseDir\*" -Destination $payloadDir -Recurse -Force
         # Sinkronkan mentahan exe di root

@@ -375,9 +375,13 @@ Widget buildConnectionCard(Client client) {
             ? Offstage()
             : _PrivilegeBoard(client: client),
         Expanded(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: _CmControlPanel(client: client),
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanStart: (_) => windowManager.startDragging(),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: _CmControlPanel(client: client),
+            ),
           ),
         )
       ],
@@ -455,29 +459,34 @@ class _CmHeaderState extends State<_CmHeader>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Color(0xff00bfe1),
-            Color(0xff0071ff),
-          ],
-        ),
-      ),
-      margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-      padding: EdgeInsets.only(
-        top: 10.0,
-        bottom: 10.0,
-        left: 10.0,
-        right: 5.0,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildClientAvatar().marginOnly(right: 10.0),
+    return MouseRegion(
+      cursor: SystemMouseCursors.move,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanStart: (_) => windowManager.startDragging(),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Color(0xff00bfe1),
+                Color(0xff0071ff),
+              ],
+            ),
+          ),
+          margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+          padding: EdgeInsets.only(
+            top: 10.0,
+            bottom: 10.0,
+            left: 10.0,
+            right: 5.0,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildClientAvatar().marginOnly(right: 10.0),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -559,24 +568,29 @@ class _CmHeaderState extends State<_CmHeader>
                 (client.type_() != ClientType.remote &&
                     client.type_() != ClientType.file &&
                     client.type_() != ClientType.camera),
-            child: IconButton(
-              onPressed: () => checkClickTime(client.id, () {
-                if (client.type_() == ClientType.file) {
-                  gFFI.chatModel.toggleCMFilePage();
-                } else {
-                  gFFI.chatModel
-                      .toggleCMChatPage(MessageKey(client.peerId, client.id));
-                }
-              }),
-              icon: SvgPicture.asset(client.type_() == ClientType.file
-                  ? 'assets/file_transfer.svg'
-                  : 'assets/chat2.svg'),
-              splashRadius: kDesktopIconButtonSplashRadius,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: IconButton(
+                onPressed: () => checkClickTime(client.id, () {
+                  if (client.type_() == ClientType.file) {
+                    gFFI.chatModel.toggleCMFilePage();
+                  } else {
+                    gFFI.chatModel
+                        .toggleCMChatPage(MessageKey(client.peerId, client.id));
+                  }
+                }),
+                icon: SvgPicture.asset(client.type_() == ClientType.file
+                    ? 'assets/file_transfer.svg'
+                    : 'assets/chat2.svg'),
+                splashRadius: kDesktopIconButtonSplashRadius,
+              ),
             ),
           )
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 
   @override
@@ -686,10 +700,17 @@ class _PrivilegeBoardState extends State<_PrivilegeBoard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            translate("Permissions"),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanStart: (_) => windowManager.startDragging(),
+            child: SizedBox(
+              width: double.infinity,
+              child: Text(
+                translate("Permissions"),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ).marginOnly(left: 4.0, bottom: 8.0),
           Expanded(
             child: GridView.count(

@@ -686,6 +686,7 @@ class _DesktopTabState extends State<DesktopTab>
                               unSelectedTabBackgroundColor:
                                   unSelectedTabBackgroundColor,
                               selectedBorderColor: selectedBorderColor,
+                              isMainWindow: isMainWindow,
                             ))),
                   ],
                 ))),
@@ -928,6 +929,7 @@ Future<bool> closeConfirmDialog() async {
 class _ListView extends StatelessWidget {
   final DesktopTabController controller;
   final RxList<String> invisibleTabKeys;
+  final bool isMainWindow;
 
   final TabBuilder? tabBuilder;
   final TabMenuBuilder? tabMenuBuilder;
@@ -942,6 +944,7 @@ class _ListView extends StatelessWidget {
   _ListView({
     required this.controller,
     required this.invisibleTabKeys,
+    this.isMainWindow = true,
     this.tabBuilder,
     this.tabMenuBuilder,
     this.labelGetter,
@@ -1023,7 +1026,11 @@ class _ListView extends StatelessWidget {
                   ),
                 );
                 return GestureDetector(
-                  onPanStart: (e) {},
+                  onPanStart: (e) {
+                    if (controller.tabType == DesktopTabType.cm) {
+                      startDragging(isMainWindow);
+                    }
+                  },
                   child: child,
                 );
               }).toList()));

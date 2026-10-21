@@ -874,7 +874,7 @@ impl Client {
                 }
             }
         }
-        if !exchanged && legacy_secure {
+        if !carries_offer && !exchanged && legacy_secure {
             secure_tcp(&mut socket, &key)
                 .await
                 .map_err(|e| anyhow!("Failed to secure tcp: {}", e))?;

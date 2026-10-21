@@ -1,4 +1,3 @@
-import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common/widgets/dialog.dart';
@@ -132,12 +131,13 @@ class _PeerCardState extends State<_PeerCard>
   }
 
   makeChild(bool isPortrait, Peer peer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final name = hideUsernameOnCard == true
         ? peer.hostname
         : '${peer.username}${peer.username.isNotEmpty && peer.hostname.isNotEmpty ? '@' : ''}${peer.hostname}';
     final greyStyle = TextStyle(
         fontSize: 11,
-        color: Theme.of(context).textTheme.titleLarge?.color?.withOpacity(0.6));
+        color: isDark ? const Color(0xFF94A3B8) : Theme.of(context).textTheme.titleLarge?.color?.withValues(alpha: 0.6));
     final showNote = _showNote(peer);
 
     return Row(
@@ -145,7 +145,11 @@ class _PeerCardState extends State<_PeerCard>
       children: [
         Container(
             decoration: BoxDecoration(
-              color: str2color('${peer.id}${peer.platform}', 0x7f),
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+              border: Border.all(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                width: 0.8,
+              ),
               borderRadius: isPortrait
                   ? BorderRadius.circular(_tileRadius)
                   : BorderRadius.only(
@@ -162,16 +166,28 @@ class _PeerCardState extends State<_PeerCard>
                     .paddingAll(6),
                 if (_shouldBuildPasswordIcon(peer))
                   Positioned(
-                    top: 1,
-                    left: 1,
-                    child: Icon(Icons.key, size: 6, color: Colors.white),
+                    top: 2,
+                    left: 2,
+                    child: Tooltip(
+                      message: translate(
+                          'Unattended Access (1-Click Connect Ready)'),
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.95),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.shield,
+                            size: 10, color: Colors.white),
+                      ),
+                    ),
                   ),
               ],
             )),
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background,
+              color: isDark ? const Color(0xFF0F172A) : Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(_tileRadius),
                 bottomRight: Radius.circular(_tileRadius),
@@ -233,6 +249,15 @@ class _PeerCardState extends State<_PeerCard>
                     ],
                   ).marginOnly(top: 2),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.play_circle_fill,
+                      size: 20, color: MyTheme.accent),
+                  tooltip: translate('Connect'),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () =>
+                      connectInPeerTab(context, peer, widget.tab),
+                ).marginOnly(right: 6),
                 isPortrait
                     ? checkBoxOrActionMorePortrait(peer)
                     : checkBoxOrActionMoreLandscape(peer, isTile: true),
@@ -280,6 +305,7 @@ class _PeerCardState extends State<_PeerCard>
 
   Widget _buildPeerCard(
       BuildContext context, Peer peer, Rx<BoxDecoration?> deco) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     hideUsernameOnCard ??=
         bind.mainGetBuildinOption(key: kHideUsernameOnCard) == 'Y';
     final name = hideUsernameOnCard == true
@@ -295,6 +321,20 @@ class _PeerCardState extends State<_PeerCard>
       child: Obx(
         () => Container(
           foregroundDecoration: deco.value,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(_cardRadius),
+            border: Border.all(
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withValues(alpha: 0.35) : Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(_cardRadius - _borderWidth),
             child: Column(
@@ -303,80 +343,185 @@ class _PeerCardState extends State<_PeerCard>
               children: [
                 Expanded(
                   child: Container(
-                    color: str2color('${peer.id}${peer.platform}', 0x7f),
-                    child: Row(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: isDark
+                            ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                            : [const Color(0xFFFFFFFF), const Color(0xFFF8FAFC)],
+                      ),
+                    ),
+                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                child:
-                                    getPlatformImage(peer.platform, size: 60),
+                        // Top HUD row: status dot & spacing
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(width: _shouldBuildPasswordIcon(peer) ? 52 : 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: (peer.online ? const Color(0xFF10B981) : Colors.grey)
+                                    .withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: (peer.online ? const Color(0xFF10B981) : Colors.grey)
+                                      .withValues(alpha: 0.3),
+                                  width: 0.8,
+                                ),
                               ),
-                              Row(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Expanded(
-                                    child: Tooltip(
-                                      message: name,
-                                      waitDuration: const Duration(seconds: 1),
-                                      child: Text(
-                                        name,
-                                        style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 12),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: peer.online ? const Color(0xFF10B981) : Colors.grey,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    peer.online ? 'Online' : 'Offline',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w600,
+                                      color: peer.online ? const Color(0xFF10B981) : Colors.grey,
                                     ),
                                   ),
                                 ],
                               ),
-                              if (_showNote(peer))
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: Tooltip(
-                                      message: peer.note,
-                                      waitDuration: const Duration(seconds: 1),
-                                      child: Text(
-                                        peer.note,
-                                        style: const TextStyle(
-                                            color: Colors.white38,
-                                            fontSize: 10),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ))
-                                  ],
-                                ),
-                            ],
-                          ).paddingOnly(top: 4.0, left: 4.0, right: 4.0),
+                            ),
+                          ],
                         ),
+                        // Center icon & workstation name
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF334155).withValues(alpha: 0.45)
+                                    : const Color(0xFFEEF2F6),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark
+                                      ? const Color(0xFF475569).withValues(alpha: 0.5)
+                                      : const Color(0xFFCBD5E1),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: getPlatformImage(peer.platform, size: 38),
+                            ),
+                            const SizedBox(height: 6),
+                            Tooltip(
+                              message: name,
+                              waitDuration: const Duration(seconds: 1),
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (_showNote(peer))
+                              Tooltip(
+                                message: peer.note,
+                                waitDuration: const Duration(seconds: 1),
+                                child: Text(
+                                  peer.note,
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                    fontSize: 10,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 1),
                       ],
                     ),
                   ),
                 ),
+                // Footer control dock
                 Container(
-                  color: Theme.of(context).colorScheme.background,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0B1120) : const Color(0xFFF1F5F9),
+                    border: Border(
+                      top: BorderSide(
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                          child: Row(children: [
-                        getOnline(8, peer.online),
-                        Expanded(
-                            child: Text(
+                        child: Text(
                           peer.alias.isEmpty ? formatID(peer.id) : peer.alias,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        )),
-                      ]).paddingSymmetric(vertical: 8)),
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(6),
+                        onTap: () => connectInPeerTab(context, peer, widget.tab),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2563EB), Color(0xFF0284C7)],
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2563EB).withValues(alpha: 0.35),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.bolt, size: 12, color: Colors.white),
+                              const SizedBox(width: 2),
+                              Text(
+                                translate('Connect'),
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
                       checkBoxOrActionMoreLandscape(peer, isTile: false),
                     ],
-                  ).paddingSymmetric(horizontal: 12.0),
-                )
+                  ),
+                ),
               ],
             ),
           ),
@@ -395,9 +540,39 @@ class _PeerCardState extends State<_PeerCard>
         child,
         if (_shouldBuildPasswordIcon(peer))
           Positioned(
-            top: 4,
-            left: 12,
-            child: Icon(Icons.key, size: 12, color: Colors.white),
+            top: 8,
+            left: 10,
+            child: Tooltip(
+              message:
+                  translate('Unattended Access (1-Click Connect Ready)'),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981),
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.shield, size: 10, color: Colors.white),
+                    SizedBox(width: 3),
+                    Text('1-Klik',
+                        style: TextStyle(
+                            fontSize: 9,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
           ),
         if (colors.isNotEmpty)
           Positioned(
@@ -483,9 +658,12 @@ class _PeerCardState extends State<_PeerCard>
       child: build_more(context));
 
   bool _shouldBuildPasswordIcon(Peer peer) {
-    if (gFFI.peerTabModel.currentTab != PeerTabIndex.ab.index) return false;
-    if (gFFI.abModel.current.isPersonal()) return false;
-    return peer.password.isNotEmpty;
+    if (peer.password.isNotEmpty || peer.hash.isNotEmpty) return true;
+    if (gFFI.peerTabModel.currentTab == PeerTabIndex.ab.index &&
+        !gFFI.abModel.current.isPersonal()) {
+      return peer.password.isNotEmpty;
+    }
+    return false;
   }
 
   /// Show the peer menu and handle user's choice.
@@ -838,6 +1016,31 @@ abstract class BasePeerCard extends StatelessWidget {
   }
 
   @protected
+  MenuEntryBase<String> _unattendedPasswordAction(
+      BuildContext context, Peer peer) {
+    return MenuEntryButton<String>(
+      childBuilder: (TextStyle? style) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.shield_outlined, size: 16, color: Colors.green)
+              .marginOnly(right: 6),
+          Text(
+            translate('Set unattended password'),
+            style: style,
+          ),
+        ],
+      ),
+      proc: () {
+        setUnattendedPasswordDialog(peer, onSuccess: () {
+          _update();
+        });
+      },
+      padding: menuPadding,
+      dismissOnClicked: true,
+    );
+  }
+
+  @protected
   MenuEntryBase<String> _unrememberPasswordAction(String id) {
     return MenuEntryButton<String>(
       childBuilder: (TextStyle? style) => Text(
@@ -845,16 +1048,14 @@ abstract class BasePeerCard extends StatelessWidget {
         style: style,
       ),
       proc: () async {
-        bool succ = await gFFI.abModel.changePersonalHashPassword(id, '');
+        await gFFI.abModel.changePersonalHashPassword(id, '');
         await bind.mainForgetPassword(id: id);
-        if (succ) {
-          showToast(translate('Successful'));
-        } else {
-          if (tab.index == PeerTabIndex.ab.index) {
-            BotToast.showText(
-                contentColor: Colors.red, text: translate("Failed"));
-          }
-        }
+        await bind.mainSetPeerOption(
+            id: id, key: 'unattended_password', value: '');
+        peer.password = '';
+        peer.hash = '';
+        showToast(translate('Successful'));
+        _update();
       },
       padding: menuPadding,
       dismissOnClicked: true,
@@ -996,6 +1197,7 @@ class RecentPeerCard extends BasePeerCard {
     if (isMobile || isDesktop || isWebDesktop) {
       menuItems.add(_renameAction(peer.id));
     }
+    menuItems.add(_unattendedPasswordAction(context, peer));
     if (await bind.mainPeerHasPassword(id: peer.id)) {
       menuItems.add(_unrememberPasswordAction(peer.id));
     }
@@ -1059,6 +1261,7 @@ class FavoritePeerCard extends BasePeerCard {
     if (isMobile || isDesktop || isWebDesktop) {
       menuItems.add(_renameAction(peer.id));
     }
+    menuItems.add(_unattendedPasswordAction(context, peer));
     if (await bind.mainPeerHasPassword(id: peer.id)) {
       menuItems.add(_unrememberPasswordAction(peer.id));
     }
@@ -1331,11 +1534,11 @@ class MyGroupPeerCard extends BasePeerCard {
     if (isWindows) {
       menuItems.add(_createShortCutAction(peer.id));
     }
-    // menuItems.add(MenuEntryDivider());
-    // menuItems.add(_renameAction(peer.id));
-    // if (await bind.mainPeerHasPassword(id: peer.id)) {
-    //   menuItems.add(_unrememberPasswordAction(peer.id));
-    // }
+    menuItems.add(MenuEntryDivider());
+    menuItems.add(_unattendedPasswordAction(context, peer));
+    if (await bind.mainPeerHasPassword(id: peer.id)) {
+      menuItems.add(_unrememberPasswordAction(peer.id));
+    }
     if (gFFI.userModel.userName.isNotEmpty) {
       menuItems.add(_addToAb(peer));
     }
@@ -1547,8 +1750,6 @@ void connectInPeerTab(BuildContext context, Peer peer, PeerTabIndex tab,
   var password = '';
   bool isSharedPassword = false;
   if (tab == PeerTabIndex.ab) {
-    // If recent peer's alias is empty, set it to ab's alias
-    // Because the platform is not set, it may not take effect, but it is more important not to display if the connection is not successful
     if (peer.alias.isNotEmpty &&
         (await bind.mainGetPeerOption(id: peer.id, key: "alias")).isEmpty) {
       await bind.mainSetPeerAlias(
@@ -1556,20 +1757,45 @@ void connectInPeerTab(BuildContext context, Peer peer, PeerTabIndex tab,
         alias: peer.alias,
       );
     }
-    if (!gFFI.abModel.current.isPersonal()) {
-      if (peer.password.isNotEmpty) {
-        password = peer.password;
-        isSharedPassword = true;
-      }
-      if (password.isEmpty) {
-        final abPassword = gFFI.abModel.getdefaultSharedPassword();
-        if (abPassword != null) {
-          password = abPassword;
-          isSharedPassword = true;
-        }
-      }
+  }
+
+  // AnyDesk Unattended 1-Click: auto-resolve password across all available sources
+  if (peer.password.isNotEmpty) {
+    password = peer.password;
+    isSharedPassword = true;
+  }
+  if (password.isEmpty) {
+    final localUnattended =
+        await bind.mainGetPeerOption(id: peer.id, key: 'unattended_password');
+    if (localUnattended.isNotEmpty) {
+      password = localUnattended;
+      isSharedPassword = true;
     }
   }
+  if (password.isEmpty &&
+      tab == PeerTabIndex.ab &&
+      !gFFI.abModel.current.isPersonal()) {
+    final abPassword = gFFI.abModel.getdefaultSharedPassword();
+    if (abPassword != null && abPassword.isNotEmpty) {
+      password = abPassword;
+      isSharedPassword = true;
+    }
+  }
+  if (password.isEmpty) {
+    final gp = gFFI.groupModel.peers.where((p) => p.id == peer.id);
+    if (gp.isNotEmpty && gp.first.password.isNotEmpty) {
+      password = gp.first.password;
+      isSharedPassword = true;
+    }
+  }
+  if (password.isEmpty) {
+    final ap = gFFI.abModel.current.peers.where((p) => p.id == peer.id);
+    if (ap.isNotEmpty && ap.first.password.isNotEmpty) {
+      password = ap.first.password;
+      isSharedPassword = true;
+    }
+  }
+
   connect(context, peer.id,
       password: password,
       isSharedPassword: isSharedPassword,
