@@ -29,6 +29,8 @@ class SessionHudBar extends StatefulWidget {
 
 class _SessionHudBarState extends State<SessionHudBar> {
   bool _isMuted = false;
+  bool _isExpanded = false;
+  bool _isHovered = false;
 
   @override
   void initState() {
@@ -89,149 +91,182 @@ class _SessionHudBarState extends State<SessionHudBar> {
 
           return Obx(() {
             final isPrivacyActive = privacyModeState.value.isNotEmpty;
+            final showFullActions = _isExpanded || _isHovered;
 
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-              decoration: BoxDecoration(
-                color: const Color(0xE60F172A),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isPrivacyActive
-                      ? const Color(0xFF8B5CF6).withValues(alpha: 0.6)
-                      : const Color(0xFF334155),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
+            return MouseRegion(
+              onEnter: (_) {
+                if (mounted && !_isHovered) setState(() => _isHovered = true);
+              },
+              onExit: (_) {
+                if (mounted && _isHovered) setState(() => _isHovered = false);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                decoration: BoxDecoration(
+                  color: showFullActions
+                      ? const Color(0xF20F172A)
+                      : const Color(0xCC0F172A),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
                     color: isPrivacyActive
-                        ? const Color(0xFF8B5CF6).withValues(alpha: 0.25)
-                        : Colors.black.withValues(alpha: 0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                        ? const Color(0xFF8B5CF6).withValues(alpha: 0.6)
+                        : (showFullActions
+                            ? const Color(0xFF475569)
+                            : const Color(0xFF334155)),
+                    width: 1,
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Live Status Badge: Latency (Ping)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFF334155),
-                        width: 0.6,
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isPrivacyActive
+                          ? const Color(0xFF8B5CF6).withValues(alpha: 0.25)
+                          : Colors.black.withValues(alpha: showFullActions ? 0.45 : 0.25),
+                      blurRadius: showFullActions ? 12 : 6,
+                      offset: const Offset(0, 2),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: delayMs < 60
-                                ? const Color(0xFF10B981)
-                                : (delayMs < 120
-                                    ? const Color(0xFFF59E0B)
-                                    : const Color(0xFFEF4444)),
-                          ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Live Status Badge: Latency (Ping)
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFF334155),
+                          width: 0.6,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${delayMs}ms',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'monospace',
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: delayMs < 60
+                                  ? const Color(0xFF10B981)
+                                  : (delayMs < 120
+                                      ? const Color(0xFFF59E0B)
+                                      : const Color(0xFFEF4444)),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${fps}fps',
-                          style: const TextStyle(
-                            color: Color(0xFF38BDF8),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                        if (speed.isNotEmpty) ...[
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 4),
                           Text(
-                            speed,
+                            '${delayMs}ms',
                             style: const TextStyle(
-                              color: Color(0xFF94A3B8),
-                              fontSize: 9.5,
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                               fontFamily: 'monospace',
                             ),
                           ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${fps}fps',
+                            style: const TextStyle(
+                              color: Color(0xFF38BDF8),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                          if (speed.isNotEmpty && showFullActions) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              speed,
+                              style: const TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 9.5,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
 
-                  // Privacy Mode Quick Toggle (Blank Screen Target)
-                  _hudIconButton(
-                    icon: isPrivacyActive
-                        ? Icons.shield_rounded
-                        : Icons.shield_outlined,
-                    tooltip: isPrivacyActive
-                        ? 'Privacy Mode Aktif (Layar Target Dimatikan) - Klik untuk membuka'
-                        : 'Aktifkan Privacy Mode (Matikan Layar Target)',
-                    isActive: isPrivacyActive,
-                    activeColor: const Color(0xFF8B5CF6),
-                    onTap: () => _togglePrivacyMode(privacyModeState),
-                  ),
+                    if (showFullActions) ...[
+                      const SizedBox(width: 6),
 
-                  // Quick Remote Audio Mute/Unmute Toggle
-                  _hudIconButton(
-                    icon: _isMuted
-                        ? Icons.volume_off_rounded
-                        : Icons.volume_up_rounded,
-                    tooltip: _isMuted
-                        ? 'Audio Host Dibisukan (Muted) - Klik untuk mengaktifkan'
-                        : 'Bisukan Audio Host (Mute)',
-                    isActive: _isMuted,
-                    activeColor: const Color(0xFFEF4444),
-                    onTap: _toggleAudio,
-                  ),
+                      // Privacy Mode Quick Toggle (Blank Screen Target)
+                      _hudIconButton(
+                        icon: isPrivacyActive
+                            ? Icons.shield_rounded
+                            : Icons.shield_outlined,
+                        tooltip: isPrivacyActive
+                            ? 'Privacy Mode Aktif (Layar Target Dimatikan) - Klik untuk membuka'
+                            : 'Aktifkan Privacy Mode (Matikan Layar Target)',
+                        isActive: isPrivacyActive,
+                        activeColor: const Color(0xFF8B5CF6),
+                        onTap: () => _togglePrivacyMode(privacyModeState),
+                      ),
 
-                  // Quick Whiteboard Toggle
-                  _hudIconButton(
-                    icon: Icons.draw_outlined,
-                    tooltip: 'On-Screen Whiteboard / Anotasi',
-                    isActive: widget.isWhiteboardActive,
-                    activeColor: const Color(0xFFFF2A6D),
-                    onTap: widget.onToggleWhiteboard,
-                  ),
+                      // Quick Remote Audio Mute/Unmute Toggle
+                      _hudIconButton(
+                        icon: _isMuted
+                            ? Icons.volume_off_rounded
+                            : Icons.volume_up_rounded,
+                        tooltip: _isMuted
+                            ? 'Audio Host Dibisukan (Muted) - Klik untuk mengaktifkan'
+                            : 'Bisukan Audio Host (Mute)',
+                        isActive: _isMuted,
+                        activeColor: const Color(0xFFEF4444),
+                        onTap: _toggleAudio,
+                      ),
 
-                  // Quick System Diagnostics Toggle
-                  _hudIconButton(
-                    icon: Icons.analytics_outlined,
-                    tooltip: 'System Info & Diagnostics Drawer',
-                    isActive: widget.isDiagnosticsActive,
-                    activeColor: const Color(0xFF05D9E8),
-                    onTap: widget.onToggleDiagnostics,
-                  ),
+                      // Quick Whiteboard Toggle
+                      _hudIconButton(
+                        icon: Icons.draw_outlined,
+                        tooltip: 'On-Screen Whiteboard / Anotasi',
+                        isActive: widget.isWhiteboardActive,
+                        activeColor: const Color(0xFFFF2A6D),
+                        onTap: widget.onToggleWhiteboard,
+                      ),
 
-                  // Quick Ctrl+Alt+Del
-                  _hudIconButton(
-                    icon: Icons.keyboard_command_key,
-                    tooltip: 'Kirim Ctrl + Alt + Delete ke PC Target',
-                    onTap: () {
-                      bind.sessionCtrlAltDel(sessionId: widget.ffi.sessionId);
-                      showToast('Ctrl + Alt + Delete dikirim ke remote target');
-                    },
-                  ),
-                ],
+                      // Quick System Diagnostics Toggle
+                      _hudIconButton(
+                        icon: Icons.analytics_outlined,
+                        tooltip: 'System Info & Diagnostics Drawer',
+                        isActive: widget.isDiagnosticsActive,
+                        activeColor: const Color(0xFF05D9E8),
+                        onTap: widget.onToggleDiagnostics,
+                      ),
+
+                      // Quick Ctrl+Alt+Del
+                      _hudIconButton(
+                        icon: Icons.keyboard_command_key,
+                        tooltip: 'Kirim Ctrl + Alt + Delete ke PC Target',
+                        onTap: () {
+                          bind.sessionCtrlAltDel(sessionId: widget.ffi.sessionId);
+                          showToast('Ctrl + Alt + Delete dikirim ke remote target');
+                        },
+                      ),
+                    ],
+
+                    // Micro-Pill Expand / Collapse Toggle Button
+                    _hudIconButton(
+                      icon: showFullActions
+                          ? Icons.chevron_left_rounded
+                          : Icons.tune_rounded,
+                      tooltip: showFullActions
+                          ? 'Ciutkan HUD (Micro-Pill Mode)'
+                          : 'Buka Kontrol Sesi Lengkap',
+                      onTap: () {
+                        setState(() {
+                          _isExpanded = !_isExpanded;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           });

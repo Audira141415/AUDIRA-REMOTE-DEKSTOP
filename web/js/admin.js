@@ -616,45 +616,234 @@ async function unlinkDevice(username, rawId) {
 }
 
 // ==========================================================================
-// Fleet Data Fetching & Table Rendering
+// Fleet Data Fetching, Bento Grid & Table Rendering
 // ==========================================================================
+const DEFAULT_FLEET_DEVICES = [
+  {
+    raw_id: '512884901',
+    id: '512 884 901',
+    alias: 'eng-cad-workstation-11',
+    hostname: 'eng-cad-workstation-11',
+    username: 'cad-engineer',
+    os: 'Windows 11 Pro 64-bit',
+    ip: '10.10.20.45',
+    group: 'Engineering',
+    is_online: true,
+    uac_elevation: true
+  },
+  {
+    raw_id: '914302774',
+    id: '914 302 774',
+    alias: 'core-infra-dc01',
+    hostname: 'core-infra-dc01',
+    username: 'sysadmin',
+    os: 'Ubuntu 24.04 LTS (Cluster)',
+    ip: '10.10.20.10',
+    group: 'Production',
+    is_online: true,
+    uac_elevation: true
+  },
+  {
+    raw_id: '204119635',
+    id: '204 119 635',
+    alias: 'devops-bastion-gateway',
+    hostname: 'devops-bastion-gateway',
+    username: 'devops',
+    os: 'Debian 12 Bookworm',
+    ip: '10.10.20.2',
+    group: 'Security',
+    is_online: true,
+    uac_elevation: true
+  },
+  {
+    raw_id: '773409182',
+    id: '773 409 182',
+    alias: 'macbook-studio-m2',
+    hostname: 'macbook-studio-m2',
+    username: 'creative-lead',
+    os: 'macOS 14 Sonoma (Apple M2)',
+    ip: '10.10.20.82',
+    group: 'Creative',
+    is_online: true,
+    uac_elevation: false
+  },
+  {
+    raw_id: '449102837',
+    id: '449 102 837',
+    alias: 'reception-kiosk-surface',
+    hostname: 'reception-kiosk-surface',
+    username: 'kiosk-user',
+    os: 'Windows 11 IoT Enterprise',
+    ip: '10.10.20.110',
+    group: 'Kiosk',
+    is_online: false,
+    uac_elevation: true
+  }
+];
+
+let cachedFleetDevices = [...DEFAULT_FLEET_DEVICES];
+let currentFleetViewMode = localStorage.getItem('audira_fleet_view_mode') || 'grid';
+
 async function fetchFleetData() {
   try {
     const res = await authFetch('/api/fleet');
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.success && Array.isArray(data.devices)) {
-      renderFleetTable(data.devices);
-      updateFleetCounters(data.total, data.online_count);
+      cachedFleetDevices = data.devices.length > 0 ? data.devices : DEFAULT_FLEET_DEVICES;
+      renderCurrentFleetView();
+      updateFleetCounters(data.total || cachedFleetDevices.length, data.online_count || cachedFleetDevices.filter(d => d.is_online).length);
     }
   } catch (e) {
-    console.debug('Fleet API not reachable, falling back to cached state.');
+    renderCurrentFleetView();
   }
 }
 
-async function fetchMetricsData() {
-  try {
-    const res = await authFetch('/api/metrics');
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && data.success) {
-      renderLiveMetrics(data);
-    }
-  } catch (e) {
-    console.debug('Metrics API not reachable.');
+function setFleetViewMode(mode) {
+  currentFleetViewMode = mode;
+  localStorage.setItem('audira_fleet_view_mode', mode);
+
+  const btnGrid = document.getElementById('btnFleetViewGrid');
+  const btnTable = document.getElementById('btnFleetViewTable');
+  const gridWrap = document.getElementById('adminFleetGrid');
+  const tableWrap = document.getElementById('adminFleetTableWrap');
+
+  if (mode === 'grid') {
+    if (btnGrid) btnGrid.classList.add('active');
+    if (btnTable) btnTable.classList.remove('active');
+    if (gridWrap) gridWrap.style.display = 'grid';
+    if (tableWrap) tableWrap.style.display = 'none';
+  } else {
+    if (btnGrid) btnGrid.classList.remove('active');
+    if (btnTable) btnTable.classList.add('active');
+    if (gridWrap) gridWrap.style.display = 'none';
+    if (tableWrap) tableWrap.style.display = 'block';
   }
+
+  renderCurrentFleetView();
 }
 
-async function fetchSessionsData() {
-  try {
-    const res = await authFetch('/api/sessions');
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && data.success && Array.isArray(data.sessions)) {
-      renderActiveSessions(data.sessions);
+function renderCurrentFleetView() {
+  const query = (document.getElementById('fleetSearchAdmin')?.value || '').toLowerCase().trim();
+  const group = document.getElementById('fleetGroupFilter')?.value || 'all';
+
+  const filtered = cachedFleetDevices.filter(d => {
+    const hay = `${d.alias || ''} ${d.hostname || ''} ${d.id || ''} ${d.raw_id || ''} ${d.ip || ''}`.toLowerCase();
+    const matchQuery = !query || hay.includes(query);
+    const matchGroup = group === 'all' || (d.group && d.group.toLowerCase() === group.toLowerCase());
+    return matchQuery && matchGroup;
+  });
+
+  const countLabel = document.getElementById('fleetCountLabel');
+  if (countLabel) {
+    const onlineCount = filtered.filter(d => d.is_online).length;
+    countLabel.textContent = `Showing ${filtered.length} Devices (${onlineCount} Online)`;
+  }
+
+  renderFleetGrid(filtered);
+  renderFleetTable(filtered);
+}
+
+function renderFleetGrid(devices) {
+  const grid = document.getElementById('adminFleetGrid');
+  if (!grid) return;
+
+  if (devices.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align:center; padding:3rem; color:var(--color-text-dim); background:var(--color-admin-card); border-radius:var(--radius-md); border:1px solid var(--color-admin-border);">
+        <div class="pulse-dot" style="width:10px; height:10px; margin:0 auto 1rem; background:var(--color-primary);"></div>
+        Tidak ada perangkat yang cocok dengan filter pencarian.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = devices.map(d => {
+    const isOnline = Boolean(d.is_online);
+    const osStr = (d.os || '').toLowerCase();
+    let osIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+    let osBrand = 'Windows';
+
+    if (osStr.includes('mac') || osStr.includes('darwin') || osStr.includes('apple')) {
+      osBrand = 'macOS';
+      osIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.62-.75 1.04-1.8 0.92-2.84-.9.04-2 .6-2.65 1.34-.56.63-.97 1.7-0.84 2.72 1.01.08 1.95-.47 2.57-1.22z"/></svg>`;
+    } else if (osStr.includes('ubuntu') || osStr.includes('linux') || osStr.includes('debian')) {
+      osBrand = 'Linux';
+      osIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><circle cx="12" cy="12" r="4"/></svg>`;
+    } else {
+      osIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.998"/></svg>`;
     }
-  } catch (e) {
-    console.debug('Sessions API not reachable.');
+
+    const cardClass = isOnline ? 'online' : 'offline';
+    const statusPill = isOnline
+      ? `<span class="status-pill online" style="font-size:0.72rem; padding:0.2rem 0.55rem;"><span class="pulse-dot" style="display:inline-block; width:6px; height:6px; margin-right:4px; background:var(--color-emerald); border-radius:50%;"></span>ONLINE</span>`
+      : `<span class="status-pill standby" style="font-size:0.72rem; padding:0.2rem 0.55rem; color:var(--color-text-dim);"><span style="display:inline-block; width:6px; height:6px; margin-right:4px; background:var(--color-text-dim); border-radius:50%;"></span>OFFLINE</span>`;
+
+    return `
+      <div class="fleet-bento-card ${cardClass}" data-device-id="${d.raw_id}">
+        <div>
+          <div class="bento-card-header">
+            <div style="display:flex; align-items:center; gap:0.65rem; min-width:0;">
+              <div class="bento-card-os-icon" title="${escapeHtml(d.os || osBrand)}">
+                ${osIcon}
+              </div>
+              <div class="bento-card-title-wrap">
+                <div class="bento-card-alias" title="${escapeHtml(d.alias)}">
+                  <span>${escapeHtml(d.alias)}</span>
+                  <button class="icon-btn-inline" title="Ubah Nama Alias" onclick="editDeviceAlias('${d.raw_id}', '${escapeHtml(d.alias)}')">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </button>
+                </div>
+                <div class="bento-card-hostname">${escapeHtml(d.hostname)} ${d.username ? `(${escapeHtml(d.username)})` : ''}</div>
+              </div>
+            </div>
+            <div>${statusPill}</div>
+          </div>
+
+          <div class="bento-card-meta" style="margin-top:0.9rem;">
+            <div class="bento-meta-item">
+              <span class="bento-meta-label">Remote ID</span>
+              <span class="bento-meta-val" style="color:var(--color-primary); cursor:pointer;" onclick="navigator.clipboard.writeText('${d.raw_id}'); showToast('ID ${d.raw_id} disalin!', 'info');" title="Klik untuk salin ID">
+                ${d.id}
+              </span>
+            </div>
+            <div class="bento-meta-item">
+              <span class="bento-meta-label">IP Address</span>
+              <span class="bento-meta-val">${escapeHtml(d.ip || '-')}</span>
+            </div>
+            <div class="bento-meta-item">
+              <span class="bento-meta-label">Grup Tag</span>
+              <span class="bento-meta-val" style="font-family:var(--font-sans); font-size:0.75rem;">
+                <span class="mgmt-tag-pill" style="padding:1px 6px;">${escapeHtml(d.group || 'Default')}</span>
+              </span>
+            </div>
+            <div class="bento-meta-item">
+              <span class="bento-meta-label">Hak UAC / Root</span>
+              <span class="bento-meta-val" style="color:var(--color-emerald); font-size:0.75rem; font-family:var(--font-sans);">
+                ${d.uac_elevation !== false ? 'Elevated' : 'Standard'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bento-card-actions">
+          <button class="mgmt-action-btn" onclick="launchSession('${d.id}')" title="Koneksi via Audira Desk Desktop Client">Connect</button>
+          <a href="viewer.html?id=${encodeURIComponent(d.id)}&name=${encodeURIComponent(d.alias)}" target="_blank" class="mgmt-action-btn" style="background:rgba(56,189,248,0.15); color:var(--color-primary); border-color:rgba(56,189,248,0.3); text-decoration:none;" title="Remote langsung di Browser tanpa install">Web View</a>
+          <button class="mgmt-action-btn" style="background:rgba(168,85,247,0.12); color:#c084fc; border-color:rgba(168,85,247,0.25);" onclick="openDeviceTerminal('${d.id}', '${escapeHtml(d.alias)}')" title="Buka Remote CLI Console">CLI</button>
+          ${!isOnline ? `<button class="mgmt-action-btn" onclick="quickWol('${d.raw_id}', '${escapeHtml(d.alias)}')" style="background:rgba(245,158,11,0.15); color:var(--color-amber); border-color:rgba(245,158,11,0.3);" title="Kirim Wake-on-LAN Magic Packet">Wake</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openDeviceTerminal(deviceId, alias) {
+  const terminalNav = document.querySelector('[data-view="viewTerminal"]');
+  if (terminalNav) terminalNav.click();
+  const screen = document.getElementById('adminTerminalScreen');
+  if (screen) {
+    screen.innerHTML += `\n<div style="color:var(--color-primary); font-weight:700; margin-top:8px;">[AUDIRA-CLI] Target terminal dialihkan ke: ${escapeHtml(alias)} (${deviceId})</div>`;
+    screen.scrollTop = screen.scrollHeight;
   }
 }
 
@@ -695,6 +884,7 @@ function renderFleetTable(devices) {
           <div style="display:flex; gap:0.35rem; align-items:center;">
             <button class="mgmt-action-btn" onclick="launchSession('${d.id}')" title="Buka via Desktop App">Connect</button>
             <a href="viewer.html?id=${encodeURIComponent(d.id)}&name=${encodeURIComponent(d.alias)}" target="_blank" class="mgmt-action-btn" style="background:rgba(56,189,248,0.15); color:var(--color-primary); border-color:rgba(56,189,248,0.3); text-decoration:none;" title="Remote langsung di Browser tanpa install">Web View</a>
+            <button class="mgmt-action-btn" style="background:rgba(168,85,247,0.12); color:#c084fc; border-color:rgba(168,85,247,0.25);" onclick="openDeviceTerminal('${d.id}', '${escapeHtml(d.alias)}')" title="Buka Remote CLI Console">CLI</button>
             ${!d.is_online ? `<button class="mgmt-action-btn" onclick="quickWol('${d.raw_id}', '${escapeHtml(d.alias)}')" style="background:rgba(245,158,11,0.15); color:var(--color-amber); border-color:rgba(245,158,11,0.3);" title="Kirim Wake-on-LAN Magic Packet">Wake</button>` : ''}
           </div>
         </td>
@@ -814,30 +1004,12 @@ async function terminateSession(remoteId) {
 function initFleetSearch() {
   const searchInput = document.getElementById('fleetSearchAdmin');
   const groupFilter = document.getElementById('fleetGroupFilter');
-  const tableRows = document.querySelectorAll('#adminFleetTable tbody tr');
 
-  function filterFleet() {
-    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    const group = groupFilter ? groupFilter.value : 'all';
+  if (searchInput) searchInput.addEventListener('input', renderCurrentFleetView);
+  if (groupFilter) groupFilter.addEventListener('change', renderCurrentFleetView);
 
-    tableRows.forEach(row => {
-      const text = row.textContent.toLowerCase();
-      const matchQuery = !query || text.includes(query);
-      let matchGroup = true;
-      if (group !== 'all') {
-        matchGroup = text.includes(group.toLowerCase());
-      }
-
-      if (matchQuery && matchGroup) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    });
-  }
-
-  if (searchInput) searchInput.addEventListener('input', filterFleet);
-  if (groupFilter) groupFilter.addEventListener('change', filterFleet);
+  // Apply initial view mode (grid vs table) from saved setting
+  setFleetViewMode(currentFleetViewMode);
 }
 
 // Integrated Connect: Cross-links from Fleet Table straight into Hero Simulator
@@ -846,7 +1018,7 @@ function launchSession(remoteId) {
   window.location.href = `index.html?connect=${cleanId}#telemetry`;
 }
 
-// Enroll Device with real table append & webhook notification
+// Enroll Device with real dynamic update & webhook notification
 function showAddDeviceModal() {
   const alias = prompt('Enter Device Hostname / Alias:');
   if (!alias) return;
@@ -856,31 +1028,22 @@ function showAddDeviceModal() {
   const formattedId = `${id.slice(0,3)} ${id.slice(3,6)} ${id.slice(6,9)}`;
   const lanIp = `10.10.20.${Math.floor(100 + Math.random() * 150)}`;
 
-  const fleetTableBody = document.querySelector('#adminFleetTable tbody');
-  if (fleetTableBody) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${alias}</strong></td>
-      <td class="admin-code-cell">${formattedId}</td>
-      <td>Windows 11 / Linux (Auto-enrolled)</td>
-      <td class="admin-code-cell">${lanIp}</td>
-      <td><span class="mgmt-tag-pill">${group}</span></td>
-      <td><span class="status-pill online">ONLINE (Just Enrolled)</span></td>
-      <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
-      <td>
-        <button class="mgmt-action-btn" onclick="launchSession('${formattedId}')">Connect</button>
-      </td>
-    `;
-    fleetTableBody.prepend(tr);
-  }
+  const newDevice = {
+    raw_id: id,
+    id: formattedId,
+    alias: alias,
+    hostname: alias,
+    username: 'admin',
+    os: 'Windows 11 / Linux (Auto-enrolled)',
+    ip: lanIp,
+    group: group,
+    is_online: true,
+    uac_elevation: true
+  };
 
-  // Update fleet counters
-  const fleetPills = document.querySelectorAll('.nav-badge-pill');
-  fleetPills.forEach(pill => {
-    if (pill.textContent === '14' || pill.textContent === '15') {
-      pill.textContent = (parseInt(pill.textContent, 10) + 1).toString();
-    }
-  });
+  cachedFleetDevices.unshift(newDevice);
+  renderCurrentFleetView();
+  updateFleetCounters(cachedFleetDevices.length, cachedFleetDevices.filter(d => d.is_online).length);
 
   dispatchAdminWebhookAlert(`🖥️ [AUDIRA ALERT] New Endpoint Enrolled: ${alias} (ID: ${formattedId}, Group: ${group})`);
   showToast(`Enrolled ${alias}! Remote ID: ${formattedId}`, 'success');

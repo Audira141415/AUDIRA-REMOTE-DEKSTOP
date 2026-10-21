@@ -97,9 +97,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           margin: const EdgeInsets.only(top: 4, bottom: 8),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
-            color: MyTheme.accent.withOpacity(0.12),
+            color: MyTheme.accent.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: MyTheme.accent.withOpacity(0.3)),
+            border: Border.all(color: MyTheme.accent.withValues(alpha: 0.3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -349,6 +349,76 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       Icons.copy_rounded,
                       size: 14,
                       color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Tooltip(
+                message: 'QR Code Mobile Connect',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        title: Row(
+                          children: [
+                            const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF38BDF8), size: 20),
+                            const SizedBox(width: 8),
+                            const Text('Mobile Quick Connect', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                              ),
+                              child: const Icon(Icons.qr_code_2_rounded, size: 140, color: Color(0xFF0F172A)),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Device ID: ${model.serverId.text}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace', fontSize: 15),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Scan menggunakan kamera Audira Desk Mobile untuk terhubung instan.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('Tutup'),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2F6),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.qr_code_rounded,
+                      size: 14,
+                      color: isDark ? const Color(0xFF10B981) : const Color(0xFF059669),
                     ),
                   ),
                 ),

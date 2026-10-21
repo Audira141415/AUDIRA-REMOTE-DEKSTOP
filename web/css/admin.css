@@ -995,6 +995,188 @@ body.admin-body {
   }
 }
 
+/* ==========================================================================
+   Fleet Bento Grid & View Toggle Styles
+   ========================================================================== */
+.view-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-admin-border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  padding: 4px 9px;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-toggle-btn:hover {
+  color: var(--color-text-heading);
+}
+
+.view-toggle-btn.active {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.fleet-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 1.1rem;
+}
+
+.fleet-bento-card {
+  background: var(--color-admin-card);
+  border: 1px solid var(--color-admin-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.fleet-bento-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 20px rgba(56, 189, 248, 0.08);
+}
+
+.fleet-bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.fleet-bento-card.online::before {
+  background: linear-gradient(90deg, #10b981, #38bdf8);
+}
+
+.fleet-bento-card.standby::before {
+  background: linear-gradient(90deg, #f59e0b, #6366f1);
+}
+
+.fleet-bento-card.offline::before {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+.bento-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.bento-card-os-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-admin-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.bento-card-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.bento-card-alias {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bento-card-hostname {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.bento-card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-admin-border-subtle);
+}
+
+.bento-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-meta-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-dim);
+  font-weight: 600;
+}
+
+.bento-meta-val {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.bento-card-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--color-admin-border-subtle);
+}
+
+.bento-card-actions .mgmt-action-btn {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+  padding: 0.42rem 0.5rem;
+  font-size: 0.75rem;
+}
+
 @media (max-width: 768px) {
   .admin-shell {
     flex-direction: column;

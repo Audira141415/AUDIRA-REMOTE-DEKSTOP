@@ -488,22 +488,38 @@
 
         <div class="admin-card">
           <div class="admin-card-header">
-            <div class="admin-toolbar">
-              <input type="text" id="fleetSearchAdmin" class="form-input" style="padding:0.4rem 0.75rem; width:260px;" placeholder="Search by name, ID, or IP...">
-              <select id="fleetGroupFilter" class="form-input" style="padding:0.4rem 0.75rem; width:160px;">
+            <div class="admin-toolbar" style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+              <input type="text" id="fleetSearchAdmin" class="form-input" style="padding:0.4rem 0.75rem; width:240px;" placeholder="Search name, ID, or IP...">
+              <select id="fleetGroupFilter" class="form-input" style="padding:0.4rem 0.75rem; width:150px;">
                 <option value="all">All Groups</option>
                 <option value="Engineering">Engineering</option>
                 <option value="Production">Production Servers</option>
                 <option value="Security">Security Bastion</option>
                 <option value="Creative">Creative Lab</option>
               </select>
+
+              <!-- View Switcher: Bento Grid vs Table -->
+              <div class="view-mode-toggle" style="margin-left:0.25rem;">
+                <button type="button" id="btnFleetViewGrid" class="view-toggle-btn active" title="Bento Box Card Grid View" onclick="setFleetViewMode('grid')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span>Grid</span>
+                </button>
+                <button type="button" id="btnFleetViewTable" class="view-toggle-btn" title="Compact Table List View" onclick="setFleetViewMode('table')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <span>Table</span>
+                </button>
+              </div>
             </div>
-            <div style="font-size:0.75rem; color:var(--color-text-dim); font-family:var(--font-mono);">
+            <div id="fleetCountLabel" style="font-size:0.75rem; color:var(--color-text-dim); font-family:var(--font-mono);">
               Showing 14 Registered Devices
             </div>
           </div>
 
-          <div class="admin-table-wrap">
+          <!-- Bento Grid Container (Default) -->
+          <div id="adminFleetGrid" class="fleet-bento-grid" style="padding:1.25rem;"></div>
+
+          <!-- Table Container -->
+          <div class="admin-table-wrap" id="adminFleetTableWrap" style="display:none;">
             <table class="admin-table" id="adminFleetTable">
               <thead>
                 <tr>

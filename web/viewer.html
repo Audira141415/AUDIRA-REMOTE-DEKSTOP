@@ -83,27 +83,88 @@
       top: 58px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(14, 18, 27, 0.88);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(14, 18, 27, 0.92);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: var(--radius-lg);
       padding: 6px 14px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65);
       z-index: 40;
-      transition: opacity 0.25s ease, transform 0.25s ease;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease;
+      cursor: default;
     }
 
-    .session-hud.minimized {
-      transform: translateX(-50%) translateY(-48px);
-      opacity: 0.2;
+    .session-hud.idle-dim {
+      opacity: 0.25;
+      transform: translateX(-50%) translateY(-4px);
     }
 
-    .session-hud.minimized:hover {
+    .session-hud.idle-dim:hover {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
+    }
+
+    /* Micro-pill collapsed mode */
+    .session-hud.micro-pill {
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: rgba(10, 14, 23, 0.88);
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(56, 189, 248, 0.15);
+      gap: 8px;
+    }
+
+    .session-hud.micro-pill .hud-full-details {
+      display: none;
+    }
+
+    .session-hud.micro-pill:hover .hud-full-details {
+      display: flex;
+    }
+
+    .session-hud.micro-pill .hud-drag-handle {
+      display: none;
+    }
+
+    .hud-pill-summary {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .session-hud.micro-pill .hud-pill-summary {
+      display: flex;
+    }
+
+    .hud-full-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hud-drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      color: var(--color-text-dim);
+      padding: 2px 4px;
+      border-radius: var(--radius-xs);
+      transition: color 0.15s ease;
+    }
+
+    .hud-drag-handle:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hud-btn.icon-only {
+      padding: 6px;
+      line-height: 1;
     }
 
     .hud-stat {
@@ -387,32 +448,51 @@
 
     <!-- Floating HUD Toolbar -->
     <div class="session-hud" id="sessionHud">
-      <div class="hud-stat">
-        <span class="hud-label">RTT Latency</span>
-        <span class="hud-value" id="hudRtt" style="color: #34d399;">12 ms</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-label">Framerate</span>
-        <span class="hud-value" id="hudFps">60.0 FPS</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-label">Bitrate</span>
-        <span class="hud-value" id="hudBitrate">4.8 Mbps</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-label">Display</span>
-        <span class="hud-value" id="hudDisplay">1080p (Native)</span>
+      <!-- Drag handle for repositioning -->
+      <div class="hud-drag-handle" id="hudDragHandle" title="Geser posisi HUD di layar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
       </div>
 
-      <div class="hud-actions">
-        <button class="hud-btn" id="btnCtrlAltDel" title="Kirim Ctrl+Alt+Del ke Remote Host">Ctrl+Alt+Del</button>
-        <button class="hud-btn" id="btnLockScreen" title="Kunci Layar Windows (Win+L)">Lock</button>
-        <button class="hud-btn" id="btnVirtualDisplay" title="Konfigurasi Virtual Display Headless">Virtual Display</button>
-        <button class="hud-btn" id="btnFitToggle" title="Toggle Mode Fit / 1:1">Fit</button>
-        <button class="hud-btn" id="btnFullscreen" title="Layar Penuh (Fullscreen)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-        </button>
+      <!-- Compact preview pill (shown when collapsed into micro-pill) -->
+      <div class="hud-pill-summary" id="hudPillSummary" title="Klik untuk memperluas toolbar">
+        <div class="viewer-status-dot" style="width:7px; height:7px;"></div>
+        <span id="hudSummaryText" style="font-family:var(--font-mono); font-size:12px; font-weight:600; color:#34d399;">12 ms • 60 FPS</span>
       </div>
+
+      <!-- Full telemetry stats and controls -->
+      <div class="hud-full-details" id="hudFullDetails">
+        <div class="hud-stat">
+          <span class="hud-label">RTT Latency</span>
+          <span class="hud-value" id="hudRtt" style="color: #34d399;">12 ms</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-label">Framerate</span>
+          <span class="hud-value" id="hudFps">60.0 FPS</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-label">Bitrate</span>
+          <span class="hud-value" id="hudBitrate">4.8 Mbps</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-label">Display</span>
+          <span class="hud-value" id="hudDisplay">1080p (Native)</span>
+        </div>
+
+        <div class="hud-actions">
+          <button class="hud-btn" id="btnCtrlAltDel" title="Kirim Ctrl+Alt+Del ke Remote Host">Ctrl+Alt+Del</button>
+          <button class="hud-btn" id="btnLockScreen" title="Kunci Layar Windows (Win+L)">Lock</button>
+          <button class="hud-btn" id="btnVirtualDisplay" title="Konfigurasi Virtual Display Headless">Virtual Display</button>
+          <button class="hud-btn" id="btnFitToggle" title="Toggle Mode Fit / 1:1">Fit</button>
+          <button class="hud-btn" id="btnFullscreen" title="Layar Penuh (Fullscreen)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick collapse/expand toggle -->
+      <button class="hud-btn icon-only" id="btnToggleHud" title="Kecilkan ke Micro-Pill">
+        <svg id="iconToggleHud" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+      </button>
     </div>
 
     <!-- Main Viewport Canvas -->
@@ -606,6 +686,8 @@ Ketik perintah PowerShell atau pilih Preset di bawah untuk eksekusi instan tanpa
         fps = Number((59.2 + Math.random() * 0.8).toFixed(1));
         document.getElementById('hudRtt').textContent = rtt + ' ms';
         document.getElementById('hudFps').textContent = fps + ' FPS';
+        const sumEl = document.getElementById('hudSummaryText');
+        if (sumEl) sumEl.textContent = `${rtt} ms • ${fps} FPS`;
       }
 
       requestAnimationFrame(renderDesktop);
@@ -682,6 +764,103 @@ Ketik perintah PowerShell atau pilih Preset di bawah untuk eksekusi instan tanpa
         window.location.href = 'index.html';
       }
     });
+
+    // =========================================================================
+    // Dynamic Session HUD: Micro-Pill Mode, Idle Auto-Dimming & Draggable Dock
+    // =========================================================================
+    const hudEl = document.getElementById('sessionHud');
+    const btnToggleHud = document.getElementById('btnToggleHud');
+    const iconToggleHud = document.getElementById('iconToggleHud');
+    const pillSummary = document.getElementById('hudPillSummary');
+    const dragHandle = document.getElementById('hudDragHandle');
+
+    // 1. Micro-Pill State
+    let isMicroPill = localStorage.getItem('audira_viewer_micropill') === 'true';
+
+    function setMicroPillState(enabled) {
+      isMicroPill = enabled;
+      localStorage.setItem('audira_viewer_micropill', isMicroPill ? 'true' : 'false');
+      if (isMicroPill) {
+        hudEl.classList.add('micro-pill');
+        iconToggleHud.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>';
+        btnToggleHud.title = 'Perluas Toolbar (Full HUD)';
+      } else {
+        hudEl.classList.remove('micro-pill');
+        iconToggleHud.innerHTML = '<polyline points="18 15 12 9 6 15"></polyline>';
+        btnToggleHud.title = 'Kecilkan ke Micro-Pill';
+      }
+    }
+    setMicroPillState(isMicroPill);
+
+    btnToggleHud.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setMicroPillState(!isMicroPill);
+    });
+
+    if (pillSummary) {
+      pillSummary.addEventListener('click', () => {
+        if (isMicroPill) setMicroPillState(false);
+      });
+    }
+
+    // 2. Idle Auto-Dimming (after 4s of mouse inactivity)
+    let hudIdleTimer = null;
+    function resetHudIdle() {
+      if (hudEl.classList.contains('idle-dim')) {
+        hudEl.classList.remove('idle-dim');
+      }
+      clearTimeout(hudIdleTimer);
+      hudIdleTimer = setTimeout(() => {
+        if (!hudEl.matches(':hover') && !document.getElementById('terminalDrawer').classList.contains('open')) {
+          hudEl.classList.add('idle-dim');
+        }
+      }, 4000);
+    }
+
+    window.addEventListener('mousemove', resetHudIdle);
+    window.addEventListener('keydown', resetHudIdle);
+    hudEl.addEventListener('mouseenter', () => {
+      hudEl.classList.remove('idle-dim');
+      clearTimeout(hudIdleTimer);
+    });
+    hudEl.addEventListener('mouseleave', resetHudIdle);
+    resetHudIdle();
+
+    // 3. Draggable HUD Dock
+    let isDraggingHud = false;
+    let dragStartX = 0, dragStartY = 0;
+    let hudInitLeft = 0, hudInitTop = 0;
+
+    if (dragHandle) {
+      dragHandle.addEventListener('mousedown', (e) => {
+        isDraggingHud = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        const rect = hudEl.getBoundingClientRect();
+        hudInitLeft = rect.left;
+        hudInitTop = rect.top;
+        hudEl.style.transform = 'none';
+        hudEl.style.left = `${hudInitLeft}px`;
+        hudEl.style.top = `${hudInitTop}px`;
+        e.preventDefault();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingHud) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        const maxL = Math.max(10, window.innerWidth - hudEl.offsetWidth - 10);
+        const maxT = Math.max(10, window.innerHeight - hudEl.offsetHeight - 10);
+        const newLeft = Math.max(10, Math.min(maxL, hudInitLeft + dx));
+        const newTop = Math.max(10, Math.min(maxT, hudInitTop + dy));
+        hudEl.style.left = `${newLeft}px`;
+        hudEl.style.top = `${newTop}px`;
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDraggingHud = false;
+      });
+    }
 
     // Terminal Drawer Logic
     const drawer = document.getElementById('terminalDrawer');
