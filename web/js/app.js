@@ -451,7 +451,10 @@ function initSimulator() {
         if (simRtt) simRtt.textContent = Math.floor(9 + Math.random() * 8) + ' ms';
         if (simFps) simFps.textContent = '60.0 FPS';
         showToast(`Connected to ${id}! Protocol: Direct UDP Hole-Punch (AV1 60fps)`, 'success');
-        showToast(`Untuk remote desktop interaktif ke ${id}, silakan jalankan aplikasi AudiraDesk Client.`, 'info');
+        showToast(`Membuka WebRTC Client Viewer di tab baru...`, 'info');
+        setTimeout(() => {
+          window.open(`viewer.html?id=${encodeURIComponent(id)}&name=RemoteHost`, '_blank');
+        }, 500);
       }, 700);
     });
 
@@ -459,6 +462,15 @@ function initSimulator() {
       if (e.key === 'Enter') {
         connectBtn.click();
       }
+    });
+  }
+
+  const webViewerBtn = document.getElementById('simWebViewerBtn');
+  if (webViewerBtn && targetIdInput) {
+    webViewerBtn.addEventListener('click', () => {
+      const id = targetIdInput.value.trim() || '269 819 537';
+      window.open(`viewer.html?id=${encodeURIComponent(id)}&name=RemoteHost`, '_blank');
+      showToast(`Membuka WebRTC Remote Viewer ke ${id}...`, 'info');
     });
   }
 

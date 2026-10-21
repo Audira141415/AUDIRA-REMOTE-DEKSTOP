@@ -2945,6 +2945,51 @@ pub fn is_valid_untrusted_peer_id(id: &str) -> bool {
         })
 }
 
+/// Sends a Wake-on-LAN (WoL) Magic Packet over UDP broadcast.
+/// `mac_str` can be formatted with ':', '-', or unspaced hex chars (e.g. "AA:BB:CC:DD:EE:FF" or "AABBCCDDEEFF").
+pub fn send_wake_on_lan(mac_str: &str, broadcast_addr: Option<&str>) -> ResultType<()> {
+    let clean_hex: String = mac_str
+        .chars()
+        .filter(|c| c.is_ascii_hexdigit())
+        .collect();
+    if clean_hex.len() != 12 {
+        bail!("Invalid MAC address for WoL: expected 12 hexadecimal characters");
+    }
+    let mut mac = [0u8; 6];
+    for (i, chunk) in clean_hex.as_bytes().chunks_exact(2).enumerate() {
+        let s = std::str::from_utf8(chunk).map_err(|e| anyhow!("{e}"))?;
+        mac[i] = u8::from_str_radix(s, 16).map_err(|e| anyhow!("{e}"))?;
+    }
+
+    let mut packet = [0u8; 102];
+    packet[..6].fill(0xFF);
+    for i in 0..16 {
+        let start = 6 + i * 6;
+        packet[start..start + 6].copy_from_slice(&mac);
+    }
+
+    let socket = std::net::UdpSocket::bind("0.0.0.0:0")?;
+    socket.set_broadcast(true)?;
+
+    let target = broadcast_addr.unwrap_or("255.255.255.255:9");
+    let target_addr: std::net::SocketAddr = if target.contains(':') {
+        target.parse()?
+    } else {
+        format!("{target}:9").parse()?
+    };
+
+    socket.send_to(&packet, target_addr)?;
+    if target_addr.ip() != std::net::Ipv4Addr::new(255, 255, 255, 255) {
+        let _ = socket.send_to(&packet, "255.255.255.255:9");
+    }
+    log::info!(
+        "Wake-on-LAN packet successfully broadcasted to {} (target: {:02X?})",
+        target_addr,
+        mac
+    );
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2953,6 +2998,14 @@ mod tests {
         time::{interval, interval_at, sleep, Duration, Instant, Interval},
     };
     use std::collections::HashSet;
+
+    #[test]
+    fn test_send_wake_on_lan_validation() {
+        assert!(send_wake_on_lan("invalid_mac", None).is_err());
+        assert!(send_wake_on_lan("00:11:22", None).is_err());
+        let res = send_wake_on_lan("00:11:22:33:44:55", Some("127.0.0.1:9"));
+        assert!(res.is_ok());
+    }
 
     #[test]
     fn a_cursor_content_id_fits_a_web_client_number() {

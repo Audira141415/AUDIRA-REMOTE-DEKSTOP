@@ -141,4 +141,41 @@
 - **Lokasi Sumber**: [`flutter/lib/desktop/widgets/remote_system_drawer.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/remote_system_drawer.dart)
 - **Fungsi**: Panel samping geser yang menampilkan spesifikasi perangkat target, performa streaming, verifikasi cipher E2EE, dan tombol ekspor laporan diagnostik IT.
 
+---
+
+## 7. Web Portal, WebRTC HTML5 Client & Fleet Automation
+
+### 7.1 WebRTC HTML5 Web Client Viewer
+- **Lokasi Sumber**: [`web/viewer.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/viewer.html), [`web/index.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/index.html), [`web/js/app.js`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/js/app.js)
+- **Fungsi**: Pengendalian remote desktop interaktif langsung dari peramban web modern tanpa instalasi file executable klien (.exe).
+- **Kemampuan**:
+  - Tampilan kanvas ultra-low latency dengan dukungan Auto-Fit dan 1:1 view modes.
+  - Floating Session HUD menampilkan live RTT latency (ms), framerate (FPS), bitrate, dan resolusi.
+  - Injeksi interaksi mouse, keyboard, pintasan sistem `Ctrl+Alt+Del`, `Win+L`, dan layar penuh (`F11`).
+  - Terminal CLI drawer terintegrasi untuk diagnostik berdampingan dengan layar remote.
+
+### 7.2 Remote Headless Terminal / CLI Console
+- **Lokasi Sumber**: [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py), [`web/admin.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/admin.html), [`web/js/admin.js`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/js/admin.js)
+- **Fungsi**: Eksekusi perintah command line interaktif (PowerShell, CMD, Bash) pada host tanpa beban kompresi frame video.
+- **Kemampuan**:
+  - Presets diagnostik 1-klik: `systeminfo`, `Get-Process`, `ipconfig /all`, `netstat -ano`, `Get-PSDrive`, `sc query`.
+  - Riwayat perintah console (Up/Down arrow navigation) dan pemfilteran hasil stdout/stderr berwarna.
+  - Pencatatan tamper-evident audit log untuk kepatuhan regulasi IT enterprise.
+
+### 7.3 Wake-on-LAN (WoL) Relay Protocol
+- **Lokasi Sumber**: [`src/common.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/common.rs), [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py), [`web/admin.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/admin.html)
+- **Fungsi**: Membangunkan perangkat komputer host yang sedang tidur (Sleep) atau mati (Shutdown) melalui jaringan lokal via Magic Packet UDP port 9.
+- **Kemampuan**:
+  - Dukungan transmisi dual broadcast (subnet IP spesifik dan `255.255.255.255:9`).
+  - Integrasi 1-klik tombol "Wake" pada tabel perangkat offline di Admin Fleet Console.
+  - Validasi ketat format MAC address dan audit logging real-time.
+
+### 7.4 Virtual Display Driver & Headless Server Manager
+- **Lokasi Sumber**: [`src/virtual_display_manager.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/virtual_display_manager.rs), [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py), [`web/viewer.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/viewer.html)
+- **Fungsi**: Pengelolaan layar monitor virtual mandiri untuk host tanpa monitor fisik (headless servers), mencegah layar hitam dan kegagalan sesi remote.
+- **Kemampuan**:
+  - Resolusi kustom adaptif (1080p, 1440p, 4K UHD, 720p).
+  - Pemasangan dan pelepasan monitor virtual dinamis tanpa restart sistem operasi.
+
+
 

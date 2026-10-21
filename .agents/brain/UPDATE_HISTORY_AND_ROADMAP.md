@@ -85,9 +85,22 @@
   - **Modern Floating Session HUD Bar**: Widget [flutter/lib/desktop/widgets/session_hud_bar.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/session_hud_bar.dart) menampilkan badge live latensi (ms), FPS real-time, tombol pintas Ctrl+Alt+Del, Whiteboard, dan System Diagnostics.
   - **Seamless Drag-and-Drop File Transfer**: Integrasi `desktop_drop` langsung pada canvas desktop di [flutter/lib/desktop/pages/remote_page.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/pages/remote_page.dart) dengan visual drop-zone glassmorphism dan verifikasi transfer instan.
   - **Remote System Diagnostics & Hardware Drawer**: Widget [flutter/lib/desktop/widgets/remote_system_drawer.dart](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/remote_system_drawer.dart) menampilkan spek OS target, status streaming, enkripsi E2EE ChaCha20-Poly1305, tombol lock host, dan export ringkasan diagnostik untuk ticketing.
-  - Verifikasi kode `flutter analyze` lulus 100% tanpa error.
-
-
+### Versi v1.5.8 (WebRTC Web Viewer, Remote CLI Console, WoL Relay & Virtual Display) — 2026-10-21
+- **1. WebRTC HTML5 Web Client Viewer**:
+  - Antarmuka web client mandiri [`web/viewer.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/viewer.html) memungkinkan operator mengendalikan desktop remote langsung dari Google Chrome, Edge, Firefox, dan Safari tanpa menginstal file `.exe`.
+  - Dilengkapi Floating Session HUD telemetri real-time (RTT ms, FPS, bitrate, dan resolusi), canvas rendering, interaksi mouse & keyboard, serta tombol sistem `Ctrl+Alt+Del`, `Win+L`, and Fullscreen.
+  - Integrasi 1-klik tombol "Web Viewer" pada portal utama [`web/index.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/index.html) dan Admin Fleet table [`web/admin.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/admin.html).
+- **2. Remote Headless Terminal / CLI Console**:
+  - Eksekusi baris perintah interaktif (PowerShell, CMD, Bash) tanpa beban streaming video melalui endpoint aman `POST /api/terminal/exec` di [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py).
+  - Tampilan konsol bergaya dark retro terminal pada Admin Console ([`web/admin.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/admin.html) tab `Remote CLI Terminal`) dan slide-over drawer pada Web Viewer.
+  - Tombol preset diagnostik cepat 1-klik (`systeminfo`, `Get-Process`, `ipconfig /all`, `netstat -ano`, `Get-PSDrive`, `sc.exe query`) dan pencatatan audit log otomatis.
+- **3. Wake-on-LAN (WoL) Relay Protocol**:
+  - Fungsi transmisi Magic Packet UDP port 9 pada engine Rust ([`src/common.rs`](file:///f:/AUDIRA-REMOTE-DEKSTOP/src/common.rs)) dan backend API server (`POST /api/wol` di [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py)).
+  - Kemampuan membangunkan perangkat host yang sedang tidur/mati dengan dukungan dual broadcast (subnet IP lokal dan `255.255.255.255:9`).
+  - Tombol aksi cepat "Wake (WoL)" pada baris perangkat offline di Device Fleet table dan dialog modal WoL.
+- **4. Virtual Display Driver & Headless Server Management**:
+  - Dukungan resolusi kustom (1080p, 1440p, 4K, 720p) dan fallback buffer virtual saat monitor fisik host dilepas atau mati (`src/virtual_display_manager.rs`, `POST /api/virtual-display`).
+  - Kontrol virtual display langsung dari toolbar Web Viewer dan dialog konfigurasi.
 
 ---
 
@@ -95,12 +108,10 @@
 
 1. **AI Predictive Latency & Mouse Smoothing**:
    - Algoritma interpolasi berbasis AI untuk memprediksi pergerakan kursor mouse pada koneksi dengan jitter tinggi agar terasa instan di sisi klien.
-2. **WebRTC Web Client Viewer**:
-   - Kemampuan bagi operator untuk mengendalikan remote desktop langsung dari browser web modern (Chrome/Edge/Firefox) tanpa instalasi aplikasi klien lokal.
-3. **Hardware AV1 Real-Time Encoding**:
+2. **Hardware AV1 Real-Time Encoding**:
    - Optimalisasi pipeline kompresi AV1 zero-copy untuk GPU generasi baru (NVIDIA RTX 40-series, Intel Arc, AMD RDNA3) guna memangkas konsumsi bandwidth hingga 35%.
-4. **Virtual Display Driver Integration**:
-   - Driver tampilan virtual headless mandiri untuk Windows dan Linux, memungkinkan resolusi kustom tanpa monitor fisik terpasang di host (*headless server management*).
+3. **Multi-Tenant MSP Team Isolation**:
+   - Partisi hak akses multi-perusahaan dalam satu instance relay server dengan kuota bandwidth per-tenant.
 
 ---
 

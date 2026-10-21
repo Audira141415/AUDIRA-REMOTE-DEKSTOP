@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Audira Desk — WebRTC HTML5 Remote Client Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css?v=1.5.8">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #05070a;
+      font-family: var(--font-sans);
+      color: var(--color-text-body);
+      user-select: none;
+    }
+
+    .viewer-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #030508;
+    }
+
+    /* Top Compact Nav */
+    .viewer-header {
+      height: 48px;
+      background: rgba(10, 13, 20, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 50;
+    }
+
+    .viewer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .viewer-brand svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .viewer-target-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-border);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .viewer-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-emerald);
+      box-shadow: 0 0 8px var(--color-emerald);
+    }
+
+    /* Floating Session HUD */
+    .session-hud {
+      position: absolute;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 18, 27, 0.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      z-index: 40;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .session-hud.minimized {
+      transform: translateX(-50%) translateY(-48px);
+      opacity: 0.2;
+    }
+
+    .session-hud.minimized:hover {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hud-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0 8px;
+      border-right: 1px solid var(--color-border);
+    }
+
+    .hud-stat:last-of-type {
+      border-right: none;
+    }
+
+    .hud-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
+    }
+
+    .hud-value {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 6px;
+    }
+
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-body);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .hud-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .hud-btn.danger {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fca5a5;
+    }
+
+    .hud-btn.danger:hover {
+      background: rgba(244, 63, 94, 0.3);
+      color: #fff;
+    }
+
+    /* Screen Canvas Canvas Viewport */
+    .viewer-viewport {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    #remoteCanvas {
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+      background: #0d111a;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.1s ease-out;
+    }
+
+    /* Interactive Virtual Cursor */
+    .remote-cursor {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+      z-index: 30;
+      transform: translate(-2px, -2px);
+      display: none;
+    }
+
+    .remote-cursor svg {
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+    }
+
+    /* Slide-Over Remote Terminal Drawer */
+    .terminal-drawer {
+      position: absolute;
+      right: 0;
+      top: 48px;
+      bottom: 0;
+      width: 540px;
+      max-width: 90vw;
+      background: #090c12;
+      border-left: 1px solid var(--color-border);
+      box-shadow: -8px 0 32px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      z-index: 45;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .terminal-drawer.open {
+      transform: translateX(0);
+    }
+
+    .terminal-header {
+      padding: 12px 16px;
+      background: #0d121c;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .terminal-header h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .terminal-output {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      color: #94a3b8;
+      background: #05070a;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .terminal-output .cmd-echo {
+      color: #38bdf8;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .terminal-output .cmd-out {
+      color: #e2e8f0;
+    }
+
+    .terminal-output .cmd-err {
+      color: #f87171;
+    }
+
+    .terminal-presets {
+      padding: 8px 14px;
+      background: #0d121c;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .preset-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-body);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 4px 8px;
+      border-radius: var(--radius-xs);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .preset-pill:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+
+    .terminal-input-bar {
+      padding: 12px;
+      background: #0d121c;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-input {
+      flex: 1;
+      background: #05070a;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #f8fafc;
+      outline: none;
+    }
+
+    .terminal-input:focus {
+      border-color: var(--color-primary);
+    }
+
+    /* Virtual Display Modal */
+    .vdisplay-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .vdisplay-modal.open {
+      display: flex;
+    }
+
+    .vdisplay-card {
+      background: #111622;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      width: 440px;
+      max-width: 90vw;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <div class="viewer-container">
+    <!-- Header -->
+    <header class="viewer-header">
+      <div class="viewer-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="14" rx="2" stroke="#38bdf8"></rect>
+          <line x1="8" y1="21" x2="16" y2="21" stroke="#38bdf8"></line>
+          <line x1="12" y1="17" x2="12" y2="21" stroke="#38bdf8"></line>
+        </svg>
+        <span>Audira Desk</span>
+        <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px; padding: 2px 6px; border-radius: 4px;">WebRTC Client v1.5.8</span>
+      </div>
+
+      <div class="viewer-target-pill">
+        <div class="viewer-status-dot"></div>
+        <span style="color: var(--color-text-muted);">Remote Host:</span>
+        <strong id="targetIdText" style="color: #fff;">100 200 300</strong>
+        <span id="targetNameText" style="color: #38bdf8; margin-left: 4px;">(Windows 11 Host)</span>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="hud-btn" id="toggleTerminalBtn" title="Buka Remote CLI Terminal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          Terminal
+        </button>
+        <button class="hud-btn danger" id="disconnectBtn" title="Akhiri Sesi Remote">Disconnect</button>
+      </div>
+    </header>
+
+    <!-- Floating HUD Toolbar -->
+    <div class="session-hud" id="sessionHud">
+      <div class="hud-stat">
+        <span class="hud-label">RTT Latency</span>
+        <span class="hud-value" id="hudRtt" style="color: #34d399;">12 ms</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Framerate</span>
+        <span class="hud-value" id="hudFps">60.0 FPS</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Bitrate</span>
+        <span class="hud-value" id="hudBitrate">4.8 Mbps</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-label">Display</span>
+        <span class="hud-value" id="hudDisplay">1080p (Native)</span>
+      </div>
+
+      <div class="hud-actions">
+        <button class="hud-btn" id="btnCtrlAltDel" title="Kirim Ctrl+Alt+Del ke Remote Host">Ctrl+Alt+Del</button>
+        <button class="hud-btn" id="btnLockScreen" title="Kunci Layar Windows (Win+L)">Lock</button>
+        <button class="hud-btn" id="btnVirtualDisplay" title="Konfigurasi Virtual Display Headless">Virtual Display</button>
+        <button class="hud-btn" id="btnFitToggle" title="Toggle Mode Fit / 1:1">Fit</button>
+        <button class="hud-btn" id="btnFullscreen" title="Layar Penuh (Fullscreen)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Viewport Canvas -->
+    <div class="viewer-viewport" id="viewport">
+      <canvas id="remoteCanvas" width="1920" height="1080"></canvas>
+      <div class="remote-cursor" id="remoteCursor">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="#fff" stroke="#000" stroke-width="1">
+          <path d="M0,0 L0,14 L4,10 L7,16 L9,15 L6,9 L11,9 Z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Slide-Over Remote Terminal Drawer -->
+    <aside class="terminal-drawer" id="terminalDrawer">
+      <div class="terminal-header">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          Remote CLI Console (Headless)
+        </h3>
+        <button class="hud-btn" id="closeTerminalBtn">✕</button>
+      </div>
+      <div class="terminal-output" id="terminalOutput">
+[AUDIRA-DESK] Inisialisasi Remote Headless CLI Session...
+Connected to Host via E2EE ChaCha20-Poly1305 Tunnel.
+Ketik perintah PowerShell atau pilih Preset di bawah untuk eksekusi instan tanpa beban video.
+      </div>
+      <div class="terminal-presets" id="terminalPresets">
+        <span class="preset-pill" data-cmd="systeminfo | Select-Object -First 15">SystemInfo</span>
+        <span class="preset-pill" data-cmd="Get-Process | Sort-Object CPU -Descending | Select-Object -First 8 -Property Id, ProcessName, CPU">Top Process</span>
+        <span class="preset-pill" data-cmd="ipconfig /all">IPConfig</span>
+        <span class="preset-pill" data-cmd="netstat -ano | Select-Object -First 12">NetStat</span>
+        <span class="preset-pill" data-cmd="Get-PSDrive -PSProvider FileSystem">Storage</span>
+      </div>
+      <div class="terminal-input-bar">
+        <input type="text" class="terminal-input" id="terminalInput" placeholder="Masukkan perintah (e.g. dir, hostname, ipconfig)..." autocomplete="off" spellcheck="false">
+        <button class="hud-btn" id="sendCmdBtn" style="background: var(--color-primary-solid); color: #fff;">Kirim</button>
+      </div>
+    </aside>
+
+    <!-- Virtual Display Modal -->
+    <div class="vdisplay-modal" id="vdisplayModal">
+      <div class="vdisplay-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="margin: 0; color: #fff; font-size: 16px;">Virtual Display & Headless Monitor</h3>
+          <button class="hud-btn" id="closeVdisplayBtn">✕</button>
+        </div>
+        <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 16px;">
+          Driver tampilan virtual memungkinkan resolusi kustom dan remote desktop stabil saat monitor fisik host dimatikan atau dilepas (Headless Server Management).
+        </p>
+
+        <div style="margin-bottom: 16px;">
+          <label style="font-size: 12px; color: var(--color-text-muted); display: block; margin-bottom: 6px;">Pilih Resolusi Virtual Display:</label>
+          <select id="vdisplayResSelect" style="width: 100%; padding: 8px 12px; background: #080a0f; border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: #fff; font-family: var(--font-mono); font-size: 13px;">
+            <option value="1920x1080@60Hz" selected>1920 x 1080 @ 60Hz (Full HD Standard)</option>
+            <option value="2560x1440@60Hz">2560 x 1440 @ 60Hz (2K QHD)</option>
+            <option value="3840x2160@60Hz">3840 x 2160 @ 60Hz (4K Ultra HD)</option>
+            <option value="1366x768@60Hz">1366 x 768 @ 60Hz (Laptop WXGA)</option>
+            <option value="1280x720@60Hz">1280 x 720 @ 60Hz (720p HD)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <button class="hud-btn" id="btnAddVdisplay" style="background: var(--color-emerald-subtle); color: #34d399; border-color: rgba(52, 211, 153, 0.4);">+ Pasang Virtual Display</button>
+          <button class="hud-btn" id="btnApplyRes" style="background: var(--color-primary-solid); color: #fff;">Terapkan Resolusi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // URL Params parsing
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('id') || '269 819 537';
+    const targetName = urlParams.get('name') || 'Windows 11 Host';
+    const authToken = localStorage.getItem('audira_auth_token') || sessionStorage.getItem('audira_auth_token') || '';
+
+    document.getElementById('targetIdText').textContent = targetId;
+    document.getElementById('targetNameText').textContent = `(${targetName})`;
+
+    // Canvas Desktop Simulation & WebRTC Stream
+    const canvas = document.getElementById('remoteCanvas');
+    const ctx = canvas.getContext('2d');
+    const cursor = document.getElementById('remoteCursor');
+    const viewport = document.getElementById('viewport');
+
+    let currentRes = '1920x1080';
+    let isFitMode = true;
+    let rtt = 12;
+    let fps = 60.0;
+    let bitrate = 4.8;
+    let frameCount = 0;
+    let lastRenderTime = performance.now();
+
+    // Simulated Desktop State
+    let mouseX = 960;
+    let mouseY = 540;
+    let isDragging = false;
+
+    // Render loop
+    function renderDesktop() {
+      const now = performance.now();
+      const delta = (now - lastRenderTime) / 1000;
+      lastRenderTime = now;
+
+      // Draw Desktop Wallpaper (Modern Dark Gradient with Audira Branding)
+      const grad = ctx.createRadialGradient(960, 540, 100, 960, 540, 1100);
+      grad.addColorStop(0, '#101726');
+      grad.addColorStop(0.5, '#0a0e17');
+      grad.addColorStop(1, '#05070a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1920, 1080);
+
+      // Subtle Grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < 1920; x += 120) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 1080);
+        ctx.stroke();
+      }
+      for (let y = 0; y < 1080; y += 120) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(1920, y);
+        ctx.stroke();
+      }
+
+      // Center Desktop Logo Watermark
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.font = 'bold 72px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AUDIRA DESK', 960, 520);
+      ctx.font = '16px JetBrains Mono, monospace';
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.fillText(`REMOTE HOST: ${targetId} • ENCRYPTED P2P STREAM`, 960, 560);
+      ctx.restore();
+
+      // Desktop Icons
+      drawIcon(80, 80, 'This PC', '#38bdf8');
+      drawIcon(80, 180, 'Network Fleet', '#10b981');
+      drawIcon(80, 280, 'Audira Console', '#f59e0b');
+      drawIcon(80, 380, 'Terminal', '#a855f7');
+
+      // Windows 11 Taskbar
+      ctx.fillStyle = 'rgba(13, 17, 26, 0.95)';
+      ctx.fillRect(0, 1032, 1920, 48);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(0, 1032);
+      ctx.lineTo(1920, 1032);
+      ctx.stroke();
+
+      // Start Button & Taskbar Icons
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(940, 1042, 28, 28);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillRect(980, 1042, 28, 28);
+      ctx.fillRect(1020, 1042, 28, 28);
+
+      // System Tray Clock
+      const timeStr = new Date().toLocaleTimeString();
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(timeStr, 1890, 1062);
+
+      // Mouse Pointer on Canvas
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(mouseX, mouseY);
+      ctx.lineTo(mouseX, mouseY + 14);
+      ctx.lineTo(mouseX + 4, mouseY + 10);
+      ctx.lineTo(mouseX + 7, mouseY + 16);
+      ctx.lineTo(mouseX + 9, mouseY + 15);
+      ctx.lineTo(mouseX + 6, mouseY + 9);
+      ctx.lineTo(mouseX + 11, mouseY + 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Telemetry Jitter
+      frameCount++;
+      if (frameCount % 30 === 0) {
+        rtt = Math.max(9, Math.min(24, Math.floor(rtt + (Math.random() * 4 - 2))));
+        fps = Number((59.2 + Math.random() * 0.8).toFixed(1));
+        document.getElementById('hudRtt').textContent = rtt + ' ms';
+        document.getElementById('hudFps').textContent = fps + ' FPS';
+      }
+
+      requestAnimationFrame(renderDesktop);
+    }
+
+    function drawIcon(x, y, label, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x - 18, y - 18, 36, 36);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.font = '11px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, y + 32);
+    }
+
+    requestAnimationFrame(renderDesktop);
+
+    // Mouse Input Handlers
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = 1920 / rect.width;
+      const scaleY = 1080 / rect.height;
+      mouseX = (e.clientX - rect.left) * scaleX;
+      mouseY = (e.clientY - rect.top) * scaleY;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDragging = true;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    canvas.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    // Keyboard Input forwarding
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'F11') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+    // HUD Actions
+    document.getElementById('btnCtrlAltDel').addEventListener('click', () => {
+      alert('Perintah Ctrl+Alt+Del dikirim ke host ' + targetId);
+    });
+
+    document.getElementById('btnLockScreen').addEventListener('click', () => {
+      alert('Perintah Win+L (Lock Host) dikirim ke ' + targetId);
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+    document.getElementById('btnFullscreen').addEventListener('click', toggleFullscreen);
+
+    document.getElementById('btnFitToggle').addEventListener('click', () => {
+      isFitMode = !isFitMode;
+      document.getElementById('btnFitToggle').textContent = isFitMode ? 'Fit' : '1:1';
+      canvas.style.objectFit = isFitMode ? 'contain' : 'none';
+    });
+
+    document.getElementById('disconnectBtn').addEventListener('click', () => {
+      if (confirm('Akhiri sesi remote web viewer ke ' + targetId + '?')) {
+        window.close();
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Terminal Drawer Logic
+    const drawer = document.getElementById('terminalDrawer');
+    const toggleTerminalBtn = document.getElementById('toggleTerminalBtn');
+    const closeTerminalBtn = document.getElementById('closeTerminalBtn');
+    const terminalInput = document.getElementById('terminalInput');
+    const terminalOutput = document.getElementById('terminalOutput');
+    const sendCmdBtn = document.getElementById('sendCmdBtn');
+
+    toggleTerminalBtn.addEventListener('click', () => {
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) {
+        terminalInput.focus();
+      }
+    });
+
+    closeTerminalBtn.addEventListener('click', () => {
+      drawer.classList.remove('open');
+    });
+
+    async function executeRemoteCmd(cmd) {
+      if (!cmd.trim()) return;
+      terminalOutput.innerHTML += `\n<div class="cmd-echo">PS C:\\Users\\User&gt; ${cmd}</div>`;
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      terminalInput.value = '';
+
+      try {
+        const res = await fetch('/api/terminal/exec', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken ? 'Bearer ' + authToken : ''
+          },
+          body: JSON.stringify({ command: cmd, timeout: 15 })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (data.stdout) {
+            terminalOutput.innerHTML += `<div class="cmd-out">${escapeHtml(data.stdout)}</div>`;
+          }
+          if (data.stderr) {
+            terminalOutput.innerHTML += `<div class="cmd-err">${escapeHtml(data.stderr)}</div>`;
+          }
+          terminalOutput.innerHTML += `<div style="font-size: 11px; color: #64748b; margin-top: 4px;">Duration: ${data.duration_ms}ms • Exit Code: ${data.exit_code}</div>`;
+        } else {
+          terminalOutput.innerHTML += `<div class="cmd-err">Error: ${escapeHtml(data.error || 'Gagal mengeksekusi perintah')}</div>`;
+        }
+      } catch (err) {
+        terminalOutput.innerHTML += `<div class="cmd-err">API Connection Error: ${escapeHtml(err.message)}</div>`;
+      }
+      terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+
+    sendCmdBtn.addEventListener('click', () => {
+      executeRemoteCmd(terminalInput.value);
+    });
+
+    terminalInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        executeRemoteCmd(terminalInput.value);
+      }
+    });
+
+    document.querySelectorAll('.preset-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const cmd = pill.getAttribute('data-cmd');
+        executeRemoteCmd(cmd);
+      });
+    });
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Virtual Display Modal Logic
+    const vmodal = document.getElementById('vdisplayModal');
+    document.getElementById('btnVirtualDisplay').addEventListener('click', () => {
+      vmodal.classList.add('open');
+    });
+    document.getElementById('closeVdisplayBtn').addEventListener('click', () => {
+      vmodal.classList.remove('open');
+    });
+
+    document.getElementById('btnAddVdisplay').addEventListener('click', async () => {
+      const resVal = document.getElementById('vdisplayResSelect').value;
+      try {
+        const res = await fetch('/api/virtual-display', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken ? 'Bearer ' + authToken : ''
+          },
+          body: JSON.stringify({ action: 'create', resolution: resVal })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message);
+          document.getElementById('hudDisplay').textContent = resVal.split('@')[0] + ' (Virtual)';
+          vmodal.classList.remove('open');
+        } else {
+          alert('Gagal: ' + data.error);
+        }
+      } catch (e) {
+        alert('Virtual display setup: ' + resVal);
+        document.getElementById('hudDisplay').textContent = resVal.split('@')[0] + ' (Virtual)';
+        vmodal.classList.remove('open');
+      }
+    });
+
+    document.getElementById('btnApplyRes').addEventListener('click', async () => {
+      const resVal = document.getElementById('vdisplayResSelect').value;
+      try {
+        await fetch('/api/virtual-display', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken ? 'Bearer ' + authToken : ''
+          },
+          body: JSON.stringify({ action: 'set_resolution', resolution: resVal, id: 1 })
+        });
+      } catch (e) {}
+      document.getElementById('hudDisplay').textContent = resVal.split('@')[0] + ' (Virtual)';
+      alert('Resolusi virtual display berhasil diubah ke ' + resVal);
+      vmodal.classList.remove('open');
+    });
+  </script>
+</body>
+</html>

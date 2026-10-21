@@ -692,7 +692,11 @@ function renderFleetTable(devices) {
         <td>${statusHtml}</td>
         <td><span style="color:var(--color-emerald); font-weight:700;">Service Active</span></td>
         <td>
-          <button class="mgmt-action-btn" onclick="launchSession('${d.id}')">Connect</button>
+          <div style="display:flex; gap:0.35rem; align-items:center;">
+            <button class="mgmt-action-btn" onclick="launchSession('${d.id}')" title="Buka via Desktop App">Connect</button>
+            <a href="viewer.html?id=${encodeURIComponent(d.id)}&name=${encodeURIComponent(d.alias)}" target="_blank" class="mgmt-action-btn" style="background:rgba(56,189,248,0.15); color:var(--color-primary); border-color:rgba(56,189,248,0.3); text-decoration:none;" title="Remote langsung di Browser tanpa install">Web View</a>
+            ${!d.is_online ? `<button class="mgmt-action-btn" onclick="quickWol('${d.raw_id}', '${escapeHtml(d.alias)}')" style="background:rgba(245,158,11,0.15); color:var(--color-amber); border-color:rgba(245,158,11,0.3);" title="Kirim Wake-on-LAN Magic Packet">Wake</button>` : ''}
+          </div>
         </td>
       </tr>
     `;
@@ -1300,3 +1304,160 @@ function showToast(message, type = 'info') {
     toast.classList.remove('show');
   }, 3200);
 }
+
+// ==========================================================================
+// Wake-on-LAN (WoL) Relay Management
+// ==========================================================================
+function openWolModal(defaultMac = '', defaultName = '') {
+  const modal = document.getElementById('modalWol');
+  if (!modal) return;
+  if (defaultMac) {
+    document.getElementById('wolMacInput').value = defaultMac;
+  }
+  if (defaultName) {
+    document.getElementById('wolDeviceLabelInput').value = defaultName;
+  }
+  modal.style.display = 'flex';
+}
+
+function closeWolModal() {
+  const modal = document.getElementById('modalWol');
+  if (modal) modal.style.display = 'none';
+}
+
+function quickWol(rawId, alias) {
+  const macGuess = '00:11:22:33:44:55';
+  openWolModal(macGuess, `${alias} (${rawId})`);
+}
+
+async function submitWolPacket(e) {
+  e.preventDefault();
+  const mac = document.getElementById('wolMacInput').value.trim();
+  const broadcastIp = document.getElementById('wolBroadcastIpInput').value.trim() || '255.255.255.255';
+  const label = document.getElementById('wolDeviceLabelInput').value.trim();
+  const btn = document.getElementById('btnSubmitWol');
+
+  if (!mac) {
+    showToast('Harap masukkan MAC Address target.', 'warning');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Broadcasting...';
+
+  try {
+    const res = await authFetch('/api/wol', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mac, broadcast_ip: broadcastIp, device_name: label })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || `Magic Packet berhasil dikirim ke ${data.mac}!`, 'success');
+      closeWolModal();
+    } else {
+      showToast(data.error || 'Gagal mengirim WoL packet.', 'warning');
+    }
+  } catch (err) {
+    showToast('Error koneksi ke API server: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> <span>Kirim Magic Packet</span>`;
+  }
+}
+
+// ==========================================================================
+// Remote Headless CLI Console (Terminal Execution)
+// ==========================================================================
+let adminCliHistory = [];
+let adminCliHistoryIdx = -1;
+
+function clearTerminalOutput() {
+  const screen = document.getElementById('adminTerminalScreen');
+  if (screen) {
+    screen.innerHTML = '[AUDIRA-CLI] Console output cleared.\nReady for commands.';
+  }
+}
+
+function copyTerminalOutput() {
+  const screen = document.getElementById('adminTerminalScreen');
+  if (!screen) return;
+  navigator.clipboard.writeText(screen.innerText).then(() => {
+    showToast('Terminal output copied to clipboard!', 'success');
+  });
+}
+
+function handleAdminCliKeyDown(e) {
+  if (e.key === 'Enter') {
+    executeAdminCli();
+  } else if (e.key === 'ArrowUp') {
+    if (adminCliHistory.length > 0 && adminCliHistoryIdx < adminCliHistory.length - 1) {
+      adminCliHistoryIdx++;
+      document.getElementById('adminCliInput').value = adminCliHistory[adminCliHistory.length - 1 - adminCliHistoryIdx];
+    }
+  } else if (e.key === 'ArrowDown') {
+    if (adminCliHistoryIdx > 0) {
+      adminCliHistoryIdx--;
+      document.getElementById('adminCliInput').value = adminCliHistory[adminCliHistory.length - 1 - adminCliHistoryIdx];
+    } else if (adminCliHistoryIdx === 0) {
+      adminCliHistoryIdx = -1;
+      document.getElementById('adminCliInput').value = '';
+    }
+  }
+}
+
+function runAdminCli(cmd) {
+  const input = document.getElementById('adminCliInput');
+  if (input) {
+    input.value = cmd;
+    executeAdminCli();
+  }
+}
+
+async function executeAdminCli() {
+  const input = document.getElementById('adminCliInput');
+  const screen = document.getElementById('adminTerminalScreen');
+  const shellSelect = document.getElementById('adminCliShell');
+  const btn = document.getElementById('btnAdminCliExec');
+
+  const cmd = input ? input.value.trim() : '';
+  if (!cmd) return;
+
+  const shell = shellSelect ? shellSelect.value : 'powershell';
+
+  adminCliHistory.push(cmd);
+  adminCliHistoryIdx = -1;
+  input.value = '';
+
+  const promptPrefix = shell === 'powershell' ? 'PS&gt;' : (shell === 'cmd' ? 'CMD&gt;' : 'bash$');
+  screen.innerHTML += `\n<div style="color:var(--color-primary); font-weight:700; margin-top:8px;">${promptPrefix} ${escapeHtml(cmd)}</div>`;
+  screen.scrollTop = screen.scrollHeight;
+
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await authFetch('/api/terminal/exec', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: cmd, shell: shell, timeout: 20 })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (data.stdout) {
+        screen.innerHTML += `<div style="color:#e2e8f0;">${escapeHtml(data.stdout)}</div>`;
+      }
+      if (data.stderr) {
+        screen.innerHTML += `<div style="color:#f87171;">${escapeHtml(data.stderr)}</div>`;
+      }
+      screen.innerHTML += `<div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Duration: ${data.duration_ms}ms • Exit Code: ${data.exit_code}</div>`;
+    } else {
+      screen.innerHTML += `<div style="color:#f87171;">[!] Error: ${escapeHtml(data.error || 'Execution failed')}</div>`;
+    }
+  } catch (err) {
+    screen.innerHTML += `<div style="color:#f87171;">[!] Network Error: ${escapeHtml(err.message)}</div>`;
+  } finally {
+    if (btn) btn.disabled = false;
+    screen.scrollTop = screen.scrollHeight;
+  }
+}
+

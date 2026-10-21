@@ -17,6 +17,8 @@ import socket
 import hmac
 import hashlib
 import base64
+import re
+import subprocess
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -675,6 +677,47 @@ def build_fleet_devices():
     devices_list.sort(key=lambda x: (not x["is_online"], x["last_seen"]), reverse=True)
     return devices_list
 
+# Virtual Display State & Management (Headless Server Fallback)
+VIRTUAL_DISPLAYS_LOCK = threading.Lock()
+VIRTUAL_DISPLAYS_STATE = {
+    "active_count": 1,
+    "displays": [
+        {"id": 1, "name": "Audira Virtual Display 1", "resolution": "1920x1080@60Hz", "headless_fallback": True, "active": True}
+    ],
+    "supported_resolutions": [
+        "1920x1080@60Hz",
+        "2560x1440@60Hz",
+        "3840x2160@60Hz",
+        "1366x768@60Hz",
+        "1280x720@60Hz"
+    ]
+}
+
+def send_wol_magic_packet(mac_address, broadcast_ip="255.255.255.255", port=9):
+    """Broadcasts Wake-on-LAN Magic Packet to target MAC address across UDP broadcast."""
+    clean_mac = re.sub(r'[^a-fA-F0-9]', '', str(mac_address))
+    if len(clean_mac) != 12:
+        raise ValueError("Invalid MAC address: must be 12 hexadecimal characters (e.g. AA:BB:CC:DD:EE:FF)")
+    mac_bytes = bytes.fromhex(clean_mac)
+    magic_packet = b'\xff' * 6 + (mac_bytes * 16)
+
+    targets = [broadcast_ip]
+    if broadcast_ip != "255.255.255.255":
+        targets.append("255.255.255.255")
+
+    sent_count = 0
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.settimeout(2.5)
+        for target in targets:
+            try:
+                sock.sendto(magic_packet, (target, int(port)))
+                sent_count += 1
+            except Exception as e:
+                print(f"[!] Error sending WoL magic packet to {target}: {e}")
+    formatted_mac = ":".join(clean_mac[i:i+2].upper() for i in range(0, 12, 2))
+    return formatted_mac, sent_count
+
 
 class AudiraAPIHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
@@ -1152,6 +1195,34 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"success": True, "total_active": len(active_lics), "licenses": active_lics}).encode())
+            return
+
+        # 13. Terminal Presets (/api/terminal/presets)
+        if path == "/api/terminal/presets":
+            presets = [
+                {"category": "System", "name": "System Info", "command": "systeminfo | Select-Object -First 20" if sys.platform == "win32" else "uname -a; uptime"},
+                {"category": "System", "name": "Top Processes", "command": "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 -Property Id, ProcessName, CPU, WorkingSet" if sys.platform == "win32" else "ps aux --sort=-%cpu | head -n 11"},
+                {"category": "Network", "name": "IP Configuration", "command": "ipconfig /all" if sys.platform == "win32" else "ip addr show"},
+                {"category": "Network", "name": "Active Connections", "command": "netstat -ano | Select-Object -First 15" if sys.platform == "win32" else "ss -tuln | head -n 15"},
+                {"category": "Disk", "name": "Storage Usage", "command": "Get-PSDrive -PSProvider FileSystem | Select-Object Name, Used, Free" if sys.platform == "win32" else "df -h"},
+                {"category": "Services", "name": "Audira Service Status", "command": 'sc.exe query "Audira Desk"' if sys.platform == "win32" else "systemctl status rustdesk --no-pager"}
+            ]
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "presets": presets}).encode())
+            return
+
+        # 14. Virtual Display State (/api/virtual-display)
+        if path == "/api/virtual-display":
+            with VIRTUAL_DISPLAYS_LOCK:
+                state = dict(VIRTUAL_DISPLAYS_STATE)
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "state": state}).encode())
             return
 
         self.send_response(404)
@@ -2502,6 +2573,204 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             except Exception as e:
                 self.send_response(500)
                 self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 22. WAKE-ON-LAN: Send Magic Packet (/api/wol)
+        if path == "/api/wol":
+            uname, u = find_user_by_token(auth_header)
+            if not uname:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid atau telah berakhir."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                mac = str(data.get("mac", "")).strip()
+                broadcast_ip = str(data.get("broadcast_ip", "255.255.255.255")).strip() or "255.255.255.255"
+                port = int(data.get("port", 9))
+                device_name = str(data.get("device_name", "")).strip() or mac
+
+                if not mac:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Parameter 'mac' (MAC Address) wajib diisi."}).encode())
+                    return
+
+                formatted_mac, count = send_wol_magic_packet(mac, broadcast_ip, port)
+                add_audit_log(
+                    "WOL_MAGIC_PACKET_SENT",
+                    uname,
+                    client_ip,
+                    formatted_mac,
+                    f"WoL Magic Packet disiarkan ke {formatted_mac} via {broadcast_ip}:{port} ({device_name})"
+                )
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "message": f"Magic Packet WoL berhasil disiarkan ke {formatted_mac} ({count} target socket).",
+                    "mac": formatted_mac,
+                    "broadcast_ip": broadcast_ip,
+                    "port": port
+                }).encode())
+                return
+            except Exception as e:
+                self.send_response(400)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Gagal mengirim Magic Packet WoL: {e}"}).encode())
+                return
+
+        # 23. REMOTE CLI TERMINAL: Execute Console Command (/api/terminal/exec)
+        if path == "/api/terminal/exec":
+            uname, u = find_user_by_token(auth_header)
+            if not uname:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid atau telah berakhir."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                command = str(data.get("command", "")).strip()
+                cwd = str(data.get("cwd", "")).strip() or None
+                shell = str(data.get("shell", "powershell" if sys.platform == "win32" else "bash")).lower()
+                timeout = min(int(data.get("timeout", 15)), 30)
+
+                if not command:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Perintah CLI tidak boleh kosong."}).encode())
+                    return
+
+                # Build process command args
+                if sys.platform == "win32":
+                    if shell == "cmd":
+                        cmd_args = ["cmd.exe", "/c", command]
+                    else:
+                        cmd_args = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", command]
+                else:
+                    cmd_args = ["/bin/bash", "-c", command]
+
+                start_t = time.time()
+                try:
+                    res = subprocess.run(
+                        cmd_args,
+                        capture_output=True,
+                        text=True,
+                        timeout=timeout,
+                        cwd=cwd,
+                        errors="replace"
+                    )
+                    stdout = res.stdout
+                    stderr = res.stderr
+                    exit_code = res.returncode
+                    duration_ms = int((time.time() - start_t) * 1000)
+                except subprocess.TimeoutExpired:
+                    stdout = ""
+                    stderr = f"[!] Command timed out after {timeout} seconds."
+                    exit_code = 124
+                    duration_ms = int((time.time() - start_t) * 1000)
+
+                add_audit_log(
+                    "REMOTE_TERMINAL_EXEC",
+                    uname,
+                    client_ip,
+                    "TERMINAL",
+                    f"Executed command: {command[:80]} (exit: {exit_code}, {duration_ms}ms)"
+                )
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "command": command,
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "exit_code": exit_code,
+                    "duration_ms": duration_ms
+                }).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Terminal error: {e}"}).encode())
+                return
+
+        # 24. VIRTUAL DISPLAY & HEADLESS: Manage Virtual Monitors (/api/virtual-display)
+        if path == "/api/virtual-display":
+            uname, u = find_user_by_token(auth_header)
+            if not uname:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                action = str(data.get("action", "query")).lower()
+                resolution = str(data.get("resolution", "1920x1080@60Hz")).strip()
+
+                with VIRTUAL_DISPLAYS_LOCK:
+                    if action == "create":
+                        next_id = len(VIRTUAL_DISPLAYS_STATE["displays"]) + 1
+                        new_disp = {
+                            "id": next_id,
+                            "name": f"Audira Virtual Display {next_id}",
+                            "resolution": resolution,
+                            "headless_fallback": True,
+                            "active": True
+                        }
+                        VIRTUAL_DISPLAYS_STATE["displays"].append(new_disp)
+                        VIRTUAL_DISPLAYS_STATE["active_count"] = len(VIRTUAL_DISPLAYS_STATE["displays"])
+                        msg = f"Virtual Display #{next_id} berhasil diaktifkan ({resolution})."
+                    elif action == "remove":
+                        disp_id = int(data.get("id", 0))
+                        if disp_id > 0:
+                            VIRTUAL_DISPLAYS_STATE["displays"] = [d for d in VIRTUAL_DISPLAYS_STATE["displays"] if d["id"] != disp_id]
+                        elif len(VIRTUAL_DISPLAYS_STATE["displays"]) > 1:
+                            VIRTUAL_DISPLAYS_STATE["displays"].pop()
+                        VIRTUAL_DISPLAYS_STATE["active_count"] = len(VIRTUAL_DISPLAYS_STATE["displays"])
+                        msg = "Virtual Display berhasil dilepas."
+                    elif action == "set_resolution":
+                        disp_id = int(data.get("id", 1))
+                        for d in VIRTUAL_DISPLAYS_STATE["displays"]:
+                            if d["id"] == disp_id:
+                                d["resolution"] = resolution
+                                break
+                        msg = f"Resolusi Virtual Display disetel ke {resolution}."
+                    else:
+                        msg = "Status virtual display dimuat."
+
+                    resp_state = dict(VIRTUAL_DISPLAYS_STATE)
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": msg, "state": resp_state}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
                 return
