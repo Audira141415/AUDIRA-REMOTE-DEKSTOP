@@ -303,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initLanguage();
   initMobileMenu();
+  initSmoothNavigation();
   initSimulator();
   initCopyActions();
   initFaqAccordion();
@@ -2071,40 +2072,139 @@ function handleUrlRouting() {
   }
 }
 
+// Safe helper to dismiss any open modals
+function closeAllModals() {
+  if (typeof closeUpgradeModal === 'function') closeUpgradeModal();
+  if (typeof closeRemoteSession === 'function') closeRemoteSession();
+  if (typeof closeFileTransferModal === 'function') closeFileTransferModal();
+  if (typeof closeMobilePairModal === 'function') closeMobilePairModal();
+  if (typeof closeChangePasswordModal === 'function') closeChangePasswordModal();
+  const loginModal = document.getElementById('loginModal');
+  if (loginModal) {
+    loginModal.classList.remove('open');
+    loginModal.setAttribute('aria-hidden', 'true');
+  }
+}
+
 // Navigation to Home (clean URL and scroll to top)
 function navigateToHome(e) {
-  if (e) e.preventDefault();
-  closeUpgradeModal();
-  closeRemoteSession();
-  closeFileTransferModal();
-  closeMobilePairModal();
-  closeChangePasswordModal();
-  const loginModal = document.getElementById('loginModal');
-  if (loginModal) loginModal.classList.remove('open');
+  if (e && e.preventDefault) e.preventDefault();
+  closeAllModals();
 
   // Strip query parameters and hashes from URL
   window.history.replaceState({}, document.title, window.location.pathname);
 
   // Set active link in nav
   document.querySelectorAll('.nav-links .nav-link').forEach(l => l.classList.remove('active'));
-  const homeLink = document.querySelector('.nav-links .nav-link[data-i18n="navHome"]');
+  const homeLink = document.querySelector('.nav-links .nav-link[data-i18n="navHome"]') || document.querySelector('.nav-links a[href="/"]');
   if (homeLink) homeLink.classList.add('active');
 
   // Smooth scroll to top of page
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Close mobile drawer if open
+  const navLinks = document.querySelector('.nav-links');
+  if (navLinks) navLinks.classList.remove('open');
+}
+
+// Smooth, robust navigation for all header links and internal anchors
+function initSmoothNavigation() {
+  const anchors = document.querySelectorAll('.nav-links a, a.brand-logo');
+
+  anchors.forEach(anchor => {
+    anchor.addEventListener('click', (e) => {
+      const href = anchor.getAttribute('href');
+      if (!href) return;
+
+      // Brand logo or Home link
+      if (href === '/' || href === '#' || anchor.getAttribute('data-i18n') === 'navHome') {
+        e.preventDefault();
+        navigateToHome(e);
+        return;
+      }
+
+      // Hash links (#features, #architecture, #comparison, etc.)
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        const targetId = href.substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          closeAllModals();
+
+          // Calculate precise scroll target offset for sticky header
+          const header = document.querySelector('.site-header');
+          const headerHeight = header ? header.offsetHeight : 64;
+          const targetY = targetEl.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 12);
+
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth'
+          });
+
+          // Mark active link
+          document.querySelectorAll('.nav-links .nav-link').forEach(l => l.classList.remove('active'));
+          anchor.classList.add('active');
+
+          if (window.history.pushState) {
+            window.history.pushState(null, '', href);
+          }
+        }
+
+        // Close mobile drawer
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks) navLinks.classList.remove('open');
+      }
+    });
+  });
+
+  initScrollSpy();
+}
+
+// Automatically highlight active navigation link as user scrolls
+function initScrollSpy() {
+  const sectionIds = ['features', 'architecture', 'comparison', 'selfhost', 'latency', 'pricing', 'downloads', 'faq'];
+  
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        const navLinks = document.querySelectorAll('.nav-links .nav-link');
+
+        if (scrollY < 200) {
+          navLinks.forEach(l => l.classList.remove('active'));
+          const homeLink = document.querySelector('.nav-links .nav-link[data-i18n="navHome"]') || document.querySelector('.nav-links a[href="/"]');
+          if (homeLink) homeLink.classList.add('active');
+          ticking = false;
+          return;
+        }
+
+        const headerHeight = 76;
+        for (let i = sectionIds.length - 1; i >= 0; i--) {
+          const id = sectionIds[i];
+          const el = document.getElementById(id);
+          if (el) {
+            const top = el.getBoundingClientRect().top + scrollY - headerHeight - 30;
+            if (scrollY >= top) {
+              navLinks.forEach(l => l.classList.remove('active'));
+              const active = document.querySelector(`.nav-links a[href="#${id}"]`);
+              if (active) active.classList.add('active');
+              break;
+            }
+          }
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 }
 
 // Global Modal Dismissal (Escape key & backdrop)
 function initModalDismiss() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeUpgradeModal();
-      closeRemoteSession();
-      closeFileTransferModal();
-      closeMobilePairModal();
-      closeChangePasswordModal();
-      const loginModal = document.getElementById('loginModal');
-      if (loginModal) loginModal.classList.remove('open');
+      closeAllModals();
     }
   });
 }
@@ -2118,12 +2218,6 @@ function initMobileMenu() {
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     navLinks.classList.toggle('open');
-  });
-
-  navLinks.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      navLinks.classList.remove('open');
-    });
   });
 
   document.addEventListener('click', (e) => {
