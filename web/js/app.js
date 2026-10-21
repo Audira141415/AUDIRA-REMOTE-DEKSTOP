@@ -850,6 +850,239 @@ function simulateTotpSubmit() {
   }, 600);
 }
 
+function switchProfileTab(tabKey, btn) {
+  document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.profile-pane').forEach(p => p.classList.remove('active'));
+
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    const targetBtn = document.querySelector(`.profile-tab-btn[data-ptab="${tabKey}"]`);
+    if (targetBtn) targetBtn.classList.add('active');
+  }
+
+  const paneId = 'paneProfile' + tabKey.charAt(0).toUpperCase() + tabKey.slice(1);
+  const targetPane = document.getElementById(paneId);
+  if (targetPane) targetPane.classList.add('active');
+}
+
+function copyProfileText(text, msg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(msg || 'Berhasil disalin ke clipboard!', 'success');
+    }).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+  function fallbackCopy(val) {
+    const ta = document.createElement('textarea');
+    ta.value = val;
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast(msg || 'Berhasil disalin!', 'success');
+    } catch (_) {
+      showToast(val, 'info');
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+async function renameUserDevice(deviceId, currentAlias) {
+  const newName = prompt(`Ubah nama alias untuk perangkat (${deviceId}):`, currentAlias || '');
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) {
+    showToast('Nama alias tidak boleh kosong.', 'warning');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('audira_access_token');
+    const res = await fetch('/api/user/rename-device', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ device_id: deviceId, alias: trimmed })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || 'Nama alias berhasil diperbarui!', 'success');
+      showLoggedInState();
+    } else {
+      showToast(data.error || 'Gagal mengubah nama perangkat.', 'error');
+    }
+  } catch (err) {
+    showToast('Gagal menghubungi server.', 'error');
+  }
+}
+
+async function unlinkUserDevice(deviceId, deviceName) {
+  if (!confirm(`Putuskan tautan perangkat "${deviceName || deviceId}" dari akun Anda? Perangkat ini tidak akan dapat diakses hingga dihubungkan kembali.`)) {
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('audira_access_token');
+    const res = await fetch('/api/user/unlink-device', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ device_id: deviceId })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || 'Perangkat berhasil diputuskan.', 'success');
+      showLoggedInState();
+    } else {
+      showToast(data.error || 'Gagal memutuskan perangkat.', 'error');
+    }
+  } catch (err) {
+    showToast('Gagal menghubungi server.', 'error');
+  }
+}
+
+async function handleProfilePasswordChange() {
+  const alertEl = document.getElementById('profilePwdAlert');
+  if (alertEl) alertEl.style.display = 'none';
+
+  const oldPwd = (document.getElementById('profileOldPwd')?.value || '').trim();
+  const newPwd = (document.getElementById('profileNewPwd')?.value || '').trim();
+  const confirmPwd = (document.getElementById('profileConfirmPwd')?.value || '').trim();
+  const btn = document.getElementById('btnProfileChangePwd');
+
+  if (!oldPwd) {
+    setProfileAlert('profilePwdAlert', 'Kata sandi saat ini wajib diisi.', 'warning');
+    return;
+  }
+  if (!newPwd || newPwd.length < 6) {
+    setProfileAlert('profilePwdAlert', 'Kata sandi baru minimal 6 karakter.', 'warning');
+    return;
+  }
+  if (newPwd !== confirmPwd) {
+    setProfileAlert('profilePwdAlert', 'Konfirmasi kata sandi baru tidak cocok.', 'warning');
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  try {
+    const token = localStorage.getItem('audira_access_token');
+    const res = await fetch('/api/accounts/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ old_password: oldPwd, new_password: newPwd })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      setProfileAlert('profilePwdAlert', 'Kata sandi berhasil diperbarui dengan aman!', 'success');
+      showToast('Kata sandi berhasil diperbarui!', 'success');
+      document.getElementById('profileChangePwdForm')?.reset();
+    } else {
+      setProfileAlert('profilePwdAlert', data.error || 'Gagal memperbarui kata sandi.', 'error');
+    }
+  } catch (err) {
+    setProfileAlert('profilePwdAlert', 'Gagal menghubungi server.', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleProfileUpdate() {
+  const alertEl = document.getElementById('profileEditAlert');
+  if (alertEl) alertEl.style.display = 'none';
+
+  const dName = (document.getElementById('editDisplayName')?.value || '').trim();
+  const email = (document.getElementById('editEmail')?.value || '').trim();
+  const tgNotif = document.getElementById('editTelegramNotif')?.checked ?? true;
+  const btn = document.getElementById('btnSaveProfile');
+
+  if (!dName) {
+    setProfileAlert('profileEditAlert', 'Nama tampilan tidak boleh kosong.', 'warning');
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  try {
+    const token = localStorage.getItem('audira_access_token');
+    const res = await fetch('/api/user/update-profile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ display_name: dName, email: email, telegram_notif: tgNotif })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      setProfileAlert('profileEditAlert', 'Profil berhasil diperbarui!', 'success');
+      showToast('Profil berhasil disimpan!', 'success');
+      try {
+        const u = JSON.parse(localStorage.getItem('audira_user') || '{}');
+        u.display_name = dName;
+        u.email = email;
+        localStorage.setItem('audira_user', JSON.stringify(u));
+      } catch (_) {}
+      showLoggedInState();
+    } else {
+      setProfileAlert('profileEditAlert', data.error || 'Gagal memperbarui profil.', 'error');
+    }
+  } catch (err) {
+    setProfileAlert('profileEditAlert', 'Gagal menghubungi server.', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleRevokeOtherSessions() {
+  if (!confirm('Putuskan semua sesi web login lain selain yang sedang aktif saat ini?')) return;
+  try {
+    const token = localStorage.getItem('audira_access_token');
+    const res = await fetch('/api/user/revoke-other-sessions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Semua sesi lain berhasil diputus.', 'success');
+    } else {
+      showToast(data.error || 'Gagal memutus sesi lain.', 'warning');
+    }
+  } catch (err) {
+    showToast('Gagal menghubungi server.', 'error');
+  }
+}
+
+function setProfileAlert(alertId, msg, type = 'error') {
+  const el = document.getElementById(alertId);
+  if (!el) return;
+  el.style.display = 'block';
+  if (type === 'success') {
+    el.style.background = 'rgba(16, 185, 129, 0.12)';
+    el.style.border = '1px solid #10b981';
+    el.style.color = '#34d399';
+  } else if (type === 'warning') {
+    el.style.background = 'rgba(245, 158, 11, 0.12)';
+    el.style.border = '1px solid #f59e0b';
+    el.style.color = '#fbbf24';
+  } else {
+    el.style.background = 'rgba(239, 68, 68, 0.12)';
+    el.style.border = '1px solid #ef4444';
+    el.style.color = '#f87171';
+  }
+  el.textContent = msg;
+}
+
 async function showLoggedInState(user) {
   document.querySelectorAll('.auth-form-view').forEach(v => v.classList.remove('active'));
   const tabs = document.querySelector('.modal-tabs');
@@ -857,6 +1090,9 @@ async function showLoggedInState(user) {
 
   const loggedInView = document.getElementById('authViewLoggedIn');
   if (loggedInView) loggedInView.classList.add('active');
+
+  const modalDialog = document.querySelector('#loginModal .modal-dialog');
+  if (modalDialog) modalDialog.classList.add('profile-expanded');
 
   if (!user) {
     try {
@@ -875,7 +1111,7 @@ async function showLoggedInState(user) {
   const openBtn = document.getElementById('openLoginBtn');
   if (openBtn) {
     openBtn.innerHTML = `
-      <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; margin-right:4px;"></span>
+      <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; margin-right:5px; box-shadow:0 0 6px #10b981;"></span>
       <span>${escapeHtml(displayName)}</span>
     `;
     openBtn.style.borderColor = '#10b981';
@@ -887,18 +1123,28 @@ async function showLoggedInState(user) {
   const handleEl = document.getElementById('profileUserHandle');
   if (handleEl) handleEl.innerHTML = `@${escapeHtml(username)} &bull; ${escapeHtml(email)}`;
 
+  const guideUserEl = document.getElementById('profileGuideUsername');
+  if (guideUserEl) guideUserEl.textContent = `@${username}`;
+
   const avatarEl = document.getElementById('profileAvatarInitial');
   if (avatarEl) {
     const parts = displayName.trim().split(/\s+/);
     const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
     avatarEl.textContent = initials || 'AD';
+    if (isOwner) {
+      avatarEl.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+      avatarEl.style.boxShadow = '0 0 20px rgba(245,158,11,0.4)';
+    } else if (isAdmin) {
+      avatarEl.style.background = 'linear-gradient(135deg, #0284c7, #2563eb)';
+      avatarEl.style.boxShadow = '0 0 20px rgba(2,132,199,0.4)';
+    } else {
+      avatarEl.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+      avatarEl.style.boxShadow = '0 0 20px rgba(16,185,129,0.3)';
+    }
   }
 
-  // Update Role Badge & Admin panel button
   const badgeEl = document.getElementById('profileRoleBadge');
-  const adminPanelLink = document.getElementById('profileAdminPanelLink');
-  const noticeTitle = document.getElementById('accountNoticeTitle');
-  const noticeDesc = document.getElementById('accountNoticeDesc');
+  const adminBanner = document.getElementById('profileAdminPanelBanner');
 
   if (badgeEl) {
     if (isOwner) {
@@ -912,29 +1158,22 @@ async function showLoggedInState(user) {
       badgeEl.style.color = '#38bdf8';
       badgeEl.style.border = '1px solid rgba(2, 132, 199, 0.3)';
     } else {
-      badgeEl.innerHTML = '👤 Pengguna Klien (Member)';
+      badgeEl.innerHTML = '👤 Member (Klien)';
       badgeEl.style.background = 'rgba(148, 163, 184, 0.15)';
       badgeEl.style.color = 'var(--color-text-dim)';
       badgeEl.style.border = '1px solid rgba(148, 163, 184, 0.3)';
     }
   }
 
-  if (adminPanelLink) {
-    adminPanelLink.style.display = isAdmin ? 'flex' : 'none';
+  if (adminBanner) {
+    adminBanner.style.display = isAdmin ? 'flex' : 'none';
   }
 
-  if (noticeTitle && noticeDesc) {
-    if (isOwner) {
-      noticeTitle.textContent = 'Akses Penuh Owner (Superadmin)';
-      noticeDesc.textContent = 'Anda memiliki kontrol penuh atas infrastruktur cluster, relay hbbr/hbbs, manajemen role akun, dan audit security.';
-    } else if (isAdmin) {
-      noticeTitle.textContent = 'Akses Administrator Fleet';
-      noticeDesc.textContent = 'Anda memiliki akses untuk memonitor seluruh endpoint fleet, memutus sesi aktif, dan mengelola perangkat.';
-    } else {
-      noticeTitle.textContent = 'Akun Pengguna Klien (Member)';
-      noticeDesc.textContent = 'Akun Anda aktif untuk sinkronisasi perangkat pribadi. Masuk dengan akun ini pada aplikasi Audira Desk di komputer atau HP Anda untuk manajemen multi-device otomatis.';
-    }
-  }
+  // Pre-fill profile settings inputs
+  const editName = document.getElementById('editDisplayName');
+  const editMail = document.getElementById('editEmail');
+  if (editName && !editName.value) editName.value = displayName;
+  if (editMail && !editMail.value) editMail.value = email;
 
   // Query live personal user profile & devices (/api/user/me)
   try {
@@ -946,30 +1185,106 @@ async function showLoggedInState(user) {
       if (myData.user) {
         const u = myData.user;
         const devices = u.devices || [];
-        const countEl = document.getElementById('profileDeviceCount');
-        if (countEl) countEl.textContent = devices.length;
+        const quota = u.quota || { devices_used: devices.length, devices_max: 5 };
 
+        // Update counts
+        const tabCountEl = document.getElementById('profileDeviceTabCount');
+        if (tabCountEl) tabCountEl.textContent = devices.length;
+
+        const kpiTotal = document.getElementById('kpiProfileDevTotal');
+        if (kpiTotal) kpiTotal.textContent = `${devices.length} Unit`;
+
+        const onlineCount = devices.filter(d => d.is_online).length;
+        const kpiOnline = document.getElementById('kpiProfileDevOnline');
+        if (kpiOnline) kpiOnline.textContent = `${onlineCount} Unit`;
+
+        const kpiQuota = document.getElementById('kpiProfileDevQuota');
+        if (kpiQuota) kpiQuota.textContent = `${devices.length} / ${quota.devices_max}`;
+
+        const featQuota = document.getElementById('featDeviceQuotaLabel');
+        if (featQuota) featQuota.textContent = `Maksimal ${quota.devices_max} Slot Perangkat Pribadi`;
+
+        // Member since
+        const memberSinceEl = document.getElementById('profileMemberSince');
+        if (memberSinceEl) {
+          memberSinceEl.textContent = `Terdaftar sejak: ${u.created_at || 'Baru'}`;
+        }
+
+        // Plan labels
+        const planBadge = document.getElementById('profilePlanBadge');
+        if (planBadge) planBadge.textContent = u.plan || 'Community Free';
+
+        const subTitle = document.getElementById('subPanePlanTitle');
+        if (subTitle) subTitle.textContent = u.plan || 'Community Free';
+
+        // License key
+        const licEl = document.getElementById('profileLicenseKeyDisplay');
+        if (licEl && u.license_key) licEl.textContent = u.license_key;
+
+        // Current IP
+        const ipEl = document.getElementById('profileCurrentIp');
+        if (ipEl && u.client_ip) ipEl.textContent = u.client_ip;
+
+        // Telegram preference
+        const tgCheck = document.getElementById('editTelegramNotif');
+        if (tgCheck && typeof u.telegram_notif !== 'undefined') tgCheck.checked = u.telegram_notif;
+
+        // Render device cards
         const devListEl = document.getElementById('profileLinkedDevicesList');
         if (devListEl) {
           if (devices.length === 0) {
             devListEl.innerHTML = `
-              <div style="text-align:center; padding:1.25rem 0.5rem; background:var(--color-bg-subtle); border:1px dashed var(--color-border); border-radius:8px; font-size:0.8rem; color:var(--color-text-dim);">
-                Belum ada PC/HP terhubung. Login pada aplikasi Audira Desk di perangkat Anda untuk menghubungkannya.
+              <div style="text-align:center; padding:1.75rem 1rem; background:var(--color-bg-subtle); border:1px dashed var(--color-border); border-radius:10px; font-size:0.83rem; color:var(--color-text-dim);">
+                <div style="font-size:1.6rem; margin-bottom:0.4rem;">💻</div>
+                <div style="font-weight:700; color:var(--color-text-heading); margin-bottom:0.25rem;">Belum ada perangkat tertaut</div>
+                <div>Login pada aplikasi Audira Desk di komputer atau smartphone Anda menggunakan akun ini untuk menghubungkannya secara otomatis.</div>
               </div>
             `;
           } else {
-            devListEl.innerHTML = devices.map(d => `
-              <div style="background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px; padding:0.55rem 0.75rem; display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:0.6rem;">
-                  <span style="width:8px; height:8px; background:${d.is_online ? '#10b981' : 'var(--color-text-dim)'}; border-radius:50%; ${d.is_online ? 'box-shadow:0 0 6px #10b981;' : ''}"></span>
-                  <div>
-                    <div style="font-size:0.82rem; font-weight:700; color:var(--color-text-heading);">${escapeHtml(d.alias || d.hostname || 'Device')}</div>
-                    <div style="font-size:0.7rem; color:var(--color-text-dim); font-family:var(--font-mono);">ID: ${escapeHtml(d.id)} &bull; ${escapeHtml(d.os || 'Windows')}</div>
+            devListEl.innerHTML = devices.map(d => {
+              const isOnline = d.is_online;
+              const cleanId = d.raw_id || d.id.replace(/\s+/g, '');
+              const alias = escapeHtml(d.alias || d.hostname || 'Device');
+              const os = d.os || 'Windows';
+              let osIcon = '💻';
+              if (os.toLowerCase().includes('android')) osIcon = '📱';
+              else if (os.toLowerCase().includes('linux')) osIcon = '🐧';
+              else if (os.toLowerCase().includes('mac') || os.toLowerCase().includes('ios')) osIcon = '🍎';
+
+              return `
+                <div class="device-card-item">
+                  <div style="display:flex; align-items:center; gap:0.75rem; min-width:0;">
+                    <div class="device-os-icon">
+                      <span style="font-size:1.25rem;">${osIcon}</span>
+                    </div>
+                    <div style="min-width:0;">
+                      <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                        <span style="font-size:0.88rem; font-weight:800; color:var(--color-text-heading);">${alias}</span>
+                        <span style="display:inline-flex; align-items:center; gap:0.3rem; font-size:0.68rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:4px; ${isOnline ? 'background:rgba(16,185,129,0.12); color:#10b981;' : 'background:rgba(148,163,184,0.12); color:var(--color-text-dim);'}">
+                          <span style="width:6px; height:6px; border-radius:50%; background:${isOnline ? '#10b981' : 'var(--color-text-dim)'}; ${isOnline ? 'box-shadow:0 0 5px #10b981;' : ''}"></span>
+                          ${isOnline ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                      <div style="font-size:0.74rem; color:var(--color-text-dim); font-family:var(--font-mono); margin-top:2px;">
+                        ID: <b style="color:var(--color-primary);">${escapeHtml(d.id)}</b> &bull; ${escapeHtml(os)} ${d.ip ? `&bull; ${escapeHtml(d.ip)}` : ''}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="quickConnect('${escapeHtml(d.id)}'); closeAuthModal();" style="padding:0.3rem 0.7rem; font-size:0.75rem; font-weight:800; box-shadow:0 0 10px rgba(0,240,255,0.25);">
+                      ⚡ Remote
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="renameUserDevice('${escapeHtml(cleanId)}', '${alias}');" title="Ubah Nama Alias" style="padding:0.3rem 0.55rem; font-size:0.75rem;">
+                      ✏️
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="unlinkUserDevice('${escapeHtml(cleanId)}', '${alias}');" title="Putuskan Perangkat" style="padding:0.3rem 0.55rem; font-size:0.75rem; color:#ef4444; border-color:rgba(239,68,68,0.3);">
+                      🗑️
+                    </button>
                   </div>
                 </div>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickConnect('${escapeHtml(d.id)}'); document.getElementById('loginModal')?.classList.remove('open');" style="padding:0.25rem 0.6rem; font-size:0.72rem;">Remote</button>
-              </div>
-            `).join('');
+              `;
+            }).join('');
           }
         }
       }
@@ -980,29 +1295,10 @@ async function showLoggedInState(user) {
 }
 
 function copyProfileLicenseKey() {
-  const keyEl = document.getElementById('profileLicenseKey');
+  const keyEl = document.getElementById('profileLicenseKeyDisplay');
   const key = keyEl ? keyEl.textContent.trim() : '';
   if (!key) return;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(key).then(() => {
-      showToast('Kunci lisensi berhasil disalin ke clipboard!', 'success');
-    }).catch(() => fallbackCopy(key));
-  } else {
-    fallbackCopy(key);
-  }
-  function fallbackCopy(text) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      showToast('Kunci lisensi berhasil disalin!', 'success');
-    } catch (e) {
-      showToast('Gagal menyalin kunci lisensi.', 'error');
-    }
-    document.body.removeChild(ta);
-  }
+  copyProfileText(key, 'Kunci lisensi klien berhasil disalin ke clipboard!');
 }
 
 function handleSignOut(silent = false) {
@@ -1018,6 +1314,7 @@ function handleSignOut(silent = false) {
   localStorage.removeItem('audira_access_token');
   localStorage.removeItem('audira_user');
   sessionStorage.removeItem('audira_logged_in');
+  document.querySelector('#loginModal .modal-dialog')?.classList.remove('profile-expanded');
   const loggedInView = document.getElementById('authViewLoggedIn');
   if (loggedInView) loggedInView.classList.remove('active');
   const tabs = document.querySelector('.modal-tabs');
@@ -1111,7 +1408,10 @@ function handleClientSessionTimeout() {
 
 function closeAuthModal() {
   const modal = document.getElementById('loginModal');
-  if (modal) modal.classList.remove('open');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.querySelector('.modal-dialog')?.classList.remove('profile-expanded');
+  }
 }
 
 function navigateToFleet() {

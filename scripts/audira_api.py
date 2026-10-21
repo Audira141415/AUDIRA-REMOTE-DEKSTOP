@@ -507,6 +507,11 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                     "status": "online" if online else "offline"
                 })
 
+            quota_max = 100 if is_owner else (25 if is_admin else 5)
+            concur_max = 20 if is_owner else (5 if is_admin else 1)
+            plan_name = u.get("plan", ("Enterprise Cluster" if is_owner else ("Pro Team & MSP" if is_admin else "Community Free (Gratis)")))
+            lic_key = u.get("license_key", f"AUD-{'OWN' if is_owner else ('ADM' if is_admin else 'COM')}-{uname[:4].upper()}-9901-772A")
+
             resp = {
                 "success": True,
                 "user": {
@@ -519,6 +524,23 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                     "is_admin": is_admin,
                     "is_owner": is_owner,
                     "created_at": u.get("created_at", ""),
+                    "plan": plan_name,
+                    "license_key": lic_key,
+                    "client_ip": client_ip,
+                    "session_timeout_minutes": 15,
+                    "telegram_notif": u.get("telegram_notif", True),
+                    "quota": {
+                        "devices_used": len(devices_data),
+                        "devices_max": quota_max,
+                        "concurrent_sessions": concur_max,
+                        "fps": 60,
+                        "codec": "AV1 / VP9 / H.265 Direct P2P"
+                    },
+                    "relay_info": {
+                        "host": "desk.audira.my.id",
+                        "port": "21116",
+                        "key": "k_AudiraDesk2026SecureRelayZeroTrust"
+                    },
                     "devices": devices_data
                 }
             }
@@ -842,7 +864,7 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         # Protected Admin Actions Guard (Strictly Owner and Admin only)
         protected_post_paths = (
             "/api/devices/alias", "/api/accounts/create", "/api/accounts/delete-device",
-            "/api/accounts/change-password", "/api/accounts/set-role", "/api/audit_logs/clear",
+            "/api/accounts/set-role", "/api/audit_logs/clear",
             "/api/orders/approve", "/api/orders/delete", "/api/sessions/terminate"
         )
         if path in protected_post_paths:
@@ -856,6 +878,145 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                     "error": "Forbidden: Akses ditolak. Tindakan ini hanya diizinkan untuk Administrator dan Owner."
                 }).encode())
                 return
+
+        # 0A. USER SELF-SERVICE: Update Profile (/api/user/update-profile)
+        if path == "/api/user/update-profile":
+            uname, u = find_user_by_token(auth_header)
+            if not uname or not u:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid atau telah berakhir."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                display_name = str(data.get("display_name", "")).strip()
+                email = str(data.get("email", "")).strip().lower()
+                telegram_notif = bool(data.get("telegram_notif", True))
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if uname in accounts:
+                        if display_name:
+                            accounts[uname]["display_name"] = display_name
+                        if email and "@" in email:
+                            accounts[uname]["email"] = email
+                        accounts[uname]["telegram_notif"] = telegram_notif
+                        save_accounts(accounts)
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": "Profil berhasil diperbarui."}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 0B. USER SELF-SERVICE: Rename Device Alias (/api/user/rename-device)
+        if path == "/api/user/rename-device":
+            uname, u = find_user_by_token(auth_header)
+            if not uname or not u:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                dev_id = str(data.get("device_id", "")).replace(" ", "").strip()
+                alias = str(data.get("alias", "")).strip()
+                if not dev_id:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "ID perangkat tidak boleh kosong."}).encode())
+                    return
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if uname in accounts and "devices" in accounts[uname] and dev_id in accounts[uname]["devices"]:
+                        accounts[uname]["devices"][dev_id]["alias"] = alias
+                        save_accounts(accounts)
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": f"Nama perangkat berhasil diubah ke '{alias}'."}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 0C. USER SELF-SERVICE: Unlink Device (/api/user/unlink-device)
+        if path == "/api/user/unlink-device":
+            uname, u = find_user_by_token(auth_header)
+            if not uname or not u:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid."}).encode())
+                return
+            try:
+                data = json.loads(body) if body else {}
+                dev_id = str(data.get("device_id", "")).replace(" ", "").strip()
+                if not dev_id:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "ID perangkat tidak boleh kosong."}).encode())
+                    return
+                with ACCOUNTS_LOCK:
+                    accounts = load_accounts()
+                    if uname in accounts and "devices" in accounts[uname] and dev_id in accounts[uname]["devices"]:
+                        del accounts[uname]["devices"][dev_id]
+                        save_accounts(accounts)
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "message": "Perangkat berhasil diputuskan dari akun."}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 0D. USER SELF-SERVICE: Revoke All Other Sessions (/api/user/revoke-other-sessions)
+        if path == "/api/user/revoke-other-sessions":
+            uname, u = find_user_by_token(auth_header)
+            if not uname or not u:
+                self.send_response(401)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Sesi tidak valid."}).encode())
+                return
+            current_tok = auth_header.split(" ", 1)[1].strip() if auth_header.startswith("Bearer ") else ""
+            with ACCOUNTS_LOCK:
+                accounts = load_accounts()
+                if uname in accounts:
+                    toks = accounts[uname].get("tokens", {})
+                    new_toks = {}
+                    if current_tok and current_tok in toks:
+                        new_toks[current_tok] = toks[current_tok]
+                    accounts[uname]["tokens"] = new_toks
+                    save_accounts(accounts)
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "message": "Semua sesi lain berhasil diputuskan."}).encode())
+            return
 
         # 1. SYSINFO_VER
         if path == "/api/sysinfo_ver":
@@ -1552,10 +1713,36 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
         # 13. ACCOUNT ACTION: Change Password (/api/accounts/change-password)
         if path == "/api/accounts/change-password":
             try:
+                uname_auth, u_auth = find_user_by_token(auth_header)
                 data = json.loads(body) if body else {}
-                username = str(data.get("username", "")).strip() or "audira"
+                username = str(data.get("username", "")).strip() or (uname_auth or "audira")
                 old_pwd = str(data.get("old_password", "")).strip()
                 new_pwd = str(data.get("new_password", "")).strip()
+
+                if not uname_auth and not is_admin_request(client_ip, auth_header)[0]:
+                    self.send_response(401)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Silakan login terlebih dahulu untuk mengubah kata sandi."}).encode())
+                    return
+
+                caller_is_admin = uname_auth and get_account_role(uname_auth, u_auth) in ["owner", "admin"]
+                if not caller_is_admin and uname_auth != username:
+                    self.send_response(403)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Anda hanya berhak mengubah kata sandi akun Anda sendiri."}).encode())
+                    return
+
+                if not caller_is_admin and not old_pwd:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Kata sandi saat ini (lama) wajib diisi."}).encode())
+                    return
 
                 if not new_pwd or len(new_pwd) < 6:
                     self.send_response(400)

@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/styles.css?v=1.5.4">
+  <link rel="stylesheet" href="css/styles.css?v=1.5.5">
   <link rel="icon" type="image/svg+xml" href="images/logo.svg">
 </head>
 <body>
@@ -1414,72 +1414,279 @@
 
         <!-- View 4: Logged In Account Dashboard (Profile & Multi-Device) -->
         <div id="authViewLoggedIn" class="auth-form-view">
-          <!-- Profile Header Card -->
-          <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem; display:flex; align-items:center; gap:1rem;">
-            <div id="profileAvatarInitial" style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, #0284c7, #2563eb); display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:800; font-size:1.2rem; flex-shrink:0; box-shadow:0 0 15px rgba(2,132,199,0.3);">
-              AD
+          
+          <!-- Top Role & Admin Banner (if Admin/Owner) -->
+          <div id="profileAdminPanelBanner" style="display:none; background:linear-gradient(90deg, rgba(2,132,199,0.18), rgba(56,189,248,0.08)); border:1px solid rgba(56,189,248,0.35); border-radius:10px; padding:0.75rem 1rem; margin-bottom:1.1rem; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:1.1rem;">👑</span>
+              <span style="font-size:0.83rem; font-weight:700; color:var(--color-text-heading);">Akses Khusus: Anda memiliki peran Administrator / Owner Fleet.</span>
             </div>
-            <div style="flex:1; min-width:0;">
-              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.25rem;">
-                <h4 id="profileDisplayName" style="margin:0; font-size:1.1rem; font-weight:800; color:var(--color-text-heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Nama Pengguna</h4>
-                <span id="profileRoleBadge" class="badge" style="font-size:0.7rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:999px; background:rgba(148,163,184,0.15); color:var(--color-text-dim); border:1px solid rgba(148,163,184,0.3);">👤 Member</span>
+            <a href="admin.html" class="btn btn-primary btn-sm" style="font-size:0.75rem; font-weight:800; padding:0.35rem 0.85rem; text-decoration:none; box-shadow:0 0 10px rgba(0,240,255,0.3);">
+              Buka Fleet Admin Console &rarr;
+            </a>
+          </div>
+
+          <!-- Hero User Card -->
+          <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:12px; padding:1.25rem 1.4rem; margin-bottom:1.15rem; display:flex; align-items:center; justify-content:space-between; gap:1.25rem; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:1rem; min-width:0;">
+              <div style="position:relative;">
+                <div id="profileAvatarInitial" style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, #0284c7, #2563eb); display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:900; font-size:1.35rem; flex-shrink:0; box-shadow:0 0 20px rgba(2,132,199,0.35); border:2px solid rgba(255,255,255,0.1);">
+                  AD
+                </div>
+                <span style="position:absolute; bottom:1px; right:1px; width:13px; height:13px; background:#10b981; border:2px solid var(--color-bg-subtle); border-radius:50%; box-shadow:0 0 8px #10b981;" title="Online"></span>
               </div>
-              <div id="profileUserHandle" style="font-size:0.8rem; color:var(--color-text-dim); font-family:var(--font-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                @username &bull; email@audira.my.id
-              </div>
-            </div>
-          </div>
-
-          <!-- Account Type / Notice Box -->
-          <div id="userAccountNoticeBox" style="background:rgba(2,132,199,0.06); border:1px solid rgba(2,132,199,0.25); border-radius:10px; padding:0.85rem 1rem; margin-bottom:1.25rem; font-size:0.82rem; line-height:1.45; color:var(--color-text-muted);">
-            <div style="font-weight:700; color:var(--color-text-heading); display:flex; align-items:center; gap:0.4rem; margin-bottom:0.25rem;">
-              <span>ℹ️</span> <span id="accountNoticeTitle">Status Akun Klien</span>
-            </div>
-            <span id="accountNoticeDesc">Akun Anda aktif untuk sinkronisasi perangkat pribadi. Masuk dengan akun ini pada aplikasi Audira Desk di komputer atau HP Anda untuk manajemen multi-device otomatis.</span>
-          </div>
-
-          <!-- Plan & Devices Summary Pill -->
-          <div style="background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:10px; padding:0.85rem 1rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-text-dim); font-weight:700;">Paket Akun</div>
-              <div id="profilePlanBadge" style="font-size:0.92rem; font-weight:800; color:var(--color-text-heading); margin-top:2px;">Community Free (Gratis)</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-text-dim); font-weight:700;">Perangkat Terhubung</div>
-              <div style="font-size:0.92rem; font-weight:800; color:var(--color-primary); margin-top:2px;"><span id="profileDeviceCount">0</span> Unit</div>
-            </div>
-          </div>
-
-          <!-- Linked Devices Section -->
-          <div style="margin-bottom:1.25rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-              <span style="font-size:0.78rem; font-weight:700; color:var(--color-text-heading); text-transform:uppercase; letter-spacing:0.04em;">Daftar Perangkat Terdaftar:</span>
-              <span style="font-size:0.72rem; color:var(--color-text-dim);">Live Sync</span>
-            </div>
-            <div id="profileLinkedDevicesList" style="display:flex; flex-direction:column; gap:0.5rem; max-height:160px; overflow-y:auto; padding-right:2px;">
-              <div style="text-align:center; padding:1.25rem 0.5rem; background:var(--color-bg-subtle); border:1px dashed var(--color-border); border-radius:8px; font-size:0.8rem; color:var(--color-text-dim);">
-                Belum ada PC/HP terhubung. Login pada aplikasi Audira Desk di perangkat Anda untuk menghubungkannya.
+              <div style="min-width:0;">
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.25rem;">
+                  <h4 id="profileDisplayName" style="margin:0; font-size:1.15rem; font-weight:800; color:var(--color-text-heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Nama Pengguna</h4>
+                  <span id="profileRoleBadge" class="badge" style="font-size:0.72rem; font-weight:800; padding:0.2rem 0.65rem; border-radius:999px; background:rgba(148,163,184,0.15); color:var(--color-text-dim); border:1px solid rgba(148,163,184,0.3);">👤 Member</span>
+                  <span class="badge" style="font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:999px; background:rgba(16,185,129,0.12); color:#10b981; border:1px solid rgba(16,185,129,0.3);">✓ E2EE Aktif</span>
+                </div>
+                <div id="profileUserHandle" style="font-size:0.8rem; color:var(--color-text-dim); font-family:var(--font-mono); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  @username &bull; email@audira.my.id
+                </div>
+                <div id="profileMemberSince" style="font-size:0.72rem; color:var(--color-text-dim); margin-top:3px;">
+                  Terdaftar sejak: Memuat...
+                </div>
               </div>
             </div>
+
+            <!-- Plan Badge & Action -->
+            <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:0.35rem;">
+              <span style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-text-dim); font-weight:700;">Status Lisensi</span>
+              <div id="profilePlanBadge" style="font-size:0.92rem; font-weight:800; color:var(--color-primary); background:rgba(0,240,255,0.08); border:1px solid rgba(0,240,255,0.25); padding:0.25rem 0.75rem; border-radius:6px;">
+                Community Free (Gratis)
+              </div>
+              <button type="button" onclick="openUpgradeModal('pro')" class="btn btn-primary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.7rem; font-weight:800; margin-top:2px;">
+                ⚡ Tingkatkan Paket
+              </button>
+            </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div style="display:flex; flex-direction:column; gap:0.6rem;">
-            <!-- Admin Panel Shortcut (Only visible for Owner & Admin) -->
-            <a id="profileAdminPanelLink" href="admin.html" class="btn btn-primary" style="display:none; width:100%; padding:0.8rem; justify-content:center; text-decoration:none; font-weight:700; box-shadow:0 4px 14px rgba(0,240,255,0.25);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-              <span>Buka Fleet Admin Control Panel &rarr;</span>
+          <!-- Profile Inner Navigation Tabs -->
+          <div class="profile-tab-nav">
+            <button type="button" class="profile-tab-btn active" data-ptab="devices" onclick="switchProfileTab('devices', this)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span>Perangkat Saya (<span id="profileDeviceTabCount">0</span>)</span>
+            </button>
+            <button type="button" class="profile-tab-btn" data-ptab="security" onclick="switchProfileTab('security', this)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Keamanan &amp; Sesi</span>
+            </button>
+            <button type="button" class="profile-tab-btn" data-ptab="subscription" onclick="switchProfileTab('subscription', this)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <span>Paket &amp; Lisensi</span>
+            </button>
+            <button type="button" class="profile-tab-btn" data-ptab="settings" onclick="switchProfileTab('settings', this)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Pengaturan Akun</span>
+            </button>
+          </div>
+
+          <!-- PANE 1: PERANGKAT SAYA (DEVICES) -->
+          <div id="paneProfileDevices" class="profile-pane active">
+            <!-- Quota & KPI Metrics Bar -->
+            <div class="profile-kpi-grid">
+              <div class="profile-kpi-card">
+                <span style="font-size:0.7rem; text-transform:uppercase; color:var(--color-text-dim); font-weight:700;">TOTAL PERANGKAT</span>
+                <span id="kpiProfileDevTotal" style="font-size:1.35rem; font-weight:900; color:var(--color-text-heading);">0 Unit</span>
+              </div>
+              <div class="profile-kpi-card">
+                <span style="font-size:0.7rem; text-transform:uppercase; color:var(--color-text-dim); font-weight:700;">ONLINE SEKARANG</span>
+                <span id="kpiProfileDevOnline" style="font-size:1.35rem; font-weight:900; color:#10b981;">0 Unit</span>
+              </div>
+              <div class="profile-kpi-card">
+                <span style="font-size:0.7rem; text-transform:uppercase; color:var(--color-text-dim); font-weight:700;">SLOT KUOTA DIGUNAKAN</span>
+                <span id="kpiProfileDevQuota" style="font-size:1.35rem; font-weight:900; color:var(--color-primary);">0 / 5</span>
+              </div>
+            </div>
+
+            <!-- List of Devices -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <span style="font-size:0.78rem; font-weight:800; color:var(--color-text-heading); text-transform:uppercase; letter-spacing:0.04em;">Daftar PC &amp; Smartphone Tertaut</span>
+              <span style="font-size:0.72rem; color:var(--color-text-dim); display:flex; align-items:center; gap:0.35rem;">
+                <span style="width:7px; height:7px; background:#10b981; border-radius:50%; box-shadow:0 0 5px #10b981;"></span>
+                <span>Live Heartbeat Sync</span>
+              </span>
+            </div>
+
+            <div id="profileLinkedDevicesList" style="display:flex; flex-direction:column; gap:0.65rem; max-height:240px; overflow-y:auto; padding-right:4px; margin-bottom:1.25rem;">
+              <div style="text-align:center; padding:2rem 1rem; background:var(--color-bg-subtle); border:1px dashed var(--color-border); border-radius:10px; font-size:0.85rem; color:var(--color-text-dim);">
+                Memuat daftar perangkat terhubung...
+              </div>
+            </div>
+
+            <!-- Pairing Instructions Box -->
+            <div style="background:rgba(2,132,199,0.06); border:1px solid rgba(2,132,199,0.22); border-radius:10px; padding:1rem; margin-bottom:1.25rem;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                <span style="font-size:0.84rem; font-weight:800; color:var(--color-text-heading); display:flex; align-items:center; gap:0.4rem;">
+                  <span>🔗</span> <span>Cara Menghubungkan Perangkat Baru:</span>
+                </span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openMobilePairModal()" style="font-size:0.72rem; padding:0.25rem 0.65rem;">
+                  📱 Buka QR Code Mobile
+                </button>
+              </div>
+              <ol style="margin:0 0 0.85rem 1.15rem; padding:0; font-size:0.8rem; color:var(--color-text-body); line-height:1.55;">
+                <li>Buka aplikasi <b>Audira Desk</b> pada komputer Windows/Linux atau ponsel Android Anda.</li>
+                <li>Pilih menu <b>Akun</b> dan login menggunakan username akun Anda.</li>
+                <li>Perangkat otomatis terhubung secara aman dan siap Anda kendalikan dari browser maupun aplikasi!</li>
+              </ol>
+              <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                <div class="copy-pill-btn" onclick="copyProfileText('desk.audira.my.id', 'Relay Host berhasil disalin!')" title="Klik untuk salin Relay Host">
+                  <span>🌐 Relay:</span> <b>desk.audira.my.id</b>
+                </div>
+                <div class="copy-pill-btn" onclick="copyProfileText('k_AudiraDesk2026SecureRelayZeroTrust', 'Public Key berhasil disalin!')" title="Klik untuk salin Public Key">
+                  <span>🔑 Key:</span> <b>k_AudiraDesk...</b>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 2: KEAMANAN & SESI (SECURITY) -->
+          <div id="paneProfileSecurity" class="profile-pane">
+            <!-- Security Overview Cards -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.25rem;">
+              <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:10px; padding:0.9rem 1rem;">
+                <div style="font-size:0.72rem; text-transform:uppercase; color:var(--color-text-dim); font-weight:700; margin-bottom:0.25rem;">KRIPTOGRAFI E2EE</div>
+                <div style="font-size:0.85rem; font-weight:800; color:#10b981;">ChaCha20-Poly1305</div>
+                <div style="font-size:0.74rem; color:var(--color-text-dim); margin-top:2px;">Curve25519 (X25519) Zero-Trust</div>
+              </div>
+              <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:10px; padding:0.9rem 1rem;">
+                <div style="font-size:0.72rem; text-transform:uppercase; color:var(--color-text-dim); font-weight:700; margin-bottom:0.25rem;">INACTIVITY TIMEOUT</div>
+                <div style="font-size:0.85rem; font-weight:800; color:#f59e0b;">⏱️ 15 Menit Auto-Logout</div>
+                <div style="font-size:0.74rem; color:var(--color-text-dim); margin-top:2px;">Proteksi sesi tanpa aktivitas</div>
+              </div>
+            </div>
+
+            <!-- Change Password Form -->
+            <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:10px; padding:1.15rem; margin-bottom:1.25rem;">
+              <h5 style="margin:0 0 0.85rem 0; font-size:0.9rem; font-weight:800; color:var(--color-text-heading); display:flex; align-items:center; gap:0.4rem;">
+                <span>🔒</span> <span>Perbarui Kata Sandi Akun</span>
+              </h5>
+              <div id="profilePwdAlert" style="display:none; padding:0.6rem 0.8rem; border-radius:6px; font-size:0.8rem; margin-bottom:0.85rem; font-weight:600;"></div>
+              <form id="profileChangePwdForm" onsubmit="event.preventDefault(); handleProfilePasswordChange();">
+                <div class="form-group" style="margin-bottom:0.75rem;">
+                  <label class="form-label" style="font-size:0.78rem;">Kata Sandi Saat Ini (Lama)</label>
+                  <input type="password" id="profileOldPwd" class="form-input" placeholder="Masukkan kata sandi saat ini" required>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.78rem;">Kata Sandi Baru</label>
+                    <input type="password" id="profileNewPwd" class="form-input" placeholder="Minimal 6 karakter" required minlength="6">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.78rem;">Ulangi Kata Sandi Baru</label>
+                    <input type="password" id="profileConfirmPwd" class="form-input" placeholder="Konfirmasi sandi baru" required minlength="6">
+                  </div>
+                </div>
+                <button type="submit" id="btnProfileChangePwd" class="btn btn-primary btn-sm" style="font-weight:700;">
+                  Simpan Kata Sandi Baru
+                </button>
+              </form>
+            </div>
+
+            <!-- Active Sessions Action -->
+            <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:10px; padding:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+              <div>
+                <div style="font-size:0.82rem; font-weight:700; color:var(--color-text-heading);">Sesi Web Saat Ini</div>
+                <div style="font-size:0.74rem; color:var(--color-text-dim);">IP Klien: <span id="profileCurrentIp" style="font-family:var(--font-mono); color:var(--color-primary);">127.0.0.1</span> &bull; Terotentikasi</div>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="handleRevokeOtherSessions()" style="font-size:0.75rem; color:#ef4444; border-color:rgba(239,68,68,0.3);">
+                Putuskan Sesi Lain
+              </button>
+            </div>
+          </div>
+
+          <!-- PANE 3: PAKET & LISENSI (SUBSCRIPTION) -->
+          <div id="paneProfileSubscription" class="profile-pane">
+            <!-- Active Plan Detail Card -->
+            <div style="background:linear-gradient(135deg, rgba(2,132,199,0.08), rgba(37,99,235,0.04)); border:1px solid rgba(2,132,199,0.25); border-radius:12px; padding:1.25rem; margin-bottom:1.25rem;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                  <div style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--color-primary); font-weight:800;">PAKET AKTIF</div>
+                  <h4 id="subPanePlanTitle" style="margin:0.2rem 0; font-size:1.15rem; font-weight:900; color:var(--color-text-heading);">Community Free</h4>
+                  <div style="font-size:0.78rem; color:var(--color-text-dim);">Lisensi aktif seumur hidup tanpa biaya langganan bulanan.</div>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="openUpgradeModal('pro')" style="font-size:0.78rem; font-weight:800; box-shadow:0 0 15px rgba(0,240,255,0.3);">
+                  Tingkatkan ke Pro &rarr;
+                </button>
+              </div>
+
+              <!-- Feature List Chips -->
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:1rem;">
+                <div style="font-size:0.78rem; color:var(--color-text-body); display:flex; align-items:center; gap:0.4rem;">
+                  <span style="color:#10b981;">✓</span> <span id="featDeviceQuotaLabel">Maksimal 5 Slot Perangkat Pribadi</span>
+                </div>
+                <div style="font-size:0.78rem; color:var(--color-text-body); display:flex; align-items:center; gap:0.4rem;">
+                  <span style="color:#10b981;">✓</span> <span>Direct P2P NAT Traversal 60 FPS</span>
+                </div>
+                <div style="font-size:0.78rem; color:var(--color-text-body); display:flex; align-items:center; gap:0.4rem;">
+                  <span style="color:#10b981;">✓</span> <span>Akselerasi Hardware AV1 / VP9</span>
+                </div>
+                <div style="font-size:0.78rem; color:var(--color-text-body); display:flex; align-items:center; gap:0.4rem;">
+                  <span style="color:#10b981;">✓</span> <span>Tanpa Batasan Durasi Sesi (Unlimited)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- License Key Card -->
+            <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:10px; padding:1.1rem; margin-bottom:1.25rem;">
+              <div style="font-size:0.72rem; text-transform:uppercase; color:var(--color-text-dim); font-weight:700; margin-bottom:0.4rem;">KUNCI LISENSI KLIEN</div>
+              <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <code id="profileLicenseKeyDisplay" style="font-family:var(--font-mono); font-size:0.95rem; font-weight:800; color:var(--color-primary); background:var(--color-bg-code); padding:0.4rem 0.85rem; border-radius:6px; border:1px solid var(--color-border); letter-spacing:0.04em; flex:1; min-width:200px;">
+                  AUD-COM-8839-XXXX-772A
+                </code>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyProfileLicenseKey()" style="font-size:0.78rem; font-weight:700;">
+                  Salin Kunci
+                </button>
+              </div>
+              <div style="font-size:0.72rem; color:var(--color-text-dim); margin-top:0.45rem;">
+                Gunakan kunci ini pada pengaturan klien untuk sinkronisasi fitur perangkat.
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE 4: PENGATURAN AKUN (SETTINGS) -->
+          <div id="paneProfileSettings" class="profile-pane">
+            <div style="background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:10px; padding:1.15rem; margin-bottom:1.25rem;">
+              <h5 style="margin:0 0 0.85rem 0; font-size:0.9rem; font-weight:800; color:var(--color-text-heading); display:flex; align-items:center; gap:0.4rem;">
+                <span>⚙️</span> <span>Informasi Profil &amp; Preferensi</span>
+              </h5>
+              <div id="profileEditAlert" style="display:none; padding:0.6rem 0.8rem; border-radius:6px; font-size:0.8rem; margin-bottom:0.85rem; font-weight:600;"></div>
+              <form id="profileEditForm" onsubmit="event.preventDefault(); handleProfileUpdate();">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.78rem;">Nama Lengkap / Tampilan</label>
+                    <input type="text" id="editDisplayName" class="form-input" required placeholder="Nama Anda">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.78rem;">Alamat Email</label>
+                    <input type="email" id="editEmail" class="form-input" required placeholder="nama@email.com">
+                  </div>
+                </div>
+
+                <div style="margin-bottom:1rem; padding:0.75rem 0.85rem; background:var(--color-bg-elevated); border:1px solid var(--color-border); border-radius:8px;">
+                  <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.82rem; color:var(--color-text-heading); font-weight:600;">
+                    <input type="checkbox" id="editTelegramNotif" style="width:16px; height:16px; accent-color:var(--color-primary);" checked>
+                    <span>Kirim notifikasi pendaftaran &amp; keamanan via Bot Telegram (@AudiraNexusBot)</span>
+                  </label>
+                </div>
+
+                <button type="submit" id="btnSaveProfile" class="btn btn-primary btn-sm" style="font-weight:700;">
+                  Simpan Perubahan Profil
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Bottom Footer Navigation Actions -->
+          <div style="display:flex; justify-content:space-between; align-items:center; padding-top:0.75rem; border-top:1px solid var(--color-border); flex-wrap:wrap; gap:0.75rem;">
+            <a href="#downloads" onclick="closeAuthModal()" class="btn btn-secondary btn-sm" style="font-size:0.78rem; text-decoration:none; font-weight:700;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Unduh Client Audira Desk (PC &amp; HP)</span>
             </a>
 
-            <!-- Download Client Button (Always visible for regular users) -->
-            <a href="#downloads" onclick="closeAuthModal()" class="btn btn-secondary" style="width:100%; padding:0.75rem; justify-content:center; text-decoration:none; font-weight:700;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Unduh Client Audira Desk untuk PC &amp; HP</span>
-            </a>
-
-            <!-- Sign Out Button -->
-            <button type="button" class="btn btn-outline" onclick="handleSignOut()" style="width:100%; padding:0.65rem; justify-content:center; color:#ef4444; border-color:rgba(239,68,68,0.3); font-size:0.85rem;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <button type="button" class="btn btn-outline btn-sm" onclick="handleSignOut()" style="font-size:0.78rem; color:#ef4444; border-color:rgba(239,68,68,0.3); font-weight:700;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               <span>Keluar dari Akun (Logout)</span>
             </button>
           </div>
@@ -1734,6 +1941,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/app.js?v=1.5.4"></script>
+  <script src="js/app.js?v=1.5.5"></script>
 </body>
 </html>
