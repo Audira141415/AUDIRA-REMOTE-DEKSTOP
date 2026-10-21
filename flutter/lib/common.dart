@@ -1950,10 +1950,10 @@ Future<Size> _adjustRestoreMainWindowSize(double? width, double? height) async {
   const double maxHeight = 6480;
 
   final defaultWidth =
-      ((isDesktop || isWebDesktop) ? 980 : kMobileDefaultDisplayWidth)
+      ((isDesktop || isWebDesktop) ? 1070 : kMobileDefaultDisplayWidth)
           .toDouble();
   final defaultHeight =
-      ((isDesktop || isWebDesktop) ? 680 : kMobileDefaultDisplayHeight)
+      ((isDesktop || isWebDesktop) ? 615 : kMobileDefaultDisplayHeight)
           .toDouble();
   double restoreWidth = width ?? defaultWidth;
   double restoreHeight = height ?? defaultHeight;
@@ -2074,7 +2074,7 @@ Future<bool> restoreWindowPosition(WindowType type,
       case WindowType.Main:
         // Center the main window only if no position is saved (on first run).
         if (isWindows || isLinux) {
-          await windowManager.setSize(const Size(980, 680));
+          await windowManager.setSize(const Size(1070, 615));
           await windowManager.center();
         }
         // For MacOS, the window is already centered by default.
@@ -2128,36 +2128,12 @@ Future<bool> restoreWindowPosition(WindowType type,
               ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
         }
       }
-      if (lpos.isMaximized == true) {
-        await restorePos();
-        if (!(bind.isIncomingOnly() || bind.isOutgoingOnly())) {
-          await windowManager.maximize();
-        }
-      } else {
-        final storeSize = !bind.isIncomingOnly() || bind.isOutgoingOnly();
-        if (isWindows) {
-          if (storeSize) {
-            // We need to set the window size first to avoid the incorrect size in some special cases.
-            // E.g. There are two monitors, the left one is 100% DPI and the right one is 175% DPI.
-            // The window belongs to the left monitor, but if it is moved a little to the right, it will belong to the right monitor.
-            // After restoring, the size will be incorrect.
-            // See known issue in https://github.com/rustdesk/rustdesk/pull/9840
-            await windowManager.setSize(size,
-                ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
-          }
-          await restorePos();
-          if (storeSize) {
-            await windowManager.setSize(size,
-                ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
-          }
-        } else {
-          if (storeSize) {
-            await windowManager.setSize(size,
-                ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
-          }
-          await restorePos();
-        }
-      }
+      const lockedSize = Size(1070, 615);
+      await windowManager.setSize(lockedSize,
+          ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
+      await restorePos();
+      await windowManager.setSize(lockedSize,
+          ignoreDevicePixelRatio: _ignoreDevicePixelRatio);
       return true;
     default:
       final wc = WindowController.fromWindowId(windowId!);

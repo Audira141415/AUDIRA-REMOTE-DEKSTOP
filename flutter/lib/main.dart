@@ -149,14 +149,15 @@ void runMainApp(bool startService) async {
         bind.mainGetBuildinOption(key: "main-window-always-on-top") == 'Y';
   }
 
-  // Set window option with clean enterprise default dimensions (980x680)
+  // Set window option with clean enterprise locked dimensions (1070x615)
   WindowOptions windowOptions = getHiddenTitleBarWindowOptions(
       isMainWindow: true,
-      size: const Size(980, 680),
+      size: const Size(1070, 615),
       center: true,
       alwaysOnTop: alwaysOnTop);
   windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.setMinimumSize(const Size(800, 560));
+    await windowManager.setSize(const Size(1070, 615));
+    await windowManager.setMinimumSize(const Size(960, 560));
     // Restore the location of the main window before window hide or show.
     await restoreWindowPosition(WindowType.Main);
     // Check the startup argument, if we successfully handle the argument, we keep the main window hidden.
