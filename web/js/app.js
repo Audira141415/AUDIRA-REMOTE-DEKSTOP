@@ -1094,6 +1094,9 @@ async function showLoggedInState(user) {
   const modalDialog = document.querySelector('#loginModal .modal-dialog');
   if (modalDialog) modalDialog.classList.add('profile-expanded');
 
+  const titleEl = document.getElementById('modalTitle');
+  if (titleEl) titleEl.textContent = 'Audira Account & Fleet Portal';
+
   if (!user) {
     try {
       const stored = localStorage.getItem('audira_user');
@@ -1315,6 +1318,8 @@ function handleSignOut(silent = false) {
   localStorage.removeItem('audira_user');
   sessionStorage.removeItem('audira_logged_in');
   document.querySelector('#loginModal .modal-dialog')?.classList.remove('profile-expanded');
+  const titleEl = document.getElementById('modalTitle');
+  if (titleEl) titleEl.textContent = 'Audira Account Portal';
   const loggedInView = document.getElementById('authViewLoggedIn');
   if (loggedInView) loggedInView.classList.remove('active');
   const tabs = document.querySelector('.modal-tabs');
