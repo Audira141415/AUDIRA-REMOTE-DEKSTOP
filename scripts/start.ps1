@@ -42,12 +42,36 @@ if ($runningProcesses) {
     Write-Host "Membuka jendela baru atau fokus ke aplikasi yang sudah berjalan..." -ForegroundColor Gray
 }
 
+# 1.5 Periksa dan pastikan API Gateway (:21114) dan Rendezvous Server (:21116) aktif
+$apiConn = Get-NetTCPConnection -LocalPort 21114 -State Listen -ErrorAction SilentlyContinue
+if (-not $apiConn) {
+    Write-Host "[INFO] Memulai layanan AUDIRA Central API Gateway (:21114)..." -ForegroundColor Yellow
+    $apiScript = Join-Path $rootDir "scripts\audira_api.py"
+    if (Test-Path $apiScript) {
+        Start-Process -FilePath "python" -ArgumentList "`"$apiScript`"" -WindowStyle Hidden
+        Start-Sleep -Milliseconds 600
+    }
+}
+
+# 1.6 Pastikan integritas master key cluster (Mencegah Key Mismatch di masa depan)
+$masterKeyDir = Join-Path $rootDir "scripts\keys"
+$serverDataDir = Join-Path $rootDir "data"
+if (Test-Path (Join-Path $masterKeyDir "id_ed25519")) {
+    if (-not (Test-Path (Join-Path $serverDataDir "id_ed25519"))) {
+        if (-not (Test-Path $serverDataDir)) { New-Item -ItemType Directory -Path $serverDataDir -Force | Out-Null }
+        Copy-Item (Join-Path $masterKeyDir "id_ed25519*") -Destination $serverDataDir -Force
+        Write-Host "[RECOVERY] Kunci master cluster id_ed25519 berhasil dipulihkan dari backup aman." -ForegroundColor Green
+    }
+}
+
+
 # 2. Periksa keberadaan binary executable Audira Desk yang sudah terkompilasi
 $potentialBinaries = @(
+    "C:\Program Files\Audira Desk\Audira Desk.exe",
+    "C:\Program Files\Audira Desk\AudiraDesk.exe",
     (Join-Path $rootDir "dist\AudiraDesk-v1.5.0-x86_64.exe"),
     (Join-Path $rootDir "AudiraDesk.exe"),
     (Join-Path $rootDir "flutter\build\windows\x64\runner\Release\audira.exe"),
-    "C:\Program Files\Audira Desk\AudiraDesk.exe",
     (Join-Path $rootDir "audira.exe")
 )
 

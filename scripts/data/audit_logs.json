@@ -1,0 +1,42 @@
+[
+  {
+    "id": "AUD-274397",
+    "timestamp": "2026-10-22 13:07:54",
+    "event_type": "LOGIN_SUCCESS",
+    "peer_id": "313015359",
+    "peer_ip": "2001:448a:1021:5bb4:68ff:10db:aeae:603",
+    "operator": "audira",
+    "details": "Login berhasil untuk pengguna 'audira' (Agus Dwi Rianto)",
+    "duration_sec": 0
+  },
+  {
+    "id": "AUD-251466",
+    "timestamp": "2026-10-22 13:07:31",
+    "event_type": "LOGIN_SUCCESS",
+    "peer_id": "269819537",
+    "peer_ip": "2001:448a:1020:1a19:d44e:20d1:9a38:749",
+    "operator": "audira",
+    "details": "Login berhasil untuk pengguna 'audira' (Agus Dwi Rianto)",
+    "duration_sec": 0
+  },
+  {
+    "id": "AUD-0001",
+    "timestamp": "2026-10-22 13:07:31",
+    "event_type": "SYSTEM_START",
+    "peer_id": "SYSTEM",
+    "peer_ip": "127.0.0.1",
+    "operator": "Audira Daemon",
+    "details": "Audira Central Management Service & Fleet Server aktif",
+    "duration_sec": 0
+  },
+  {
+    "id": "AUD-0002",
+    "timestamp": "2026-10-22 13:07:31",
+    "event_type": "TELEGRAM_BOT_READY",
+    "peer_id": "TELEGRAM",
+    "peer_ip": "127.0.0.1",
+    "operator": "Telegram Bot Worker",
+    "details": "Layanan verifikasi 2FA & Approval Remote via Telegram Bot siap digunakan",
+    "duration_sec": 0
+  }
+]

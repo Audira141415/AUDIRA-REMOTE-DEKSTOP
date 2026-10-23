@@ -115,7 +115,7 @@ const CHARS: &[char] = &[
 ];
 
 pub const RENDEZVOUS_SERVERS: &[&str] = &["desk.audira.my.id", "192.168.100.175"];
-pub const RS_PUB_KEY: &str = "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8=";
+pub const RS_PUB_KEY: &str = "mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;

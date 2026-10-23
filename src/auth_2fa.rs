@@ -412,7 +412,7 @@ pub fn start_telegram_bot_service() {
                                     if let Some(text) = msg["text"].as_str() {
                                         let text_trim = text.trim();
                                         if text_trim == "/start" || text_trim == "/help" {
-                                            let help_msg = "🤖 *Audira Remote Desktop Bot*\n━━━━━━━━━━━━━━━━━━━━━━\nPerintah yang tersedia:\n• `/pass` atau `/id` : Minta ID & Password Saat Ini\n• `/status` atau `/specs` : Cek status host, OS, & koneksi aktif\n• `/refresh` : Perbarui Password Sementara baru\n━━━━━━━━━━━━━━━━━━━━━━\n🔔 _Permintaan koneksi remote masuk akan otomatis dikirimkan ke sini dengan tombol persetujuan._";
+                                            let help_msg = "🤖 *Audira Remote Desktop Bot*\n━━━━━━━━━━━━━━━━━━━━━━\nPerintah yang tersedia:\n• `/pass` atau `/id` : Minta ID, Password, & Kunci Host\n• `/key` atau `/config` : Minta Kunci Publik & Format Host\n• `/status` atau `/specs` : Cek status host, OS, & koneksi aktif\n• `/refresh` : Perbarui Password Sementara baru\n━━━━━━━━━━━━━━━━━━━━━━\n🔔 _Permintaan koneksi remote masuk akan otomatis dikirimkan ke sini dengan tombol persetujuan._";
                                             send_message_to_telegram(help_msg, &bot, None).await.ok();
                                         } else if text_trim == "/pass" || text_trim == "/id" || text_trim == "/password" {
                                             let my_id = Config::get_id();
@@ -422,9 +422,20 @@ pub fn start_telegram_bot_service() {
                                             let pwd = "".to_string();
                                             let hostname = crate::common::hostname();
                                             let server = Config::get_rendezvous_server();
+                                            let key = Config::get_option("key");
+                                            let key_display = if key.is_empty() { hbb_common::config::RS_PUB_KEY } else { &key };
                                             let reply = format!(
-                                                "🛡️ *KREDENSIAL AUDIRA DESK*\n━━━━━━━━━━━━━━━━━━━━━━\n💻 *Host:* `{}`\n🆔 *Remote ID:* `{}`\n🔑 *Password:* `{}`\n🌐 *Server:* `{}`\n━━━━━━━━━━━━━━━━━━━━━━",
-                                                hostname, my_id, if pwd.is_empty() { "-" } else { &pwd }, server
+                                                "🛡️ *KREDENSIAL AUDIRA DESK*\n━━━━━━━━━━━━━━━━━━━━━━\n💻 *Host:* `{}`\n🆔 *Remote ID:* `{}`\n🔑 *Password:* `{}`\n🌐 *Server:* `{}`\n🗝️ *Public Key:* `{}`\n━━━━━━━━━━━━━━━━━━━━━━\n📋 *Konfigurasi Klien:*\n`{}:21116?key={}`",
+                                                hostname, my_id, if pwd.is_empty() { "-" } else { &pwd }, server, key_display, server, key_display
+                                            );
+                                            send_message_to_telegram(&reply, &bot, None).await.ok();
+                                        } else if text_trim == "/key" || text_trim == "/config" {
+                                            let server = Config::get_rendezvous_server();
+                                            let key = Config::get_option("key");
+                                            let key_display = if key.is_empty() { hbb_common::config::RS_PUB_KEY } else { &key };
+                                            let reply = format!(
+                                                "🗝️ *KUNCI PUBLIK CLUSTER AUDIRA*\n━━━━━━━━━━━━━━━━━━━━━━\n🌐 *Server Rendezvous:* `{}`\n🔑 *Public Key (Ed25519):*\n`{}`\n━━━━━━━━━━━━━━━━━━━━━━\n_Ketik /pass untuk melihat ID dan Password sesi saat ini._",
+                                                server, key_display
                                             );
                                             send_message_to_telegram(&reply, &bot, None).await.ok();
                                         } else if text_trim == "/refresh" {

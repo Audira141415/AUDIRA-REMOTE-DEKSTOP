@@ -1,15 +1,60 @@
 {
   "audira": {
     "username": "audira",
-    "password": "Sigma1993",
+    "password": "pbkdf2:sha256:100000$81a7a73a8c3008fad049cdb86db98013$9b408302dbbf06f42161be6894fa0ccb3071e289de3f8459e4ad0670a640e044",
     "display_name": "Agus Dwi Rianto",
     "email": "admin@audira.my.id",
     "note": "Audira Certified Administrator",
     "is_admin": true,
     "status": 1,
     "created_at": "2026-10-18 00:00:00",
-    "tokens": {},
-    "devices": {},
+    "tokens": {
+      "df908c79cf2d4269be1c5ec531f8686a": {
+        "created_at": 1792649251.4648767,
+        "device_id": "269819537",
+        "client_ip": "2001:448a:1020:1a19:d44e:20d1:9a38:749",
+        "persistent": true
+      },
+      "58324b4f0cf5479792523cfc894a65d6": {
+        "created_at": 1792649274.3970504,
+        "device_id": "313015359",
+        "client_ip": "2001:448a:1021:5bb4:68ff:10db:aeae:603",
+        "persistent": true
+      }
+    },
+    "devices": {
+      "269819537": {
+        "id": "269819537",
+        "uuid": "N2M5OTE5ZmMtNzg2YS00YWU3LWIxNDMtMmU1NTA0ZjU3N2Yy",
+        "hostname": "desktop-apcuejo",
+        "username": "audira",
+        "os": "Windows Desktop",
+        "ip": "2001:448a:1020:1a19:d44e:20d1:9a38:749",
+        "alias": "desktop-apcuejo",
+        "tags": [
+          "My Devices"
+        ],
+        "last_login": "2026-10-22 13:07:31",
+        "last_seen_ts": 1792652382.452895,
+        "note": "Perangkat terhubung pada akun audira",
+        "hash": "Fg7nmJgKbfn4I0+qrmCMafThm/ZeI5erxOb7xdLZ83w="
+      },
+      "313015359": {
+        "id": "313015359",
+        "uuid": "YWU2MDQxNjAtZjI0Zi00MWZjLWJhY2ItNTZiN2Y4NTM4NmNl",
+        "hostname": "agusdwir",
+        "username": "audira",
+        "os": "Windows Desktop",
+        "ip": "2001:448a:1021:5bb4:68ff:10db:aeae:603",
+        "alias": "agusdwir",
+        "tags": [
+          "My Devices"
+        ],
+        "last_login": "2026-10-22 13:07:54",
+        "last_seen_ts": 1792660303.76945,
+        "note": "Perangkat terhubung pada akun audira"
+      }
+    },
     "tags": [
       "My Devices",
       "Audira Fleet"

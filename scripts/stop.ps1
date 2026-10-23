@@ -30,15 +30,15 @@ foreach ($procName in $targetProcesses) {
     }
 }
 
-# Periksa port lokal jika ada listener aktif (21115, 21116, 21117, 21118)
-$ports = @(21115, 21116, 21117, 21118)
+# Periksa port lokal jika ada listener aktif (21114, 21115, 21116, 21117, 21118)
+$ports = @(21114, 21115, 21116, 21117, 21118)
 foreach ($port in $ports) {
     $connections = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
     if ($connections) {
         $pids = $connections | Select-Object -ExpandProperty OwningProcess -Unique
         foreach ($procId in $pids) {
             $p = Get-Process -Id $procId -ErrorAction SilentlyContinue
-            if ($p -and ($p.ProcessName -like "*rustdesk*" -or $p.ProcessName -like "*cargo*")) {
+            if ($p -and ($p.ProcessName -like "*rustdesk*" -or $p.ProcessName -like "*cargo*" -or $p.ProcessName -like "*python*")) {
                 Write-Host "  [-] Menutup listener port $port (PID: $procId - $($p.ProcessName))..." -ForegroundColor Yellow
                 Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
                 $terminatedCount++

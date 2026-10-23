@@ -6,9 +6,9 @@ import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/models/model.dart';
 import 'package:flutter_hbb/models/platform_model.dart';
 import 'package:flutter_hbb/models/chat_model.dart';
+import 'package:flutter_hbb/models/state_model.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
 import 'package:get/get.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:bot_toast/bot_toast.dart';
 
 /// Chrome / Native Browser style curved tab shape painter
@@ -424,23 +424,34 @@ class _RemoteSessionHudWidgetState extends State<RemoteSessionHudWidget> {
 }
 
 /// Control Center Button & Dropdown Menu
-class ControlCenterButton extends StatelessWidget {
+class ControlCenterButton extends StatefulWidget {
   final String peerId;
   final FFI ffi;
 
   const ControlCenterButton({Key? key, required this.peerId, required this.ffi})
       : super(key: key);
 
+  @override
+  State<ControlCenterButton> createState() => _ControlCenterButtonState();
+}
+
+class _ControlCenterButtonState extends State<ControlCenterButton> {
+  Offset? _tapPosition;
+
   void _showControlCenterMenu(BuildContext context, Offset position) {
     BotToast.showAttachedWidget(
       target: position,
       preferDirection: PreferDirection.bottomRight,
-      verticalOffset: 6,
+      verticalOffset: 6.0,
+      horizontalOffset: 0.0,
+      onlyOne: true,
+      allowClick: true,
+      enableSafeArea: true,
       backgroundColor: Colors.transparent,
       attachedBuilder: (cancelFunc) {
         return _ControlCenterDropdown(
-          peerId: peerId,
-          ffi: ffi,
+          peerId: widget.peerId,
+          ffi: widget.ffi,
           onClose: cancelFunc,
         );
       },
@@ -452,7 +463,17 @@ class ControlCenterButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTapDown: (details) {
-        _showControlCenterMenu(context, details.globalPosition);
+        _tapPosition = details.globalPosition;
+      },
+      onTap: () {
+        Offset pos = _tapPosition ?? Offset.zero;
+        if (_tapPosition == null) {
+          final box = context.findRenderObject() as RenderBox?;
+          if (box != null) {
+            pos = box.localToGlobal(box.size.bottomRight(Offset.zero));
+          }
+        }
+        _showControlCenterMenu(context, pos);
       },
       borderRadius: BorderRadius.circular(4),
       child: Padding(
@@ -656,10 +677,9 @@ class _ControlCenterDropdown extends StatelessWidget {
                     icon: Icons.fullscreen_rounded,
                     title: 'Toggle Fullscreen',
                     subtitle: 'F11 or Ctrl+Alt+F',
-                    onTap: () async {
+                    onTap: () {
                       onClose();
-                      final isFull = await windowManager.isFullScreen();
-                      windowManager.setFullScreen(!isFull);
+                      stateGlobal.setFullscreen(!stateGlobal.fullscreen.isTrue);
                     },
                   ),
                   _MenuItem(

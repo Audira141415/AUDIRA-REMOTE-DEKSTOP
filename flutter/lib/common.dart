@@ -2999,7 +2999,7 @@ class ServerConfig {
             : options['api-server'],
         key = (options['key'] == null ||
                 (options['key'] as String).trim().isEmpty)
-            ? "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8="
+            ? "mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs="
             : options['key'];
 }
 

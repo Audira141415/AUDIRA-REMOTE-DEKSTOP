@@ -8,7 +8,17 @@ config_dirs = [
 
 SERVER_HOST = 'desk.audira.my.id'
 SERVER_PORT = '21116'
-PUB_KEY = 'SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8='
+DEFAULT_KEY = 'mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs='
+
+pub_key_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'id_ed25519.pub')
+if not os.path.exists(pub_key_path):
+    pub_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'id_ed25519.pub')
+
+if os.path.exists(pub_key_path):
+    with open(pub_key_path, 'r', encoding='utf-8') as f:
+        PUB_KEY = f.read().strip() or DEFAULT_KEY
+else:
+    PUB_KEY = DEFAULT_KEY
 
 def fix_cfg2(file_path):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)

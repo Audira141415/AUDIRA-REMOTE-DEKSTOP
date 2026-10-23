@@ -43,6 +43,11 @@ if (-not $needRebuild) {
     if (Test-Path $payloadDir) { Remove-Item -Path $payloadDir -Recurse -Force -ErrorAction SilentlyContinue }
     New-Item -ItemType Directory -Path $payloadDir -Force | Out-Null
     
+    if ($Rebuild -or (-not (Test-Path (Join-Path $rootDir "target\release\librustdesk.dll")))) {
+        Write-Host "[BUILD] Mengompilasi Rust core engine (librustdesk.dll) release..." -ForegroundColor Cyan
+        & cargo build --features flutter --lib --release
+    }
+    
     if ($Rebuild -or (-not (Test-Path $runnerExe))) {
         Write-Host "[BUILD] Mengompilasi Flutter UI release terbaru (Modern Dark Enterprise)..." -ForegroundColor Cyan
         Push-Location (Join-Path $rootDir "flutter")
