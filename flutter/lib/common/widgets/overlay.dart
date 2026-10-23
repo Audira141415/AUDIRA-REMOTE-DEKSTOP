@@ -560,59 +560,174 @@ class IOSDraggableState extends State<IOSDraggable> {
 
 class QualityMonitor extends StatelessWidget {
   final QualityMonitorModel qualityMonitorModel;
-  QualityMonitor(this.qualityMonitorModel);
+  final ValueChanged<Offset>? onDrag;
+
+  const QualityMonitor(this.qualityMonitorModel, {Key? key, this.onDrag})
+      : super(key: key);
 
   Widget _row(String info, String? value, {Color? rightColor}) {
-    return Row(
-      children: [
-        Expanded(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1.5),
+      child: Row(
+        children: [
+          Expanded(
             flex: 8,
-            child: AutoSizeText(info,
-                style: TextStyle(color: Color.fromARGB(255, 210, 210, 210)),
-                textAlign: TextAlign.right,
-                maxLines: 1)),
-        Spacer(flex: 1),
-        Expanded(
-            flex: 8,
-            child: AutoSizeText(value ?? '',
-                style: TextStyle(color: rightColor ?? Colors.white),
-                maxLines: 1)),
-      ],
+            child: AutoSizeText(
+              info,
+              style: const TextStyle(
+                color: Color(0xFF94A3B8),
+                fontSize: 11,
+                fontFamily: 'monospace',
+              ),
+              textAlign: TextAlign.right,
+              maxLines: 1,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 9,
+            child: AutoSizeText(
+              value ?? '',
+              style: TextStyle(
+                color: rightColor ?? Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'monospace',
+              ),
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider.value(
-      value: qualityMonitorModel,
-      child: Consumer<QualityMonitorModel>(
-          builder: (context, qualityMonitorModel, child) => qualityMonitorModel
-                  .show
-              ? Container(
-                  constraints: BoxConstraints(maxWidth: 200),
-                  padding: const EdgeInsets.all(8),
-                  color: MyTheme.canvasColor.withAlpha(150),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _row("Speed", qualityMonitorModel.data.speed ?? '-'),
-                      _row("FPS", qualityMonitorModel.data.fps ?? '-'),
-                      // let delay be 0 if fps is 0
-                      _row(
-                          "Delay",
-                          "${qualityMonitorModel.data.delay == null ? '-' : (qualityMonitorModel.data.fps ?? "").replaceAll(' ', '').replaceAll('0', '').isEmpty ? 0 : qualityMonitorModel.data.delay}ms",
-                          rightColor: Colors.green),
-                      _row("Target Bitrate",
-                          "${qualityMonitorModel.data.targetBitrate ?? '-'}kb"),
-                      _row(
-                          "Codec", qualityMonitorModel.data.codecFormat ?? '-'),
-                      _row("Chroma", qualityMonitorModel.data.chroma ?? '-'),
-                      if (qualityMonitorModel.webrtcTransport != null)
-                        _row("Transport",
-                            qualityMonitorModel.webrtcTransport!),
-                    ],
+        value: qualityMonitorModel,
+        child: Consumer<QualityMonitorModel>(
+          builder: (context, qModel, child) {
+            if (!qModel.show) return const SizedBox.shrink();
+
+            return Container(
+              constraints: const BoxConstraints(maxWidth: 220),
+              decoration: BoxDecoration(
+                color: const Color(0xF20F172A),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF334155), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Draggable Header with Title & Close button
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onPanUpdate: (details) => onDrag?.call(details.delta),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF1E293B),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(11),
+                          topRight: Radius.circular(11),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          MouseRegion(
+                            cursor: SystemMouseCursors.move,
+                            child: const Icon(
+                              Icons.drag_indicator_rounded,
+                              size: 14,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.speed_rounded,
+                            size: 13,
+                            color: Color(0xFF38BDF8),
+                          ),
+                          const SizedBox(width: 4),
+                          const Expanded(
+                            child: Text(
+                              'Telemetri',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+                          // Close button [X]
+                          Tooltip(
+                            message: 'Tutup Monitor Kualitas',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(4),
+                              onTap: () async {
+                                final ffi = qModel.parent.target;
+                                if (ffi != null) {
+                                  await bind.sessionToggleOption(
+                                    sessionId: ffi.sessionId,
+                                    value: 'show-quality-monitor',
+                                  );
+                                  qModel.checkShowQualityMonitor(ffi.sessionId);
+                                }
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(2),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 14,
+                                  color: Color(0xFF94A3B8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                )
-              : const SizedBox.shrink()));
+                  // Metrics list - also draggable via background pan
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onPanUpdate: (details) => onDrag?.call(details.delta),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _row("Speed", qModel.data.speed ?? '-'),
+                          _row("FPS", qModel.data.fps ?? '-'),
+                          _row(
+                            "Delay",
+                            "${qModel.data.delay == null ? '-' : (qModel.data.fps ?? "").replaceAll(' ', '').replaceAll('0', '').isEmpty ? 0 : qModel.data.delay}ms",
+                            rightColor: const Color(0xFF10B981),
+                          ),
+                          _row("Target Bitrate", "${qModel.data.targetBitrate ?? '-'}kb"),
+                          _row("Codec", qModel.data.codecFormat ?? '-'),
+                          _row("Chroma", qModel.data.chroma ?? '-'),
+                          if (qModel.webrtcTransport != null)
+                            _row("Transport", qModel.webrtcTransport!),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
 }
 
 class BlockableOverlayState extends OverlayKeyState {

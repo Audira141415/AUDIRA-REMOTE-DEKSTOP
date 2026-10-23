@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:get/get.dart';
-import '../../common.dart';
 import '../../models/model.dart';
 import '../../models/platform_model.dart';
-import '../../common/shared_state.dart';
-import '../../common/widgets/toolbar.dart';
 
 class SessionHudBar extends StatefulWidget {
   final FFI ffi;
@@ -13,6 +9,7 @@ class SessionHudBar extends StatefulWidget {
   final VoidCallback onToggleDiagnostics;
   final bool isWhiteboardActive;
   final bool isDiagnosticsActive;
+  final ValueChanged<Offset>? onDrag;
 
   const SessionHudBar({
     Key? key,
@@ -21,6 +18,7 @@ class SessionHudBar extends StatefulWidget {
     required this.onToggleDiagnostics,
     this.isWhiteboardActive = false,
     this.isDiagnosticsActive = false,
+    this.onDrag,
   }) : super(key: key);
 
   @override
@@ -28,58 +26,8 @@ class SessionHudBar extends StatefulWidget {
 }
 
 class _SessionHudBarState extends State<SessionHudBar> {
-  bool _isMuted = false;
-  bool _isExpanded = false;
-  bool _isHovered = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAudioState();
-  }
-
-  void _checkAudioState() {
-    final muted = bind.sessionGetToggleOptionSync(
-            sessionId: widget.ffi.sessionId, arg: 'disable-audio') ==
-        true;
-    if (mounted && _isMuted != muted) {
-      setState(() {
-        _isMuted = muted;
-      });
-    }
-  }
-
-  void _toggleAudio() async {
-    await bind.sessionToggleOption(
-        sessionId: widget.ffi.sessionId, value: 'disable-audio');
-    final nextMuted = !_isMuted;
-    if (mounted) {
-      setState(() {
-        _isMuted = nextMuted;
-      });
-      showToast(nextMuted
-          ? 'Audio host dimatikan (Muted)'
-          : 'Audio host diaktifkan (Unmuted)');
-    }
-  }
-
-  void _togglePrivacyMode(RxString privacyModeState) async {
-    final currentActive = privacyModeState.value.isNotEmpty;
-    await bind.sessionToggleOption(
-        sessionId: widget.ffi.sessionId, value: 'privacy-mode');
-    togglePrivacyModeTime = DateTime.now();
-
-    if (!currentActive) {
-      showToast('🔒 Privacy Mode Aktif: Layar fisik PC target telah dimatikan');
-    } else {
-      showToast('🔓 Privacy Mode Nonaktif: Layar fisik PC target menyala normal');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final privacyModeState = PrivacyModeState.find(widget.ffi.id);
-
     return ChangeNotifierProvider.value(
       value: widget.ffi.qualityMonitorModel,
       child: Consumer<QualityMonitorModel>(
@@ -87,189 +35,145 @@ class _SessionHudBarState extends State<SessionHudBar> {
           final data = qModel.data;
           final delayMs = int.tryParse(data.delay ?? '') ?? 0;
           final fps = data.fps ?? '60';
-          final speed = data.speed ?? '';
 
-          return Obx(() {
-            final isPrivacyActive = privacyModeState.value.isNotEmpty;
-            final showFullActions = _isExpanded || _isHovered;
-
-            return MouseRegion(
-              onEnter: (_) {
-                if (mounted && !_isHovered) setState(() => _isHovered = true);
-              },
-              onExit: (_) {
-                if (mounted && _isHovered) setState(() => _isHovered = false);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                decoration: BoxDecoration(
-                  color: showFullActions
-                      ? const Color(0xF20F172A)
-                      : const Color(0xCC0F172A),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isPrivacyActive
-                        ? const Color(0xFF8B5CF6).withValues(alpha: 0.6)
-                        : (showFullActions
-                            ? const Color(0xFF475569)
-                            : const Color(0xFF334155)),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isPrivacyActive
-                          ? const Color(0xFF8B5CF6).withValues(alpha: 0.25)
-                          : Colors.black.withValues(alpha: showFullActions ? 0.45 : 0.25),
-                      blurRadius: showFullActions ? 12 : 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
+            decoration: BoxDecoration(
+              color: const Color(0xF20F172A),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: const Color(0xFF334155),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Live Status Badge: Latency (Ping)
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFF334155),
-                          width: 0.6,
+              ],
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onPanUpdate: (details) => widget.onDrag?.call(details.delta),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Drag Handle: Geser HUD ke mana saja di layar
+                  Tooltip(
+                    message: 'Tahan & geser untuk memindahkan posisi',
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.move,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onPanUpdate: (details) {
+                          widget.onDrag?.call(details.delta);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                          margin: const EdgeInsets.only(right: 5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFF334155), width: 0.8),
+                          ),
+                          child: const Icon(
+                            Icons.drag_indicator_rounded,
+                            size: 14,
+                            color: Color(0xFF94A3B8),
+                          ),
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: delayMs < 60
-                                  ? const Color(0xFF10B981)
-                                  : (delayMs < 120
-                                      ? const Color(0xFFF59E0B)
-                                      : const Color(0xFFEF4444)),
-                            ),
+                    ),
+                  ),
+
+                  // Live Status Badge: Latency (Ping) & FPS - Klik untuk buka/tutup telemetri
+                  Tooltip(
+                    message: 'Klik untuk ${qModel.show ? "sembunyikan" : "tampilkan"} rincian telemetri',
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () async {
+                        await bind.sessionToggleOption(
+                            sessionId: widget.ffi.sessionId,
+                            value: 'show-quality-monitor');
+                        widget.ffi.qualityMonitorModel
+                            .checkShowQualityMonitor(widget.ffi.sessionId);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                        decoration: BoxDecoration(
+                          color: qModel.show ? const Color(0xFF334155) : const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: qModel.show ? const Color(0xFF00D2FF) : const Color(0xFF334155),
+                            width: 0.8,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${delayMs}ms',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: delayMs < 60
+                                    ? const Color(0xFF10B981)
+                                    : (delayMs < 120
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFFEF4444)),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${fps}fps',
-                            style: const TextStyle(
-                              color: Color(0xFF38BDF8),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'monospace',
+                            const SizedBox(width: 5),
+                            Text(
+                              '${delayMs}ms',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'monospace',
+                              ),
                             ),
-                          ),
-                          if (speed.isNotEmpty && showFullActions) ...[
                             const SizedBox(width: 6),
                             Text(
-                              speed,
+                              '${fps}fps',
                               style: const TextStyle(
-                                color: Color(0xFF94A3B8),
-                                fontSize: 9.5,
+                                color: Color(0xFF38BDF8),
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
                                 fontFamily: 'monospace',
                               ),
                             ),
                           ],
-                        ],
+                        ),
                       ),
                     ),
+                  ),
 
-                    if (showFullActions) ...[
-                      const SizedBox(width: 6),
+                  const SizedBox(width: 4),
 
-                      // Privacy Mode Quick Toggle (Blank Screen Target)
-                      _hudIconButton(
-                        icon: isPrivacyActive
-                            ? Icons.shield_rounded
-                            : Icons.shield_outlined,
-                        tooltip: isPrivacyActive
-                            ? 'Privacy Mode Aktif (Layar Target Dimatikan) - Klik untuk membuka'
-                            : 'Aktifkan Privacy Mode (Matikan Layar Target)',
-                        isActive: isPrivacyActive,
-                        activeColor: const Color(0xFF8B5CF6),
-                        onTap: () => _togglePrivacyMode(privacyModeState),
-                      ),
+                  // On-Screen Whiteboard Toggle (Fitur Anotasi Khusus)
+                  _hudIconButton(
+                    icon: Icons.draw_outlined,
+                    tooltip: 'On-Screen Whiteboard / Anotasi',
+                    isActive: widget.isWhiteboardActive,
+                    activeColor: const Color(0xFFFF2A6D),
+                    onTap: widget.onToggleWhiteboard,
+                  ),
 
-                      // Quick Remote Audio Mute/Unmute Toggle
-                      _hudIconButton(
-                        icon: _isMuted
-                            ? Icons.volume_off_rounded
-                            : Icons.volume_up_rounded,
-                        tooltip: _isMuted
-                            ? 'Audio Host Dibisukan (Muted) - Klik untuk mengaktifkan'
-                            : 'Bisukan Audio Host (Mute)',
-                        isActive: _isMuted,
-                        activeColor: const Color(0xFFEF4444),
-                        onTap: _toggleAudio,
-                      ),
-
-                      // Quick Whiteboard Toggle
-                      _hudIconButton(
-                        icon: Icons.draw_outlined,
-                        tooltip: 'On-Screen Whiteboard / Anotasi',
-                        isActive: widget.isWhiteboardActive,
-                        activeColor: const Color(0xFFFF2A6D),
-                        onTap: widget.onToggleWhiteboard,
-                      ),
-
-                      // Quick System Diagnostics Toggle
-                      _hudIconButton(
-                        icon: Icons.analytics_outlined,
-                        tooltip: 'System Info & Diagnostics Drawer',
-                        isActive: widget.isDiagnosticsActive,
-                        activeColor: const Color(0xFF05D9E8),
-                        onTap: widget.onToggleDiagnostics,
-                      ),
-
-                      // Quick Ctrl+Alt+Del
-                      _hudIconButton(
-                        icon: Icons.keyboard_command_key,
-                        tooltip: 'Kirim Ctrl + Alt + Delete ke PC Target',
-                        onTap: () {
-                          bind.sessionCtrlAltDel(sessionId: widget.ffi.sessionId);
-                          showToast('Ctrl + Alt + Delete dikirim ke remote target');
-                        },
-                      ),
-                    ],
-
-                    // Micro-Pill Expand / Collapse Toggle Button
-                    _hudIconButton(
-                      icon: showFullActions
-                          ? Icons.chevron_left_rounded
-                          : Icons.tune_rounded,
-                      tooltip: showFullActions
-                          ? 'Ciutkan HUD (Micro-Pill Mode)'
-                          : 'Buka Kontrol Sesi Lengkap',
-                      onTap: () {
-                        setState(() {
-                          _isExpanded = !_isExpanded;
-                        });
-                      },
-                    ),
-                  ],
-                ),
+                  // Remote System Diagnostics Drawer
+                  _hudIconButton(
+                    icon: Icons.analytics_outlined,
+                    tooltip: 'System Info & Diagnostics Drawer',
+                    isActive: widget.isDiagnosticsActive,
+                    activeColor: const Color(0xFF05D9E8),
+                    onTap: widget.onToggleDiagnostics,
+                  ),
+                ],
               ),
-            );
-          });
+            ),
+          );
         },
       ),
     );

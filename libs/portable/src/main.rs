@@ -307,7 +307,7 @@ trusted_devices = ''\n\n\
 custom-rendezvous-server = 'desk.audira.my.id'\n\
 relay-server = 'desk.audira.my.id'\n\
 api-server = 'http://desk.audira.my.id:21114'\n\
-key = 'mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs='\n\
+key = 'SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8='\n\
 direct-server = 'Y'\n\
 allow-lan = 'Y'\n\
 enable-directx-capture = 'Y'\n\

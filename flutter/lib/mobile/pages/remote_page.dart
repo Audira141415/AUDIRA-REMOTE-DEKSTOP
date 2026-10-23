@@ -24,6 +24,7 @@ import '../../models/platform_model.dart';
 import '../../utils/image.dart';
 import '../widgets/dialog.dart';
 import '../widgets/custom_scale_widget.dart';
+import '../widgets/radial_menu.dart';
 
 final initText = '1' * 1024;
 
@@ -517,12 +518,21 @@ class _RemotePageState extends State<RemotePage> with WidgetsBindingObserver {
                               }
                               return Container(
                                 color: MyTheme.canvasColor,
-                                child: inputModel.isPhysicalMouse.value
-                                    ? getBodyForMobile()
-                                    : RawTouchGestureDetectorRegion(
-                                        child: getBodyForMobile(),
+                                child: Stack(
+                                  children: [
+                                    inputModel.isPhysicalMouse.value
+                                        ? getBodyForMobile()
+                                        : RawTouchGestureDetectorRegion(
+                                            child: getBodyForMobile(),
+                                            ffi: gFFI,
+                                          ),
+                                    if (!isWebDesktop)
+                                      RadialQuickMenu(
                                         ffi: gFFI,
+                                        onToggleKeyboard: openKeyboard,
                                       ),
+                                  ],
+                                ),
                               );
                             }),
                           ),

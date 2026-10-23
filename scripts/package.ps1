@@ -1,7 +1,8 @@
 # AUDIRA Remote Desktop - Production Standalone Single-File Packager
 # Menghasilkan file tunggal AudiraDesk.exe murni (seperti AnyDesk) tanpa dependensi luar
 param (
-    [switch]$Rebuild
+    [switch]$Rebuild,
+    [switch]$Repack
 )
 $ErrorActionPreference = "Stop"
 
@@ -22,9 +23,15 @@ $rootExe = Join-Path $rootDir "AudiraDesk-Full-Installer.exe"
 # 1. Periksa apakah binary produksi sudah terkompilasi
 $runnerReleaseDir = Join-Path $rootDir "flutter\build\windows\x64\runner\Release"
 $runnerExe = Join-Path $runnerReleaseDir "audira.exe"
-$needRebuild = $Rebuild -or (-not (Test-Path $standaloneExe))
+$appSo = Join-Path $runnerReleaseDir "data\app.so"
+$needRebuild = $Rebuild -or $Repack -or (-not (Test-Path $standaloneExe))
 if (-not $needRebuild -and (Test-Path $runnerExe) -and (Test-Path $standaloneExe)) {
-    if ((Get-Item $runnerExe).LastWriteTime -gt (Get-Item $standaloneExe).LastWriteTime) {
+    $newestArtifact = (Get-Item $runnerExe).LastWriteTime
+    if (Test-Path $appSo) {
+        $appSoTime = (Get-Item $appSo).LastWriteTime
+        if ($appSoTime -gt $newestArtifact) { $newestArtifact = $appSoTime }
+    }
+    if ($newestArtifact -gt (Get-Item $standaloneExe).LastWriteTime) {
         $needRebuild = $true
     }
 }

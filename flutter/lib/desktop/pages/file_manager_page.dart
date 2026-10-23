@@ -83,7 +83,6 @@ class _FileManagerPageState extends State<FileManagerPage>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   final _mouseFocusScope = Rx<MouseFocusScope>(MouseFocusScope.none);
 
-  final _dropMaskVisible = false.obs; // TODO impl drop mask
   final _overlayKeyState = OverlayKeyState();
   final _uniqueKey = UniqueKey();
 
@@ -184,16 +183,70 @@ class _FileManagerPageState extends State<FileManagerPage>
   }
 
   Widget dropArea(FileManagerView fileView) {
+    final isLocal = fileView.controller.isLocal;
+    final isHovering = false.obs;
     return DropTarget(
-        onDragDone: (detail) =>
-            handleDragDone(detail, fileView.controller.isLocal),
-        onDragEntered: (enter) {
-          _dropMaskVisible.value = true;
-        },
-        onDragExited: (exit) {
-          _dropMaskVisible.value = false;
-        },
-        child: fileView);
+      onDragDone: (detail) {
+        isHovering.value = false;
+        handleDragDone(detail, isLocal);
+      },
+      onDragEntered: (enter) {
+        isHovering.value = true;
+      },
+      onDragExited: (exit) {
+        isHovering.value = false;
+      },
+      child: Stack(
+        children: [
+          fileView,
+          Obx(() => isHovering.value
+              ? Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00D2FF).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF00D2FF),
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF131926).withValues(alpha: 0.92),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF00D2FF), width: 1),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF00D2FF).withValues(alpha: 0.2),
+                              blurRadius: 16,
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.file_upload_outlined, color: Color(0xFF00D2FF), size: 28),
+                            const SizedBox(width: 10),
+                            Text(
+                              isLocal ? 'Lepaskan untuk simpan ke Komputer Lokal' : 'Lepaskan untuk kirim ke Remote Target',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink()),
+        ],
+      ),
+    );
   }
 
   Widget generateCard(Widget child) {

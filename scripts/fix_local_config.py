@@ -8,7 +8,7 @@ config_dirs = [
 
 SERVER_HOST = 'desk.audira.my.id'
 SERVER_PORT = '21116'
-DEFAULT_KEY = 'mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs='
+DEFAULT_KEY = 'SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8='
 
 pub_key_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'id_ed25519.pub')
 if not os.path.exists(pub_key_path):

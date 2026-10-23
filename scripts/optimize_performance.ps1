@@ -33,7 +33,7 @@ $optimizations = @{
     "custom-rendezvous-server"     = "desk.audira.my.id"
     "relay-server"                 = "desk.audira.my.id"
     "api-server"                   = "http://desk.audira.my.id:21114"
-    "key"                          = "mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs="
+    "key"                          = "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8="
 }
 
 # Baca file TOML jika sudah ada

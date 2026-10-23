@@ -118,6 +118,8 @@ class _RemotePageState extends State<RemotePage>
   final _uniqueKey = UniqueKey();
 
   var _blockableOverlayState = BlockableOverlayState();
+  double? _hudLeft;
+  double _hudTop = 6.0;
 
   final FocusNode _rawKeyFocusNode = FocusNode(debugLabel: "rawkeyFocusNode");
 
@@ -865,24 +867,62 @@ class _RemotePageState extends State<RemotePage>
               _ffi.ffiModel.pi.isSet.isFalse ? emptyOverlay() : Offstage(),
             ],
           ),
-          // Floating Live Session HUD Bar (Top Right)
+          // Floating Live Session HUD Bar & Telemetry (Draggable anywhere)
           Positioned(
-            top: 6,
-            right: 14,
-            child: SessionHudBar(
-              ffi: _ffi,
-              isWhiteboardActive: _whiteboardController.isActive,
-              isDiagnosticsActive: _isDiagnosticsDrawerOpen,
-              onToggleWhiteboard: () {
-                setState(() {
-                  _whiteboardController.toggleActive();
-                });
-              },
-              onToggleDiagnostics: () {
-                setState(() {
-                  _isDiagnosticsDrawerOpen = !_isDiagnosticsDrawerOpen;
-                });
-              },
+            top: _hudTop,
+            left: _hudLeft,
+            right: _hudLeft == null ? 14 : null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SessionHudBar(
+                  ffi: _ffi,
+                  onDrag: (delta) {
+                    setState(() {
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final curLeft = _hudLeft ??
+                          (screenWidth - 230.0)
+                              .clamp(10.0, screenWidth - 120.0);
+                      _hudLeft =
+                          (curLeft + delta.dx).clamp(10.0, screenWidth - 120.0);
+                      _hudTop = (_hudTop + delta.dy)
+                          .clamp(6.0, MediaQuery.of(context).size.height - 60.0);
+                    });
+                  },
+                  isWhiteboardActive: _whiteboardController.isActive,
+                  isDiagnosticsActive: _isDiagnosticsDrawerOpen,
+                  onToggleWhiteboard: () {
+                    setState(() {
+                      _whiteboardController.toggleActive();
+                    });
+                  },
+                  onToggleDiagnostics: () {
+                    setState(() {
+                      _isDiagnosticsDrawerOpen = !_isDiagnosticsDrawerOpen;
+                    });
+                  },
+                ),
+                // Detailed Quality Monitor sits attached below HUD when enabled and moves together
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: QualityMonitor(
+                    _ffi.qualityMonitorModel,
+                    onDrag: (delta) {
+                      setState(() {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final curLeft = _hudLeft ??
+                            (screenWidth - 230.0)
+                                .clamp(10.0, screenWidth - 120.0);
+                        _hudLeft =
+                            (curLeft + delta.dx).clamp(10.0, screenWidth - 120.0);
+                        _hudTop = (_hudTop + delta.dy)
+                            .clamp(6.0, MediaQuery.of(context).size.height - 60.0);
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           // Interactive Whiteboard Overlay
@@ -1103,14 +1143,7 @@ class _RemotePageState extends State<RemotePage>
                   zoomCursor: _zoomCursor,
                 )));
     }
-    paints.add(
-      Positioned(
-        top: 10,
-        right: 10,
-        child: _buildRawTouchAndPointerRegion(
-            QualityMonitor(_ffi.qualityMonitorModel), null, null),
-      ),
-    );
+
     return Stack(
       children: paints,
     );

@@ -24,6 +24,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart' as window_size;
 import 'package:flutter_hbb/common/widgets/dialog.dart';
 import 'package:flutter_hbb/utils/http_service.dart' as http;
+import 'package:qr_flutter/qr_flutter.dart';
 import '../widgets/system_info_dialog.dart';
 
 class DesktopHomePage extends StatefulWidget {
@@ -381,7 +382,15 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: const Color(0xFFE2E8F0)),
                               ),
-                              child: const Icon(Icons.qr_code_2_rounded, size: 140, color: Color(0xFF0F172A)),
+                              child: QrImageView(
+                                data: model.serverId.text.isNotEmpty
+                                    ? '${bind.mainUriPrefixSync()}://${model.serverId.text}'
+                                    : 'audira-desk',
+                                version: QrVersions.auto,
+                                size: 140.0,
+                                backgroundColor: Colors.white,
+                                padding: EdgeInsets.zero,
+                              ),
                             ),
                             const SizedBox(height: 12),
                             Text(

@@ -247,18 +247,28 @@ class ColorThemeExtension extends ThemeExtension<ColorThemeExtension> {
 class MyTheme {
   MyTheme._();
 
+  // AUDIRA Cyber Dark Design Tokens (DESIGN.md §2)
+  static const Color bgCanvas = Color(0xFF0B0F17);
+  static const Color bgSurface = Color(0xFF131926);
+  static const Color bgElevated = Color(0xFF1C2538);
+  static const Color borderSubtle = Color(0xFF232F47);
+  static const Color borderFocus = Color(0xFF00D2FF);
+  static const Color primaryCyan = Color(0xFF00D2FF);
+  static const Color accentBlue = Color(0xFF3B82F6);
+  static const Color accentAiIndigo = Color(0xFF6366F1);
+
   static const Color grayBg = Color(0xFFEFEFF2);
-  static const Color accent = Color(0xFF0071FF);
-  static const Color accent50 = Color(0x770071FF);
-  static const Color accent80 = Color(0xAA0071FF);
-  static const Color canvasColor = Color(0xFF212121);
-  static const Color border = Color(0xFFCCCCCC);
-  static const Color idColor = Color(0xFF00B6F0);
+  static const Color accent = Color(0xFF00D2FF);
+  static const Color accent50 = Color(0x7700D2FF);
+  static const Color accent80 = Color(0xAA00D2FF);
+  static const Color canvasColor = Color(0xFF0B0F17);
+  static const Color border = Color(0xFF232F47);
+  static const Color idColor = Color(0xFF00D2FF);
   static const Color darkGray = Color.fromARGB(255, 148, 148, 148);
   static const Color cmIdColor = Color(0xFF21790B);
   static const Color dark = Colors.black87;
-  static const Color button = Color(0xFF2C8CFF);
-  static const Color hoverBorder = Color(0xFF999999);
+  static const Color button = Color(0xFF00D2FF);
+  static const Color hoverBorder = Color(0xFF00D2FF);
 
   // ListTile
   static const ListTileThemeData listTileTheme = ListTileThemeData(
@@ -2999,7 +3009,7 @@ class ServerConfig {
             : options['api-server'],
         key = (options['key'] == null ||
                 (options['key'] as String).trim().isEmpty)
-            ? "mBDp6r4r2ci0dwh9q7Ir6k98Rfx1XhhOD6hjXxL9JNs="
+            ? "SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8="
             : options['key'];
 }
 
