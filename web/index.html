@@ -130,7 +130,32 @@
         </div>
       </div>
 
-            <!-- High-Performance Architecture & Live Telemetry Cockpit (Features Anchor) -->
+      <!-- AUDIRA-GLOW 3D: Deep-Space Orbital Recon Satellite & Earth Laser Uplink -->
+      <div class="audira-glow-plate-wrap" id="audiraGlowShowcase">
+        <div class="audira-glow-header">
+          <div class="ag-meta">
+            <span class="ag-badge">AUDIRA-GLOW &bull; 3D ORBITAL TELEMETRY</span>
+            <span class="ag-title">Fig 1 &bull; Deep-Space Recon Satellite to Earth Link</span>
+          </div>
+          <div class="ag-swatches" id="glowSwatches" role="radiogroup" aria-label="Glow Accent Color"></div>
+          <div class="ag-actions">
+            <button type="button" class="ag-key-btn" onclick="window.audiraGlowTrigger('space')"><kbd>Space</kbd> Transmit Laser</button>
+            <button type="button" class="ag-key-btn" onclick="window.audiraGlowTrigger('1')"><kbd>1</kbd> Ion RCS</button>
+            <button type="button" class="ag-key-btn" onclick="window.audiraGlowTrigger('2')"><kbd>2</kbd> Quantum Lock</button>
+          </div>
+        </div>
+
+        <div class="audira-glow-stage-container" id="stageHolder">
+          <!-- Rendered dynamically by Audira-Glow Kernel -->
+        </div>
+
+        <div class="audira-glow-footer">
+          <span class="ag-hint" id="glowHint">Click Dish Antenna or Space to transmit 100Gbps Laser Uplink &bull; Keys 1–4</span>
+          <span class="ag-readout" id="glowReadout">ORBITAL RECON SATELLITE &bull; SOLAR ARRAY 100% &bull; READY</span>
+        </div>
+      </div>
+
+      <!-- High-Performance Architecture & Live Telemetry Cockpit (Features Anchor) -->
       <div id="features" style="scroll-margin-top:84px;"></div>
       <div id="telemetry" class="simulator-container">
         <!-- Titlebar -->
@@ -1979,6 +2004,7 @@
   <!-- Scripts: High-Performance 3D Engine & Application Core -->
   <script src="js/three.min.js"></script>
   <script src="js/hero-3d.js?v=2.0.0-orbital"></script>
+  <script src="js/audira-glow.js?v=1.0.0"></script>
   <script src="js/app.js?v=1.5.9"></script>
 </body>
 </html>
