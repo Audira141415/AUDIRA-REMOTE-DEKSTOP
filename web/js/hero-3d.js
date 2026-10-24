@@ -26,8 +26,8 @@
   class AudiraRemoteWorkstation3D {
     constructor(container) {
       this.container = container;
-      this.width = this.container.clientWidth;
-      this.height = this.container.clientHeight;
+      this.width = this.container.clientWidth || 640;
+      this.height = this.container.clientHeight || 520;
 
       this.scene = null;
       this.camera = null;
@@ -43,11 +43,11 @@
       this.prevX = 0;
       this.prevY = 0;
       this.rotX = 0.22;
-      this.rotY = -0.35;
+      this.rotY = -0.32;
       this.targetRotX = 0.22;
-      this.targetRotY = -0.35;
-      this.camDist = 260;
-      this.targetCamDist = 260;
+      this.targetRotY = -0.32;
+      this.camDist = 275;
+      this.targetCamDist = 275;
 
       this.isRendering = true;
       this.clock = new THREE.Clock();
@@ -661,17 +661,26 @@
       }, { passive: false });
 
       // Resize
-      window.addEventListener('resize', () => {
+      const handleResize = () => {
         if (!this.container || !this.renderer || !this.camera) return;
-        this.width = this.container.clientWidth;
-        this.height = this.container.clientHeight;
+        const newW = this.container.clientWidth;
+        const newH = this.container.clientHeight;
+        if (newW > 0 && newH > 0) {
+          this.width = newW;
+          this.height = newH;
+          this.camera.aspect = this.width / this.height;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(this.width, this.height);
+          this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }
+      };
 
-        this.camera.aspect = this.width / this.height;
-        this.camera.updateProjectionMatrix();
+      window.addEventListener('resize', handleResize);
 
-        this.renderer.setSize(this.width, this.height);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      });
+      if (window.ResizeObserver && this.container) {
+        const ro = new ResizeObserver(() => handleResize());
+        ro.observe(this.container);
+      }
 
       // GPU Saver
       if ('IntersectionObserver' in window) {
@@ -743,8 +752,8 @@
 
   // Bootstrap
   function bootstrap() {
-    const heroSection = document.querySelector('.hero-section');
-    if (heroSection) {
+    const stage = document.getElementById('hero-3d-stage') || document.querySelector('.hero-section');
+    if (stage) {
       const existing = document.getElementById('audira-hero-3d');
       if (existing) existing.remove();
 
@@ -752,7 +761,7 @@
       canvasContainer.id = 'audira-hero-3d';
       canvasContainer.className = 'audira-hero-3d-wrapper';
 
-      heroSection.insertBefore(canvasContainer, heroSection.firstChild);
+      stage.appendChild(canvasContainer);
 
       window.audiraWorkstation3D = new AudiraRemoteWorkstation3D(canvasContainer);
     }
