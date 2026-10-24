@@ -497,51 +497,50 @@ code, kbd, samp, pre {
 }
 
 /* ==========================================================================
-   Audira 3D Orbital Space-to-Earth Telemetry HUD
+   Audira 3D Remote Workstation Telemetry HUD
    ========================================================================== */
-.audira-orbital-hud {
+.audira-workstation-hud {
   position: absolute;
   top: 1.25rem;
   right: 1.5rem;
   z-index: 15;
   pointer-events: auto;
-  max-width: 360px;
 }
 
-.orbital-hud-card {
-  background: rgba(8, 14, 26, 0.88);
+.ws-hud-card {
+  background: rgba(8, 14, 26, 0.9);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 0.65rem 0.85rem;
+  padding: 0.5rem 0.85rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
 }
 
-.orbital-header {
+.ws-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.orbital-indicator {
+.ws-indicator {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: var(--color-emerald);
   box-shadow: 0 0 8px var(--color-emerald);
-  animation: pulseOrbital 1.8s infinite ease-in-out;
+  animation: pulseWs 1.8s infinite ease-in-out;
 }
 
-@keyframes pulseOrbital {
+@keyframes pulseWs {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
-.orbital-title {
+.ws-title {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   font-weight: 700;
@@ -549,49 +548,12 @@ code, kbd, samp, pre {
   letter-spacing: 0.04em;
 }
 
-.orbital-metrics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem 0.75rem;
-  margin-bottom: 0.6rem;
-}
-
-.metric-box {
-  display: flex;
-  flex-direction: column;
-}
-
-.metric-label {
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--color-text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.metric-value {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--color-text-heading);
-}
-
-.metric-value.cyan {
-  color: var(--color-primary);
-}
-
-.metric-value.emerald {
-  color: var(--color-emerald);
-}
-
-.orbital-controls {
+.ws-controls {
   display: flex;
   gap: 0.35rem;
-  padding-top: 0.4rem;
-  border-top: 1px solid var(--color-border-subtle);
 }
 
-.orbital-btn {
+.ws-btn {
   flex: 1;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
@@ -600,250 +562,24 @@ code, kbd, samp, pre {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   font-weight: 600;
-  padding: 0.25rem 0.35rem;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
   transition: all var(--transition-fast);
   text-align: center;
+  white-space: nowrap;
 }
 
-.orbital-btn:hover {
+.ws-btn:hover {
   background: var(--color-bg-card-hover);
   border-color: var(--color-border-hover);
   color: var(--color-primary);
 }
 
-.orbital-btn.active {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
 @media (max-width: 768px) {
-  .audira-orbital-hud {
-    position: static;
-    margin: 1rem auto 1.5rem auto;
-    max-width: 100%;
+  .audira-workstation-hud {
+    top: 0.75rem;
+    right: 0.75rem;
   }
-}
-
-/* ==========================================================================
-   AUDIRA-GLOW 3D / Isometric Precision Engine Styles
-   Installed from: F:\AUDIRA-GLOW (Audira Studio)
-   ========================================================================== */
-:root {
-  --line: #334155;
-  --detail: #1e293b;
-  --body: #0d121c;
-  --deck: #131b28;
-  --ink: #94a3b8;
-  --ink-hi: #f8fafc;
-  --live: #ffffff;
-  --glass: #080c14;
-  --glass-on: rgba(16, 185, 129, 0.22);
-  --recess: #06090e;
-  --accent: #10b981;
-  --accent-hi: #38bdf8;
-  --accent-dim: rgba(16, 185, 129, 0.15);
-}
-
-.audira-glow-plate-wrap {
-  max-width: 1060px;
-  margin: 0 auto 3rem auto;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  overflow: hidden;
-  position: relative;
-  z-index: 12;
-  text-align: left;
-}
-
-.audira-glow-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem 1.25rem;
-  background: var(--color-bg-subtle);
-  border-bottom: 1px solid var(--color-border);
-  flex-wrap: wrap;
-}
-
-.ag-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.ag-badge {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.ag-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--color-text-heading);
-}
-
-.ag-swatches {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border);
-}
-
-.ag-swatches button {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 1px solid transparent;
-  background: none;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  transition: transform 0.2s;
-}
-
-.ag-swatches button i {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--sw);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 0 0 var(--sw);
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.ag-swatches button:hover i {
-  transform: scale(1.2);
-}
-
-.ag-swatches button[aria-checked="true"] {
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.ag-swatches button[aria-checked="true"] i {
-  box-shadow: 0 0 10px 2px var(--sw);
-}
-
-.ag-actions {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.ag-key-btn {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-body);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  padding: 0.3rem 0.65rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: all var(--transition-fast);
-}
-
-.ag-key-btn kbd {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0.1rem 0.35rem;
-  border-radius: 3px;
-  font-size: 0.65rem;
-  color: var(--accent-hi);
-}
-
-.ag-key-btn:hover {
-  background: var(--color-bg-card-hover);
-  border-color: var(--accent);
-  color: var(--color-text-heading);
-}
-
-.audira-glow-stage-container {
-  aspect-ratio: 16 / 9;
-  max-height: 520px;
-  width: 100%;
-  background: radial-gradient(ellipse 65% 50% at 50% 50%, var(--accent-dim), transparent 75%), #080b12;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: background 0.4s ease;
-}
-
-#audira-glow-stage {
-  width: 100%;
-  height: 100%;
-  display: block;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-#audira-glow-stage text {
-  font-family: var(--font-mono);
-}
-
-/* Hairline & Glow Vector Vocabulary */
-.face { fill: var(--body); stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.face.top { fill: var(--deck); }
-.face.recess { fill: var(--recess); }
-.detail { fill: none; stroke: var(--detail); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.label { fill: var(--ink); font-family: var(--font-mono); }
-.glass { fill: var(--glass); transition: fill .3s, stroke .3s; }
-.glass.hot { fill: var(--glass-on); stroke: var(--accent); }
-.wire { fill: none; stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; transition: stroke .4s; }
-.wire.hot { stroke: var(--accent); filter: url(#soft); }
-.scr { fill: var(--accent-hi); font-family: var(--font-mono); }
-.scr-accent { fill: var(--accent); font-family: var(--font-mono); font-weight: 700; }
-
-.sat-dish { cursor: pointer; transition: transform 0.2s; }
-.sat-dish:hover { filter: url(#glow); }
-.solar-wing { cursor: pointer; }
-.solar-wing:hover .face.top { stroke: var(--accent-hi); }
-.laser-beam { stroke-dasharray: 8 6; }
-.sat-burst { animation: sat-shake 0.3s ease-out; }
-@keyframes sat-shake {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(-2px, 2px); }
-  75% { transform: translate(2px, -2px); }
-}
-
-.audira-glow-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.65rem 1.25rem;
-  background: var(--color-bg-subtle);
-  border-top: 1px solid var(--color-border);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  flex-wrap: wrap;
-}
-
-.ag-hint {
-  color: var(--color-text-dim);
-}
-
-.ag-readout {
-  color: var(--accent);
-  font-weight: 700;
-  letter-spacing: 0.03em;
 }
 
 .hero-grid-lines {

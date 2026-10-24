@@ -69,7 +69,6 @@ def main():
         (r"css\admin.css", f"{REMOTE_PROJECT_DIR}/web/css/admin.css"),
         (r"js\three.min.js", f"{REMOTE_PROJECT_DIR}/web/js/three.min.js"),
         (r"js\hero-3d.js", f"{REMOTE_PROJECT_DIR}/web/js/hero-3d.js"),
-        (r"js\audira-glow.js", f"{REMOTE_PROJECT_DIR}/web/js/audira-glow.js"),
         (r"js\app.js", f"{REMOTE_PROJECT_DIR}/web/js/app.js"),
         (r"js\admin.js", f"{REMOTE_PROJECT_DIR}/web/js/admin.js"),
         ("nginx.conf", f"{REMOTE_PROJECT_DIR}/web/nginx.conf"),
