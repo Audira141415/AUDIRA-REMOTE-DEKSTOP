@@ -1,25 +1,27 @@
 /**
- * AUDIRA REMOTE DESKTOP — High-Performance 3D P2P Holographic Engine
- * Architecture: Three.js WebGL, 60 FPS Hardware Render, Zero External CDN Dependency
+ * AUDIRA REMOTE DESKTOP — Orbital Space-to-Earth Quantum Telemetry Engine
+ * Concept: Deep Space Satellite (LEO Orbit) linked to Earth Ground Station via Optical Laser Beam
+ * Technologies: Three.js WebGL, Procedural Earth Map & Atmosphere Shader, Procedural Satellite Model
  * Features:
- *   - Interactive 3D Cyber P2P Globe with real lat/long infrastructure nodes
- *   - Animated P2P Bézier data arcs with real-time traveling packets (AV1/VP9 video & Opus audio)
- *   - Rotating Libsodium X25519 E2EE Cryptographic Core
- *   - Mouse Parallax & Touch Drag Orbit with realistic inertia damping
- *   - IntersectionObserver GPU throttle (0% GPU usage when scrolled out of view)
- *   - Dynamic theme integration (OLED Dark & Swiss Monochrome)
+ *   - Photorealistic Earth with dark oceans, illuminated landmasses, glowing city lights
+ *   - Dynamic cloud weather layer rotating independently above Earth
+ *   - Atmospheric Fresnel rim glow (neon cyan/emerald horizon halo)
+ *   - Highly detailed 3D Orbital Satellite with dual solar panels, parabolic dish, and blinking strobe LEDs
+ *   - Continuous Space-to-Earth high-speed laser data link with animated photon pulses
+ *   - Ground Station (Jakarta Base Station) with radiating radar waves and lock telemetry
+ *   - Cinematic Starfield with twinkling distant stars and space dust
+ *   - Interactive Camera: Orbit drag, mouse parallax, zoom, and preset camera angles
+ *   - IntersectionObserver GPU saver (0% GPU usage when scrolled away)
  */
 
 (function () {
   'use strict';
 
-  // Ensure Three.js is loaded
   if (typeof THREE === 'undefined') {
-    console.warn('[Audira 3D] Three.js not found. 3D initialization deferred.');
+    console.warn('[Audira 3D] Three.js not found.');
     return;
   }
 
-  // Check WebGL availability
   function isWebGLAvailable() {
     try {
       const canvas = document.createElement('canvas');
@@ -30,78 +32,80 @@
   }
 
   if (!isWebGLAvailable()) {
-    console.warn('[Audira 3D] WebGL not supported on this browser/GPU.');
+    console.warn('[Audira 3D] WebGL not supported.');
     return;
   }
 
-  // Global Nodes coordinates [lat, lon, name, type]
-  const NETWORK_NODES = [
-    { lat: -6.2088, lon: 106.8456, name: 'Jakarta (Core Hub)', type: 'core' },
-    { lat: 1.3521, lon: 103.8198, name: 'Singapore (Gateway)', type: 'relay' },
-    { lat: 35.6762, lon: 139.6503, name: 'Tokyo (Edge Node)', type: 'edge' },
-    { lat: 50.1109, lon: 8.6821, name: 'Frankfurt (EU Cluster)', type: 'relay' },
-    { lat: 51.5074, lon: -0.1278, name: 'London (UK Relay)', type: 'relay' },
-    { lat: 37.7749, lon: -122.4194, name: 'San Francisco (US-West)', type: 'core' },
-    { lat: 40.7128, lon: -74.0060, name: 'New York (US-East)', type: 'relay' },
-    { lat: -33.8688, lon: 151.2093, name: 'Sydney (Oceania Edge)', type: 'edge' },
-    { lat: 52.5200, lon: 13.4050, name: 'Berlin (Telemetry)', type: 'edge' },
-    { lat: 22.3193, lon: 114.1694, name: 'Hong Kong (Edge Node)', type: 'edge' },
-    { lat: 25.2048, lon: 55.2708, name: 'Dubai (ME Gateway)', type: 'relay' },
-    { lat: -23.5505, lon: -46.6333, name: 'São Paulo (SA Node)', type: 'edge' }
-  ];
+  // Constants
+  const EARTH_RADIUS = 120;
+  const SATELLITE_ORBIT_ALTITUDE = 165; // Orbit radius = 285
+  const SATELLITE_RADIUS = EARTH_RADIUS + SATELLITE_ORBIT_ALTITUDE;
+  
+  // Ground Station: Jakarta HQ (Latitude: -6.2088, Longitude: 106.8456)
+  const GROUND_STATION = {
+    name: 'AUDIRA Jakarta Base Ground Station',
+    lat: -6.2088,
+    lon: 106.8456,
+    status: 'QUANTUM LASER LOCKED',
+    rtt: '3.4 ms (LEO Downlink)',
+    freq: 'Optical Laser 1550nm',
+    uplink: 'Direct AV1 60FPS Stream'
+  };
 
-  // P2P Active Tunnel Pairs (Source Index -> Target Index)
-  const ACTIVE_TUNNELS = [
-    { from: 0, to: 1, label: 'JKT-SIN P2P Direct', color: 0x10b981 },
-    { from: 0, to: 3, label: 'JKT-FRA Fallback hbbr', color: 0x38bdf8 },
-    { from: 1, to: 2, label: 'SIN-TYO AV1 60FPS', color: 0x10b981 },
-    { from: 3, to: 4, label: 'FRA-LDN Low-RTT', color: 0x10b981 },
-    { from: 5, to: 6, label: 'SFO-NYC Direct P2P', color: 0x10b981 },
-    { from: 5, to: 2, label: 'SFO-TYO Pacific Link', color: 0x38bdf8 },
-    { from: 0, to: 5, label: 'JKT-SFO X25519 E2EE', color: 0x06b6d4 },
-    { from: 3, to: 10, label: 'FRA-DXB Relay', color: 0x10b981 },
-    { from: 1, to: 7, label: 'SIN-SYD UDP Stream', color: 0x38bdf8 }
-  ];
-
-  const GLOBE_RADIUS = 135;
-
-  class AudiraHero3D {
-    constructor(containerElement) {
-      this.container = containerElement;
+  class AudiraOrbitalEngine {
+    constructor(container) {
+      this.container = container;
       this.width = this.container.clientWidth;
       this.height = this.container.clientHeight;
 
       this.scene = null;
       this.camera = null;
       this.renderer = null;
-      this.globeGroup = null;
-      this.coreMesh = null;
-      this.particles = [];
-      this.arcPackets = [];
 
-      this.isInteracting = false;
-      this.pointerX = 0;
-      this.pointerY = 0;
-      this.targetRotationX = 0.2;
-      this.targetRotationY = 0.6;
-      this.currentRotationX = 0.2;
-      this.currentRotationY = 0.6;
-      this.touchStartX = 0;
-      this.touchStartY = 0;
+      // Hierarchy groups
+      this.universeGroup = null;
+      this.earthGroup = null;
+      this.earthMesh = null;
+      this.cloudsMesh = null;
+      this.atmosphereMesh = null;
+      this.satelliteGroup = null;
+      this.laserBeam = null;
+      this.photonPackets = [];
+      this.groundRings = [];
+      this.strobeLeds = [];
+
+      // Orbit state
+      this.orbitAngle = 0.85;
+      this.orbitSpeed = 0.0018;
+      this.earthRotationSpeed = 0.0006;
+      this.groundTargetPos = new THREE.Vector3();
+
+      // Camera interaction
+      this.isDragging = false;
+      this.prevMouseX = 0;
+      this.prevMouseY = 0;
+      this.camRotY = 0.45;
+      this.camRotX = 0.25;
+      this.targetRotY = 0.45;
+      this.targetRotX = 0.25;
+      this.camDistance = 420;
+      this.targetCamDistance = 420;
+      this.viewMode = 'cinematic'; // 'cinematic' | 'satellite' | 'earth'
 
       this.isRendering = true;
-      this.currentMode = 'globe'; // 'globe' or 'core'
+      this.clock = new THREE.Clock();
 
       this.init();
     }
 
     init() {
-      // 1. Create Scene
+      // 1. Scene
       this.scene = new THREE.Scene();
+      this.scene.fog = new THREE.FogExp2(0x05070d, 0.0006);
 
-      // 2. Camera Setup
-      this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 2000);
-      this.camera.position.z = 390;
+      // 2. Camera
+      this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 3000);
+      this.updateCameraPosition();
 
       // 3. WebGL Renderer
       this.renderer = new THREE.WebGLRenderer({
@@ -111,7 +115,8 @@
       });
       this.renderer.setSize(this.width, this.height);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.setClearColor(0x000000, 0);
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.25;
 
       this.canvas = this.renderer.domElement;
       this.canvas.className = 'audira-3d-canvas';
@@ -120,42 +125,46 @@
       this.canvas.style.left = '0';
       this.canvas.style.width = '100%';
       this.canvas.style.height = '100%';
-      this.canvas.style.pointerEvents = 'auto';
-      this.canvas.style.cursor = 'grab';
       this.canvas.style.zIndex = '1';
+      this.canvas.style.cursor = 'grab';
 
       this.container.appendChild(this.canvas);
 
-      // 4. Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-      this.scene.add(ambientLight);
+      // 4. Universe Group
+      this.universeGroup = new THREE.Group();
+      this.scene.add(this.universeGroup);
 
-      const cyanPoint = new THREE.PointLight(0x38bdf8, 2.5, 800);
-      cyanPoint.position.set(220, 220, 250);
-      this.scene.add(cyanPoint);
+      // 5. Lighting: Distant Sun + Ambient + Earth Reflectance
+      const sunLight = new THREE.DirectionalLight(0xfff7ed, 2.8);
+      sunLight.position.set(400, 200, 350);
+      this.scene.add(sunLight);
 
-      const emeraldPoint = new THREE.PointLight(0x10b981, 2.5, 800);
-      emeraldPoint.position.set(-220, -180, 250);
-      this.scene.add(emeraldPoint);
+      const spaceAmbient = new THREE.AmbientLight(0x0f172a, 0.7);
+      this.scene.add(spaceAmbient);
 
-      // 5. Globe Group
-      this.globeGroup = new THREE.Group();
-      this.scene.add(this.globeGroup);
+      const earthGlowLight = new THREE.PointLight(0x38bdf8, 1.4, 600);
+      earthGlowLight.position.set(-200, -100, 100);
+      this.scene.add(earthGlowLight);
 
-      // Build 3D Elements
-      this.buildGlobeDots();
-      this.buildGlobeWireframe();
-      this.buildNodesAndArcs();
-      this.buildCryptoCore();
-      this.buildOrbitalHalo();
+      // 6. Build Deep Space Starfield & Cosmic Dust
+      this.buildStarfield();
 
-      // 6. UI HUD Overlay
-      this.createHudOverlay();
+      // 7. Build Realistic Earth, Clouds, and Atmosphere
+      this.buildEarthSystem();
 
-      // 7. Event Listeners
+      // 8. Build High-Detail Spacecraft / Satellite
+      this.buildSatellite();
+
+      // 9. Build Laser Beam & Telemetry Link
+      this.buildSpaceToEarthLaser();
+
+      // 10. HUD Telemetry Overlay
+      this.buildHudOverlay();
+
+      // 11. Event Listeners
       this.setupEvents();
 
-      // 8. Start Render Loop
+      // 12. Run Loop
       this.animate = this.animate.bind(this);
       requestAnimationFrame(this.animate);
     }
@@ -169,487 +178,799 @@
       return new THREE.Vector3(x, y, z);
     }
 
-    buildGlobeDots() {
-      // Golden Spiral / Fibonacci sphere distribution for uniform digital dot grid
-      const count = 1100;
-      const geometry = new THREE.BufferGeometry();
-      const positions = [];
-      const colors = [];
+    // -------------------------------------------------------------
+    // Starfield & Deep Space Skybox
+    // -------------------------------------------------------------
+    buildStarfield() {
+      const starCount = 1800;
+      const geo = new THREE.BufferGeometry();
+      const pos = [];
+      const col = [];
 
-      const colorCyan = new THREE.Color(0x38bdf8);
-      const colorEmerald = new THREE.Color(0x10b981);
-      const colorMuted = new THREE.Color(0x1e293b);
+      for (let i = 0; i < starCount; i++) {
+        const u = Math.random();
+        const v = Math.random();
+        const theta = u * 2.0 * Math.PI;
+        const phi = Math.acos(2.0 * v - 1.0);
+        const r = 900 + Math.random() * 800;
 
-      const offset = 2 / count;
-      const increment = Math.PI * (3 - Math.sqrt(5));
+        const x = r * Math.sin(phi) * Math.cos(theta);
+        const y = r * Math.sin(phi) * Math.sin(theta);
+        const z = r * Math.cos(phi);
 
-      for (let i = 0; i < count; i++) {
-        const y = i * offset - 1 + offset / 2;
-        const r = Math.sqrt(1 - y * y);
-        const phi = i * increment;
+        pos.push(x, y, z);
 
-        const x = Math.cos(phi) * r;
-        const z = Math.sin(phi) * r;
-
-        positions.push(x * GLOBE_RADIUS, y * GLOBE_RADIUS, z * GLOBE_RADIUS);
-
-        // Continental density / visual sparkle variation
-        const rand = Math.random();
-        let pointColor;
-        if (rand > 0.82) {
-          pointColor = colorEmerald;
-        } else if (rand > 0.65) {
-          pointColor = colorCyan;
+        // Color variance: blue-white, bright white, warm yellow
+        const colorType = Math.random();
+        if (colorType > 0.8) {
+          col.push(0.65, 0.85, 1.0); // Electric cyan-white
+        } else if (colorType > 0.65) {
+          col.push(1.0, 0.92, 0.7); // Warm star
         } else {
-          pointColor = colorMuted;
+          col.push(0.95, 0.98, 1.0); // Pure star
         }
-
-        colors.push(pointColor.r, pointColor.g, pointColor.b);
       }
 
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
 
-      // Circular particle texture created procedurally via HTML5 Canvas
-      const dotTexture = this.createDotTexture();
-
-      const material = new THREE.PointsMaterial({
-        size: 3.4,
+      const mat = new THREE.PointsMaterial({
+        size: 2.2,
         vertexColors: true,
-        map: dotTexture,
         transparent: true,
-        opacity: 0.85,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
+        opacity: 0.85
       });
 
-      const dotMesh = new THREE.Points(geometry, material);
-      this.globeGroup.add(dotMesh);
+      this.starPoints = new THREE.Points(geo, mat);
+      this.universeGroup.add(this.starPoints);
     }
 
-    createDotTexture() {
+    // -------------------------------------------------------------
+    // Earth System: Procedural Earth Map, Night Lights, Clouds & Halo
+    // -------------------------------------------------------------
+    buildEarthSystem() {
+      this.earthGroup = new THREE.Group();
+      this.universeGroup.add(this.earthGroup);
+
+      // 1. Procedural High-Definition Earth Canvas Texture
+      const earthTex = this.generateEarthTexture();
+
+      // Earth Mesh with phong shading
+      const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
+      const earthMat = new THREE.MeshPhongMaterial({
+        map: earthTex,
+        bumpScale: 0.05,
+        specular: new THREE.Color(0x224466),
+        shininess: 18
+      });
+
+      this.earthMesh = new THREE.Mesh(earthGeo, earthMat);
+      this.earthGroup.add(this.earthMesh);
+
+      // 2. Weather Cloud Layer
+      const cloudTex = this.generateCloudTexture();
+      const cloudGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.018, 48, 48);
+      const cloudMat = new THREE.MeshStandardMaterial({
+        map: cloudTex,
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      this.cloudsMesh = new THREE.Mesh(cloudGeo, cloudMat);
+      this.earthGroup.add(this.cloudsMesh);
+
+      // 3. Atmospheric Fresnel Rim Glow (The Blue Horizon Halo seen from Orbit)
+      const atmoGeo = new THREE.SphereGeometry(EARTH_RADIUS * 1.055, 48, 48);
+      const atmoMat = new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            vec3 viewDir = normalize(-vPosition);
+            float intensity = pow(0.7 - dot(vNormal, viewDir), 2.2);
+            vec3 atmosphereColor = mix(vec3(0.06, 0.72, 0.5), vec3(0.22, 0.74, 0.98), intensity);
+            gl_FragColor = vec4(atmosphereColor, intensity * 0.95);
+          }
+        `,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+        transparent: true,
+        depthWrite: false
+      });
+
+      this.atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
+      this.earthGroup.add(this.atmosphereMesh);
+
+      // 4. Ground Station Base Beacon at Jakarta
+      this.buildGroundStation();
+    }
+
+    generateEarthTexture() {
+      const width = 2048;
+      const height = 1024;
       const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
 
-      const grad = ctx.createRadialGradient(32, 32, 2, 32, 32, 30);
-      grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      grad.addColorStop(0.35, 'rgba(56, 189, 248, 0.85)');
-      grad.addColorStop(0.7, 'rgba(16, 185, 129, 0.3)');
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      // Ocean base: deep obsidian OLED navy
+      const oceanGrad = ctx.createLinearGradient(0, 0, 0, height);
+      oceanGrad.addColorStop(0, '#040914');
+      oceanGrad.addColorStop(0.5, '#02060e');
+      oceanGrad.addColorStop(1, '#040914');
+      ctx.fillStyle = oceanGrad;
+      ctx.fillRect(0, 0, width, height);
 
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(32, 32, 30, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw latitude / longitude bathymetric grid lines
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < width; x += 128) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < height; y += 64) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Draw stylized world continents with accurate silhouettes
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.5;
+
+      const continents = [
+        // Eurasia & Southeast Asia
+        [[100, 200], [250, 180], [450, 150], [600, 160], [800, 220], [850, 320], [800, 420], [680, 520], [580, 480], [500, 420], [380, 450], [280, 380], [180, 340], [120, 260]],
+        // Africa
+        [[280, 400], [360, 420], [400, 500], [380, 620], [320, 720], [260, 680], [240, 540], [260, 450]],
+        // North America
+        [[1100, 140], [1350, 150], [1500, 220], [1450, 360], [1300, 440], [1200, 380], [1120, 260]],
+        // South America
+        [[1320, 460], [1420, 520], [1400, 660], [1320, 760], [1260, 680], [1280, 540]],
+        // Australia
+        [[720, 620], [840, 600], [860, 720], [750, 750], [700, 680]],
+        // Indonesian Archipelago & Southeast Asia Islands (Detailed)
+        [[640, 530], [680, 520], [670, 550], [630, 560]], // Sumatra & Malaya
+        [[660, 565], [710, 565], [700, 580], [655, 580]], // Java
+        [[690, 510], [740, 510], [730, 550], [680, 550]], // Borneo
+        [[740, 520], [770, 520], [760, 560], [735, 550]], // Sulawesi
+        [[780, 520], [850, 530], [840, 560], [775, 550]]  // Papua
+      ];
+
+      continents.forEach((poly) => {
+        ctx.beginPath();
+        ctx.moveTo(poly[0][0], poly[0][1]);
+        for (let i = 1; i < poly.length; i++) {
+          ctx.lineTo(poly[i][0], poly[i][1]);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      // Illuminated Global City Lights / Ground Terminals
+      const cities = [
+        { x: 685, y: 572, name: 'Jakarta', major: true },
+        { x: 672, y: 535, name: 'Singapore', major: true },
+        { x: 800, y: 350, name: 'Tokyo', major: true },
+        { x: 300, y: 280, name: 'Frankfurt', major: true },
+        { x: 260, y: 260, name: 'London', major: true },
+        { x: 1180, y: 360, name: 'San Francisco', major: true },
+        { x: 1360, y: 340, name: 'New York', major: true },
+        { x: 820, y: 720, name: 'Sydney', major: true }
+      ];
+
+      cities.forEach((c) => {
+        // Glowing night light halo
+        const halo = ctx.createRadialGradient(c.x, c.y, 1, c.x, c.y, c.major ? 16 : 8);
+        halo.addColorStop(0, c.major ? '#38bdf8' : '#f59e0b');
+        halo.addColorStop(0.4, c.major ? 'rgba(16, 185, 129, 0.8)' : 'rgba(245, 158, 11, 0.6)');
+        halo.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.major ? 16 : 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // City core pin
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.major ? 3 : 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
       return new THREE.CanvasTexture(canvas);
     }
 
-    buildGlobeWireframe() {
-      // Internal atmosphere core glow sphere
-      const innerGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 0.985, 28, 28);
-      const innerMat = new THREE.MeshBasicMaterial({
-        color: 0x0c1524,
-        transparent: true,
-        opacity: 0.45,
-        wireframe: false
-      });
-      const innerSphere = new THREE.Mesh(innerGeo, innerMat);
-      this.globeGroup.add(innerSphere);
+    generateCloudTexture() {
+      const width = 1024;
+      const height = 512;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
 
-      // Lat/Long Rings
-      const ringsGroup = new THREE.Group();
-      const ringMat = new THREE.LineBasicMaterial({
-        color: 0x1e293b,
-        transparent: true,
-        opacity: 0.28
-      });
+      ctx.clearRect(0, 0, width, height);
 
-      // Equator & Tropic Latitude lines
-      [-40, -20, 0, 20, 40].forEach((lat) => {
-        const phi = (90 - lat) * (Math.PI / 180);
-        const radius = GLOBE_RADIUS * Math.sin(phi);
-        const y = GLOBE_RADIUS * Math.cos(phi);
+      // Wispy atmospheric swirl patterns
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+      for (let i = 0; i < 90; i++) {
+        const cx = Math.random() * width;
+        const cy = 100 + Math.random() * (height - 200);
+        const radius = 25 + Math.random() * 75;
 
-        const circleGeo = new THREE.BufferGeometry();
-        const points = [];
-        for (let i = 0; i <= 64; i++) {
-          const theta = (i / 64) * Math.PI * 2;
-          points.push(new THREE.Vector3(Math.cos(theta) * radius, y, Math.sin(theta) * radius));
-        }
-        circleGeo.setFromPoints(points);
-        const line = new THREE.Line(circleGeo, ringMat);
-        ringsGroup.add(line);
-      });
+        const grad = ctx.createRadialGradient(cx, cy, 5, cx, cy, radius);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+        grad.addColorStop(0.6, 'rgba(240, 248, 255, 0.18)');
+        grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = grad;
 
-      this.globeGroup.add(ringsGroup);
-    }
-
-    buildNodesAndArcs() {
-      const nodeVectors = [];
-
-      // 1. Create Node Markers
-      NETWORK_NODES.forEach((node) => {
-        const vec = this.latLongToVector3(node.lat, node.lon, GLOBE_RADIUS);
-        nodeVectors.push(vec);
-
-        // Center beacon
-        const isCore = node.type === 'core';
-        const beaconGeo = new THREE.SphereGeometry(isCore ? 3.0 : 2.0, 16, 16);
-        const beaconMat = new THREE.MeshBasicMaterial({
-          color: isCore ? 0x10b981 : 0x38bdf8
-        });
-        const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-        beacon.position.copy(vec);
-        this.globeGroup.add(beacon);
-
-        // Pulsing radar ring
-        const ringGeo = new THREE.RingGeometry(isCore ? 3.8 : 2.8, isCore ? 4.8 : 3.6, 24);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: isCore ? 0x10b981 : 0x06b6d4,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.7
-        });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.position.copy(vec);
-        ring.lookAt(new THREE.Vector3(0, 0, 0));
-        this.globeGroup.add(ring);
-      });
-
-      // 2. Create 3D Bézier Arcs & Packet Data Streams
-      ACTIVE_TUNNELS.forEach((tunnel) => {
-        const vStart = nodeVectors[tunnel.from];
-        const vEnd = nodeVectors[tunnel.to];
-
-        if (!vStart || !vEnd) return;
-
-        // Quadratic Bézier curve extending outwards proportional to distance
-        const distance = vStart.distanceTo(vEnd);
-        const mid = vStart.clone().lerp(vEnd, 0.5);
-        const midLength = mid.length();
-        mid.normalize();
-        mid.multiplyScalar(midLength + distance * 0.28); // Height of arc
-
-        const curve = new THREE.QuadraticBezierCurve3(vStart, mid, vEnd);
-        const points = curve.getPoints(48);
-        const arcGeo = new THREE.BufferGeometry().setFromPoints(points);
-
-        const arcMat = new THREE.LineBasicMaterial({
-          color: tunnel.color,
-          transparent: true,
-          opacity: 0.45,
-          blending: THREE.AdditiveBlending
-        });
-
-        const arcLine = new THREE.Line(arcGeo, arcMat);
-        this.globeGroup.add(arcLine);
-
-        // Add 2 animated packet particles per arc
-        for (let i = 0; i < 2; i++) {
-          const packetGeo = new THREE.SphereGeometry(1.6, 8, 8);
-          const packetMat = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.95
-          });
-          const packetMesh = new THREE.Mesh(packetGeo, packetMat);
-          this.globeGroup.add(packetMesh);
-
-          this.arcPackets.push({
-            mesh: packetMesh,
-            curve: curve,
-            progress: i * 0.5,
-            speed: 0.0035 + Math.random() * 0.0035
-          });
-        }
-      });
-    }
-
-    buildCryptoCore() {
-      // Central Holographic Cryptographic Core (Libsodium X25519)
-      const coreGroup = new THREE.Group();
-
-      const icosaGeo = new THREE.IcosahedronGeometry(GLOBE_RADIUS * 0.42, 1);
-      const icosaMat = new THREE.MeshBasicMaterial({
-        color: 0x10b981,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.35,
-        blending: THREE.AdditiveBlending
-      });
-      this.coreMesh = new THREE.Mesh(icosaGeo, icosaMat);
-      coreGroup.add(this.coreMesh);
-
-      // Inner Dodecahedron (Cyan)
-      const dodecaGeo = new THREE.DodecahedronGeometry(GLOBE_RADIUS * 0.28, 0);
-      const dodecaMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.5
-      });
-      this.innerCoreMesh = new THREE.Mesh(dodecaGeo, dodecaMat);
-      coreGroup.add(this.innerCoreMesh);
-
-      this.globeGroup.add(coreGroup);
-    }
-
-    buildOrbitalHalo() {
-      // Surrounding orbital dust particles (Opus audio packets & AV1 keyframes)
-      const particleCount = 200;
-      const haloGeo = new THREE.BufferGeometry();
-      const pos = [];
-      const col = [];
-
-      for (let i = 0; i < particleCount; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = GLOBE_RADIUS * 1.25 + Math.random() * 35;
-        const ySpread = (Math.random() - 0.5) * 45;
-
-        pos.push(Math.cos(angle) * radius, ySpread, Math.sin(angle) * radius);
-
-        if (Math.random() > 0.5) {
-          col.push(0.06, 0.72, 0.5); // Emerald
-        } else {
-          col.push(0.22, 0.74, 0.97); // Cyan
-        }
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      haloGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-      haloGeo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-
-      const haloMat = new THREE.PointsMaterial({
-        size: 2.2,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.6,
-        blending: THREE.AdditiveBlending
-      });
-
-      this.haloMesh = new THREE.Points(haloGeo, haloMat);
-      this.haloMesh.rotation.x = Math.PI / 6;
-      this.globeGroup.add(this.haloMesh);
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      return tex;
     }
 
-    createHudOverlay() {
+    buildGroundStation() {
+      // Convert Jakarta coordinates to vector on Earth surface
+      this.groundTargetPos = this.latLongToVector3(GROUND_STATION.lat, GROUND_STATION.lon, EARTH_RADIUS);
+
+      const stationGroup = new THREE.Group();
+      stationGroup.position.copy(this.groundTargetPos);
+      stationGroup.lookAt(new THREE.Vector3(0, 0, 0));
+
+      // 1. Central Ground Beacon
+      const beaconGeo = new THREE.SphereGeometry(2.4, 16, 16);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+      stationGroup.add(beacon);
+
+      // 2. Radar Pulse Wave Rings
+      for (let i = 0; i < 3; i++) {
+        const ringGeo = new THREE.RingGeometry(3.5, 4.4, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: 0x38bdf8,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.8
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        stationGroup.add(ring);
+        this.groundRings.push({ mesh: ring, scale: 1.0 + i * 0.8, baseOpacity: 0.85 });
+      }
+
+      this.earthMesh.add(stationGroup);
+      this.groundStationGroup = stationGroup;
+    }
+
+    // -------------------------------------------------------------
+    // High-Detail Orbital Spacecraft / Satellite Model
+    // -------------------------------------------------------------
+    buildSatellite() {
+      this.satelliteGroup = new THREE.Group();
+      this.universeGroup.add(this.satelliteGroup);
+
+      // Initial orbital position in space
+      this.updateSatelliteOrbit(this.orbitAngle);
+
+      // 1. Satellite Main Chassis Body (Hexagonal / Box Multi-layer Insulation)
+      const busGeo = new THREE.BoxGeometry(14, 20, 12);
+      const busMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        metalness: 0.88,
+        roughness: 0.25
+      });
+      const busMesh = new THREE.Mesh(busGeo, busMat);
+      this.satelliteGroup.add(busMesh);
+
+      // Gold Thermal Insulation MLI Foil Panels
+      const foilMat = new THREE.MeshStandardMaterial({
+        color: 0xd97706,
+        metalness: 0.95,
+        roughness: 0.35
+      });
+      const foilTop = new THREE.Mesh(new THREE.BoxGeometry(12, 1.2, 10), foilMat);
+      foilTop.position.y = 10.4;
+      this.satelliteGroup.add(foilTop);
+
+      const foilBottom = new THREE.Mesh(new THREE.BoxGeometry(12, 1.2, 10), foilMat);
+      foilBottom.position.y = -10.4;
+      this.satelliteGroup.add(foilBottom);
+
+      // 2. Parabolic High-Gain Dish Antenna (Pointed Directly to Earth)
+      const dishGroup = new THREE.Group();
+      dishGroup.position.set(0, 0, 8);
+
+      const dishGeo = new THREE.ConeGeometry(8, 3.5, 24, 1, true);
+      const dishMat = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        metalness: 0.85,
+        roughness: 0.2,
+        side: THREE.DoubleSide
+      });
+      const dish = new THREE.Mesh(dishGeo, dishMat);
+      dish.rotation.x = Math.PI / 2;
+      dishGroup.add(dish);
+
+      // Feed horn & laser optics at the focus of the dish
+      const hornGeo = new THREE.CylinderGeometry(0.8, 0.8, 5, 12);
+      const hornMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+      const horn = new THREE.Mesh(hornGeo, hornMat);
+      horn.rotation.x = Math.PI / 2;
+      horn.position.z = 3.5;
+      dishGroup.add(horn);
+
+      // Glowing Optical Laser Emitter Lens
+      const lensGeo = new THREE.SphereGeometry(1.4, 16, 16);
+      const lensMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+      this.laserEmitter = new THREE.Mesh(lensGeo, lensMat);
+      this.laserEmitter.position.set(0, 0, 6.2);
+      dishGroup.add(this.laserEmitter);
+
+      this.satelliteGroup.add(dishGroup);
+
+      // 3. Dual Photovoltaic Solar Array Wings (Left and Right)
+      const solarTex = this.generateSolarTexture();
+      const solarMat = new THREE.MeshStandardMaterial({
+        map: solarTex,
+        metalness: 0.9,
+        roughness: 0.15,
+        side: THREE.DoubleSide
+      });
+
+      // Solar Boom Trusses
+      const boomMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9 });
+      const boomLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 16), boomMat);
+      boomLeft.rotation.z = Math.PI / 2;
+      boomLeft.position.x = -14;
+      this.satelliteGroup.add(boomLeft);
+
+      const boomRight = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 16), boomMat);
+      boomRight.rotation.z = Math.PI / 2;
+      boomRight.position.x = 14;
+      this.satelliteGroup.add(boomRight);
+
+      // Left Solar Array (3 segments)
+      const wingLeft = new THREE.Mesh(new THREE.BoxGeometry(42, 14, 0.8), solarMat);
+      wingLeft.position.set(-42, 0, 0);
+      this.satelliteGroup.add(wingLeft);
+
+      // Right Solar Array (3 segments)
+      const wingRight = new THREE.Mesh(new THREE.BoxGeometry(42, 14, 0.8), solarMat);
+      wingRight.position.set(42, 0, 0);
+      this.satelliteGroup.add(wingRight);
+
+      // 4. Strobe Navigation LEDs (Port: Red, Starboard: Green, Beacon: Pulsing Cyan)
+      const portLed = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf43f5e }));
+      portLed.position.set(-63, 0, 0);
+      this.satelliteGroup.add(portLed);
+
+      const stbdLed = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 8), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+      stbdLed.position.set(63, 0, 0);
+      this.satelliteGroup.add(stbdLed);
+
+      const beaconLed = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 8), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      beaconLed.position.set(0, 11.5, 0);
+      this.satelliteGroup.add(beaconLed);
+
+      this.strobeLeds.push(portLed, stbdLed, beaconLed);
+    }
+
+    generateSolarTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+
+      // Solar cell base: reflective midnight blue
+      ctx.fillStyle = '#0a192f';
+      ctx.fillRect(0, 0, 512, 128);
+
+      // Solar cell silicon grid
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.2;
+
+      // Vertical divisions
+      for (let x = 0; x < 512; x += 32) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 128);
+        ctx.stroke();
+      }
+
+      // Horizontal busbars
+      for (let y = 0; y < 128; y += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(512, y);
+        ctx.stroke();
+      }
+
+      // Metallic contact sheen lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 0.8;
+      for (let x = 8; x < 512; x += 16) {
+        ctx.beginPath();
+        ctx.moveTo(x, 4);
+        ctx.lineTo(x, 124);
+        ctx.stroke();
+      }
+
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    updateSatelliteOrbit(angle) {
+      // Inclined circular orbit (52 deg inclination)
+      const inclination = Math.PI / 3.5;
+      const x = Math.cos(angle) * SATELLITE_RADIUS;
+      const y = Math.sin(angle) * Math.sin(inclination) * SATELLITE_RADIUS;
+      const z = Math.sin(angle) * Math.cos(inclination) * SATELLITE_RADIUS;
+
+      this.satelliteGroup.position.set(x, y, z);
+
+      // Orient satellite so its antenna always points toward the center of Earth
+      this.satelliteGroup.lookAt(0, 0, 0);
+    }
+
+    // -------------------------------------------------------------
+    // Space-to-Earth Quantum Laser Link & Flying Photons
+    // -------------------------------------------------------------
+    buildSpaceToEarthLaser() {
+      // 1. Core High-Coherence Laser Beam (Line connecting Satellite to Ground)
+      const laserGeo = new THREE.BufferGeometry();
+      laserGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0], 3));
+
+      const laserMat = new THREE.LineBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        linewidth: 2
+      });
+
+      this.laserBeam = new THREE.Line(laserGeo, laserMat);
+      this.universeGroup.add(this.laserBeam);
+
+      // 2. Laser Sheath / Atmosphere Penetration Glow
+      const glowGeo = new THREE.BufferGeometry();
+      glowGeo.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0], 3));
+      const glowMat = new THREE.LineBasicMaterial({
+        color: 0x10b981,
+        transparent: true,
+        opacity: 0.45,
+        blending: THREE.AdditiveBlending,
+        linewidth: 4
+      });
+      this.laserGlow = new THREE.Line(glowGeo, glowMat);
+      this.universeGroup.add(this.laserGlow);
+
+      // 3. High-Speed Photon Data Packets (Downlink & Uplink streams)
+      const packetCount = 8;
+      for (let i = 0; i < packetCount; i++) {
+        const pGeo = new THREE.SphereGeometry(2.0, 8, 8);
+        const pMat = new THREE.MeshBasicMaterial({
+          color: i % 2 === 0 ? 0x38bdf8 : 0x10b981,
+          transparent: true,
+          opacity: 0.95
+        });
+        const pMesh = new THREE.Mesh(pGeo, pMat);
+        this.universeGroup.add(pMesh);
+
+        this.photonPackets.push({
+          mesh: pMesh,
+          progress: i / packetCount,
+          speed: 0.012 + Math.random() * 0.005,
+          direction: i % 3 === 0 ? -1 : 1 // Downlink from space vs uplink from ground
+        });
+      }
+    }
+
+    updateSpaceToEarthLink() {
+      if (!this.laserBeam || !this.satelliteGroup || !this.groundStationGroup) return;
+
+      // Current world position of satellite laser emitter
+      const satWorldPos = new THREE.Vector3();
+      this.laserEmitter.getWorldPosition(satWorldPos);
+
+      // Current world position of Jakarta ground station
+      const groundWorldPos = new THREE.Vector3();
+      this.groundStationGroup.getWorldPosition(groundWorldPos);
+
+      // Update laser lines
+      const positions = new Float32Array([
+        satWorldPos.x, satWorldPos.y, satWorldPos.z,
+        groundWorldPos.x, groundWorldPos.y, groundWorldPos.z
+      ]);
+
+      this.laserBeam.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      this.laserBeam.geometry.attributes.position.needsUpdate = true;
+
+      this.laserGlow.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      this.laserGlow.geometry.attributes.position.needsUpdate = true;
+
+      // Update traveling photon packets
+      for (let i = 0; i < this.photonPackets.length; i++) {
+        const p = this.photonPackets[i];
+        p.progress += p.speed * p.direction;
+
+        if (p.progress > 1.0) p.progress = 0.0;
+        if (p.progress < 0.0) p.progress = 1.0;
+
+        const currentPos = new THREE.Vector3().lerpVectors(satWorldPos, groundWorldPos, p.progress);
+        p.mesh.position.copy(currentPos);
+
+        // Pulsing scale
+        const scale = 1.0 + Math.sin(p.progress * Math.PI) * 0.8;
+        p.mesh.scale.set(scale, scale, scale);
+      }
+
+      // Update Ground Station Radar wave expansion
+      for (let i = 0; i < this.groundRings.length; i++) {
+        const r = this.groundRings[i];
+        r.scale += 0.025;
+        if (r.scale > 3.8) {
+          r.scale = 1.0;
+        }
+        r.mesh.scale.set(r.scale, r.scale, r.scale);
+        r.mesh.material.opacity = Math.max(0, r.baseOpacity * (1 - (r.scale - 1.0) / 2.8));
+      }
+    }
+
+    // -------------------------------------------------------------
+    // HUD Telemetry Overlay
+    // -------------------------------------------------------------
+    buildHudOverlay() {
       const hud = document.createElement('div');
-      hud.className = 'audira-3d-hud';
+      hud.className = 'audira-orbital-hud';
       hud.innerHTML = `
-        <div class="hud-inner">
-          <div class="hud-status">
-            <span class="hud-pulse"></span>
-            <span class="hud-label">P2P 3D MESH &bull; ACTIVE (60 FPS)</span>
+        <div class="orbital-hud-card">
+          <div class="orbital-header">
+            <span class="orbital-indicator"></span>
+            <span class="orbital-title">LEO SATELLITE &bull; QUANTUM DOWNLINK ACTIVE</span>
           </div>
-          <div class="hud-tools">
-            <button type="button" id="btn3dReset" class="hud-btn" title="Reset 3D View">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-              <span>Align</span>
-            </button>
-            <button type="button" id="btn3dToggleMode" class="hud-btn" title="Switch View Mode">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span id="hudModeLabel">Globe View</span>
-            </button>
+
+          <div class="orbital-metrics-grid">
+            <div class="metric-box">
+              <span class="metric-label">Orbital Altitude</span>
+              <span class="metric-value cyan">550 KM (LEO)</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Target Station</span>
+              <span class="metric-value emerald">Jakarta Base (-6.2° / 106.8°)</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Laser Carrier</span>
+              <span class="metric-value">1550nm Coherent</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Direct Latency</span>
+              <span class="metric-value emerald">3.4 ms (Zero Relay)</span>
+            </div>
+          </div>
+
+          <div class="orbital-controls">
+            <button type="button" id="btnOrbitalCinematic" class="orbital-btn active">Cinematic Orbit</button>
+            <button type="button" id="btnOrbitalSatellite" class="orbital-btn">Satellite Cam</button>
+            <button type="button" id="btnOrbitalEarth" class="orbital-btn">Earth Horizon</button>
           </div>
         </div>
       `;
 
       this.container.appendChild(hud);
 
-      // Event listeners for HUD
-      const btnReset = hud.querySelector('#btn3dReset');
-      if (btnReset) {
-        btnReset.addEventListener('click', (e) => {
+      // Camera view presets
+      const btnCinematic = hud.querySelector('#btnOrbitalCinematic');
+      const btnSat = hud.querySelector('#btnOrbitalSatellite');
+      const btnEarth = hud.querySelector('#btnOrbitalEarth');
+
+      const setButtonActive = (btn) => {
+        [btnCinematic, btnSat, btnEarth].forEach(b => b && b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+      };
+
+      if (btnCinematic) {
+        btnCinematic.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.targetRotationX = 0.2;
-          this.targetRotationY = 0.6;
+          setButtonActive(btnCinematic);
+          this.viewMode = 'cinematic';
+          this.targetCamDistance = 420;
+          this.targetRotX = 0.25;
+          this.targetRotY = 0.45;
         });
       }
 
-      const btnToggle = hud.querySelector('#btn3dToggleMode');
-      if (btnToggle) {
-        btnToggle.addEventListener('click', (e) => {
+      if (btnSat) {
+        btnSat.addEventListener('click', (e) => {
           e.stopPropagation();
-          this.toggleMode();
+          setButtonActive(btnSat);
+          this.viewMode = 'satellite';
+          this.targetCamDistance = 210;
+          this.targetRotX = 0.15;
+          this.targetRotY = this.orbitAngle + 0.35;
+        });
+      }
+
+      if (btnEarth) {
+        btnEarth.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setButtonActive(btnEarth);
+          this.viewMode = 'earth';
+          this.targetCamDistance = 280;
+          this.targetRotX = 0.55;
+          this.targetRotY = 1.45;
         });
       }
     }
 
-    toggleMode() {
-      const label = document.getElementById('hudModeLabel');
-      if (this.currentMode === 'globe') {
-        this.currentMode = 'core';
-        if (label) label.textContent = 'Crypto Core';
-        // Zoom camera in to center on encryption core
-        this.targetCameraZ = 240;
-      } else {
-        this.currentMode = 'globe';
-        if (label) label.textContent = 'Globe View';
-        this.targetCameraZ = 390;
-      }
-    }
-
+    // -------------------------------------------------------------
+    // Interactivity & Event Handlers
+    // -------------------------------------------------------------
     setupEvents() {
-      // Mouse Parallax & Drag Orbit
       const el = this.canvas;
 
       el.addEventListener('mousedown', (e) => {
-        this.isInteracting = true;
-        this.pointerX = e.clientX;
-        this.pointerY = e.clientY;
+        this.isDragging = true;
+        this.prevMouseX = e.clientX;
+        this.prevMouseY = e.clientY;
         el.style.cursor = 'grabbing';
       });
 
       window.addEventListener('mouseup', () => {
-        if (this.isInteracting) {
-          this.isInteracting = false;
+        if (this.isDragging) {
+          this.isDragging = false;
           el.style.cursor = 'grab';
         }
       });
 
       window.addEventListener('mousemove', (e) => {
-        if (this.isInteracting) {
-          const deltaX = e.clientX - this.pointerX;
-          const deltaY = e.clientY - this.pointerY;
-          this.pointerX = e.clientX;
-          this.pointerY = e.clientY;
+        if (this.isDragging) {
+          const dx = e.clientX - this.prevMouseX;
+          const dy = e.clientY - this.prevMouseY;
+          this.prevMouseX = e.clientX;
+          this.prevMouseY = e.clientY;
 
-          this.targetRotationY += deltaX * 0.006;
-          this.targetRotationX += deltaY * 0.006;
+          this.targetRotY += dx * 0.005;
+          this.targetRotX += dy * 0.005;
         } else {
-          // Subtle Hero Parallax tracking
-          const rect = this.container.getBoundingClientRect();
-          if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
-            const normalizedX = (e.clientX / window.innerWidth) - 0.5;
-            const normalizedY = (e.clientY / window.innerHeight) - 0.5;
-            this.targetRotationY += normalizedX * 0.0012;
-            this.targetRotationX += normalizedY * 0.0012;
-          }
+          // Subtle mouse parallax
+          const nx = (e.clientX / window.innerWidth) - 0.5;
+          const ny = (e.clientY / window.innerHeight) - 0.5;
+          this.targetRotY += nx * 0.0008;
+          this.targetRotX += ny * 0.0008;
         }
       });
 
-      // Touch events for Mobile / Tablet
+      // Mobile Touch Drag Orbit
       el.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
-          this.isInteracting = true;
-          this.touchStartX = e.touches[0].clientX;
-          this.touchStartY = e.touches[0].clientY;
+          this.isDragging = true;
+          this.prevMouseX = e.touches[0].clientX;
+          this.prevMouseY = e.touches[0].clientY;
         }
       }, { passive: true });
 
       window.addEventListener('touchmove', (e) => {
-        if (this.isInteracting && e.touches.length === 1) {
-          const deltaX = e.touches[0].clientX - this.touchStartX;
-          const deltaY = e.touches[0].clientY - this.touchStartY;
-          this.touchStartX = e.touches[0].clientX;
-          this.touchStartY = e.touches[0].clientY;
+        if (this.isDragging && e.touches.length === 1) {
+          const dx = e.touches[0].clientX - this.prevMouseX;
+          const dy = e.touches[0].clientY - this.prevMouseY;
+          this.prevMouseX = e.touches[0].clientX;
+          this.prevMouseY = e.touches[0].clientY;
 
-          this.targetRotationY += deltaX * 0.008;
-          this.targetRotationX += deltaY * 0.008;
+          this.targetRotY += dx * 0.007;
+          this.targetRotX += dy * 0.007;
         }
       }, { passive: true });
 
       window.addEventListener('touchend', () => {
-        this.isInteracting = false;
+        this.isDragging = false;
       });
 
-      // Window Resize Listener
+      // Zoom via Mouse Wheel
+      el.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        this.targetCamDistance += e.deltaY * 0.25;
+        this.targetCamDistance = Math.max(160, Math.min(650, this.targetCamDistance));
+      }, { passive: false });
+
+      // Resize
       window.addEventListener('resize', () => {
-        this.onResize();
+        if (!this.container || !this.renderer || !this.camera) return;
+        this.width = this.container.clientWidth;
+        this.height = this.container.clientHeight;
+
+        this.camera.aspect = this.width / this.height;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       });
 
-      // GPU Saver: IntersectionObserver
+      // IntersectionObserver GPU saver
       if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              this.isRendering = entry.isIntersecting;
-            });
-          },
-          { threshold: 0.05 }
-        );
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            this.isRendering = entry.isIntersecting;
+          });
+        }, { threshold: 0.05 });
         observer.observe(this.container);
       }
     }
 
-    onResize() {
-      if (!this.container || !this.renderer || !this.camera) return;
-      this.width = this.container.clientWidth;
-      this.height = this.container.clientHeight;
+    updateCameraPosition() {
+      // Spherical coordinates to Cartesian for smooth camera orbit
+      const x = this.camDistance * Math.cos(this.camRotX) * Math.sin(this.camRotY);
+      const y = this.camDistance * Math.sin(this.camRotX);
+      const z = this.camDistance * Math.cos(this.camRotX) * Math.cos(this.camRotY);
 
-      this.camera.aspect = this.width / this.height;
-      this.camera.updateProjectionMatrix();
-
-      this.renderer.setSize(this.width, this.height);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      this.camera.position.set(x, y, z);
+      this.camera.lookAt(0, 0, 0);
     }
 
+    // -------------------------------------------------------------
+    // Main Animation Loop
+    // -------------------------------------------------------------
     animate() {
       requestAnimationFrame(this.animate);
 
       if (!this.isRendering) return;
 
-      // 1. Natural Auto-rotation when idle
-      if (!this.isInteracting) {
-        this.targetRotationY += 0.0018; // smooth orbit spin
+      const elapsed = this.clock.getElapsedTime();
+
+      // 1. Advance Satellite Orbit in LEO
+      this.orbitAngle += this.orbitSpeed;
+      this.updateSatelliteOrbit(this.orbitAngle);
+
+      // 2. Rotate Earth & Clouds
+      if (this.earthMesh) {
+        this.earthMesh.rotation.y += this.earthRotationSpeed;
+      }
+      if (this.cloudsMesh) {
+        this.cloudsMesh.rotation.y += this.earthRotationSpeed * 1.35; // Clouds drift faster
       }
 
-      // 2. Smooth Inertial Damping
-      this.currentRotationX += (this.targetRotationX - this.currentRotationX) * 0.05;
-      this.currentRotationY += (this.targetRotationY - this.currentRotationY) * 0.05;
-
-      // Clamp X rotation to avoid flipping upside down
-      this.currentRotationX = Math.max(-1.1, Math.min(1.1, this.currentRotationX));
-
-      if (this.globeGroup) {
-        this.globeGroup.rotation.x = this.currentRotationX;
-        this.globeGroup.rotation.y = this.currentRotationY;
+      // 3. Strobe Navigation LEDs
+      const strobe = Math.sin(elapsed * 5.0) > 0.3;
+      for (let i = 0; i < this.strobeLeds.length; i++) {
+        this.strobeLeds[i].scale.setScalar(strobe ? 1.5 : 0.8);
       }
 
-      // 3. Smooth Camera Zoom transition for Mode Switching
-      if (this.targetCameraZ) {
-        this.camera.position.z += (this.targetCameraZ - this.camera.position.z) * 0.06;
-      }
+      // 4. Update Space-to-Earth Quantum Laser Link
+      this.updateSpaceToEarthLink();
 
-      // 4. Rotate Inner Cryptographic Core
-      if (this.coreMesh) {
-        this.coreMesh.rotation.x -= 0.008;
-        this.coreMesh.rotation.y += 0.012;
-      }
-      if (this.innerCoreMesh) {
-        this.innerCoreMesh.rotation.x += 0.014;
-        this.innerCoreMesh.rotation.z -= 0.010;
-      }
+      // 5. Camera Damping & Rotation
+      this.camRotY += (this.targetRotY - this.camRotY) * 0.06;
+      this.camRotX += (this.targetRotX - this.camRotX) * 0.06;
+      this.camDistance += (this.targetCamDistance - this.camDistance) * 0.08;
 
-      // 5. Rotate Halo Ring
-      if (this.haloMesh) {
-        this.haloMesh.rotation.y -= 0.002;
-      }
+      // Clamp vertical camera tilt
+      this.camRotX = Math.max(-1.1, Math.min(1.1, this.camRotX));
 
-      // 6. Advance Packet Particles along Bézier Arcs
-      for (let i = 0; i < this.arcPackets.length; i++) {
-        const item = this.arcPackets[i];
-        item.progress += item.speed;
-        if (item.progress > 1) {
-          item.progress = 0;
-        }
-        const point = item.curve.getPoint(item.progress);
-        item.mesh.position.copy(point);
+      this.updateCameraPosition();
 
-        // Flash packet brighter when at the apex of the arc
-        const apexFactor = Math.sin(item.progress * Math.PI);
-        const scale = 1.0 + apexFactor * 0.8;
-        item.mesh.scale.set(scale, scale, scale);
-      }
-
-      // 7. Render
+      // 6. Render
       this.renderer.render(this.scene, this.camera);
     }
   }
 
-  // 3D Card Interactive Tilt for Simulator Cockpit
+  // Simulator Cockpit 3D Tilt
   function setupSimulatorTilt() {
     const simCard = document.getElementById('telemetry');
     if (!simCard) return;
@@ -662,8 +983,8 @@
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      const rotateX = ((y - centerY) / centerY) * -3.5;
-      const rotateY = ((x - centerX) / centerX) * 3.5;
+      const rotateX = ((y - centerY) / centerY) * -3.2;
+      const rotateY = ((x - centerX) / centerX) * 3.2;
 
       simCard.style.transform = `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
     });
@@ -673,23 +994,23 @@
     });
   }
 
-  // Initialize on DOM Ready
+  // Bootstrap
   function bootstrap() {
     const heroSection = document.querySelector('.hero-section');
     if (heroSection) {
-      // Create dedicated 3D canvas wrapper
+      // Remove previous 3D wrapper if existing
+      const existing = document.getElementById('audira-hero-3d');
+      if (existing) existing.remove();
+
       const canvasContainer = document.createElement('div');
       canvasContainer.id = 'audira-hero-3d';
       canvasContainer.className = 'audira-hero-3d-wrapper';
 
-      // Insert at the very beginning of hero-section so it sits gracefully behind content
       heroSection.insertBefore(canvasContainer, heroSection.firstChild);
 
-      // Initialize 3D Scene
-      window.audiraHero3D = new AudiraHero3D(canvasContainer);
+      window.audiraOrbitalEngine = new AudiraOrbitalEngine(canvasContainer);
     }
 
-    // Initialize 3D perspective tilt on telemetry card
     setupSimulatorTilt();
   }
 
