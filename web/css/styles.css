@@ -463,6 +463,125 @@ code, kbd, samp, pre {
   overflow: hidden;
 }
 
+/* ==========================================================================
+   Audira 3D WebGL Holographic Engine Styles
+   ========================================================================== */
+.audira-hero-3d-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audira-3d-canvas {
+  pointer-events: auto !important;
+  opacity: 0.92;
+  transition: opacity var(--transition-normal);
+  filter: drop-shadow(0 0 35px rgba(56, 189, 248, 0.12));
+}
+
+.audira-hero-3d-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, transparent 25%, var(--color-bg-page) 88%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.audira-3d-hud {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  z-index: 15;
+  pointer-events: auto;
+}
+
+.hud-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(14, 20, 31, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.hud-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-emerald);
+  letter-spacing: 0.04em;
+}
+
+.hud-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-emerald);
+  box-shadow: 0 0 8px var(--color-emerald);
+  animation: pulse3d 2s infinite ease-in-out;
+}
+
+@keyframes pulse3d {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+.hud-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-left: 1px solid var(--color-border);
+  padding-left: 0.6rem;
+}
+
+.hud-btn {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-body);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all var(--transition-fast);
+}
+
+.hud-btn:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+  .audira-3d-hud {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+  .hud-status {
+    font-size: 0.6rem;
+  }
+}
+
 .hero-grid-lines {
   display: none;
 }
@@ -566,6 +685,9 @@ code, kbd, samp, pre {
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   text-align: left;
+  transform-style: preserve-3d;
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease;
+  will-change: transform;
 }
 
 .sim-titlebar {
