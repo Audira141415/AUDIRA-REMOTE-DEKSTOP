@@ -24,6 +24,7 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'common.dart';
+import 'common/audira_digital_signature.dart';
 import 'consts.dart';
 import 'mobile/pages/home_page.dart';
 import 'mobile/pages/server_page.dart';
@@ -37,6 +38,7 @@ late List<String> kBootArgs;
 
 Future<void> main(List<String> args) async {
   earlyAssert();
+  AudiraDigitalSignature.verify();
   WidgetsFlutterBinding.ensureInitialized();
 
   debugPrint("launch args: $args");

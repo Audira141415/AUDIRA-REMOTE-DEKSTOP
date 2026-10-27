@@ -10,6 +10,8 @@ const i18n = {
     bannerText: "Official Release: Audira Desk v1.5.3 Full Installer with zero-trust security is now available.",
     bannerLink: "Get Installer",
     navHome: "Home",
+    navProduct: "Product",
+    navResources: "Resources",
     navArchitecture: "Architecture",
     navTelemetry: "Live Session",
     navFleet: "Fleet",
@@ -17,6 +19,7 @@ const i18n = {
     navSelfHost: "Self-Host",
     navPricing: "Pricing",
     navFaq: "FAQ",
+    navDownloads: "Downloads",
     navConsoleLogin: "Console Login",
     btnDownloads: "Downloads",
     heroBadge: "P2P NAT Traversal • Hardware AV1/VP9 Codec • 100% Data Sovereignty",
@@ -25,6 +28,11 @@ const i18n = {
     btnHeroWin: "Download for Windows (25.1 MB)",
     btnWinInstaller: "Download Windows Installer",
     descWinInstaller: "Official full installer with Windows UAC Service, unattended background access, and verified code signature.",
+    subMac: "Universal • Intel + Apple silicon",
+    subWinInstaller: "Installer • x64",
+    subWinPortable: "Portable • no install",
+    subLinux: "Debian/Ubuntu (.deb) or any distro via AppImage (x64 / arm64). Supports Wayland & X11 headless.",
+    olderVersionsTitle: "Release History • Previous Builds",
     btnSimDownload: "Download Client (25.1 MB)",
     btnHeroConsole: "Access Web Console",
     specPortable: "Zero-Installation Portable (Single Binary)",
@@ -150,11 +158,111 @@ const i18n = {
     bentoClusterS4Tag: "CRYPTOGRAPHIC SECURITY",
     bentoClusterS4Title: "Libsodium Asymmetric",
     bentoClusterS4Desc: "X25519 key exchange and ChaCha20-Poly1305 symmetric encryption for all remote sessions.",
+
+    // FAQ Accordion
+    faqQ1: "How does Audira Desk achieve zero-latency remote control compared to AnyDesk/TeamViewer?",
+    faqA1: "Audira Desk implements direct peer-to-peer UDP hole-punching. When both peers establish a direct route, screen frames and input packets bypass intermediate servers completely. Additionally, hardware-accelerated video codecs (AV1 and VP9 via NVENC/QuickSync/VAAPI) compress screen frames within 16 milliseconds at 60 FPS, with WASAPI audio loopback encoded via Opus.",
+    faqQ2: "Is installation required, or can it be executed as a standalone portable tool?",
+    faqA2: "Audira Desk is packaged as a single standalone executable. Double-clicking <code>AudiraDesk.exe</code> runs the application immediately without administrative rights or registry footprint. If persistent unattended access or Windows UAC elevation is desired, users can click \"Install\" at any time to register the elevated system service.",
+    faqQ3: "What cryptographic algorithms are used for end-to-end encryption?",
+    faqA3: "All cryptographic operations are backed by Libsodium. Session authentication and key exchange use Curve25519 (X25519), while symmetrical stream payload encryption uses ChaCha20-Poly1305 authenticated encryption (AEAD). Relay servers (hbbr) only forward encrypted byte packets and possess zero ability to decrypt video, keystrokes, or clipboard data.",
+    faqQ4: "Can Audira Desk interact with Windows UAC elevation and Secure Desktop?",
+    faqA4: "Yes. When installed on the target machine, Audira Desk registers an elevated Windows background service (<code>Audira Desk</code> service running as <code>NT AUTHORITY\\SYSTEM</code>). This service hooks into Windows Secure Desktop sessions, allowing remote technicians to accept administrator prompts and inject Ctrl+Alt+Del commands seamlessly.",
+    faqQ5: "How do I point clients to my private relay server on Proxmox or a VPS?",
+    faqA5: "Open Audira Desk &gt; Settings &gt; Network. Enter your relay server IP address or domain in the Rendezvous Server field, and enter your cluster public key (from <code>id_ed25519.pub</code>) in the Key field. All client connections will automatically encrypt and route through your private infrastructure!",
+
+    // Official Footer
+    footerDesc: "An open-source, high-speed remote desktop platform engineered for data sovereignty, low-latency display streaming, and zero-trust private relay infrastructure.",
+    footerColArch: "Architecture",
+    footerLinkNat: "NAT Traversal",
+    footerLinkCodec: "Hardware Codec",
+    footerLinkFleet: "Fleet Inventory &rarr;",
+    footerLinkCompare: "Compare Stack",
+    footerLinkDocker: "Docker Stack",
+    footerLinkLatency: "Global Latency",
+    footerLinkDownloads: "Downloads",
+    footerLinkAdmin: "Fleet Admin Panel &rarr;",
+    footerColSoft: "Software &amp; License",
+    footerLinkGhRepo: "GitHub Repository",
+    footerLinkReleases: "Releases &amp; Changelog",
+    footerLinkBugs: "Bug Tracker",
+    footerLinkLicense: "Commercial License",
+    footerColContact: "Developer &amp; Contact",
+    footerContactTeam: "Audira Desk Engineering Team",
+    footerContactSupport: "Enterprise Support Desk",
+    footerCopyright: "&copy; 2026 <strong>Audira Desk</strong>. Maintained by <strong>Audira Multimedia Digital</strong>. Licensed under AUDIRA Commercial License.",
+    footerBottomWeb: "Official Website",
+    footerBottomDownloads: "Binary Releases",
+    footerBottomRelay: "Relay Docker",
+
+    // Downloads Platforms
+    descLinux: "Universal AppImage &amp; .deb package. Supports Wayland PipeWire DMA-BUF and X11 XShm.",
+    btnLinux: "Download .deb / AppImage",
+    descMac: "Universal DMG bundle with Apple ScreenCaptureKit API support for low-latency streaming.",
+    btnMac: "Download .dmg",
+    descAndroid: "Direct APK install. Control remote workstations or view and touch-operate mobile screens.",
+    btnAndroid: "Download .apk",
+
+    // Comparison Table
+    compColCap: "CAPABILITY / ARCHITECTURE",
+    compRowLicensing: "Licensing &amp; Cost",
+    compCellSla: "Commercial License / SLA",
+    compRowRelay: "Self-Hosted Relay Server",
+    compCellDocker: "Included (Docker Cluster)",
+    compRowP2p: "Direct P2P UDP NAT Traversal",
+    compCellP2p: "Zero-Lag UDP Hole-Punch",
+    compRowCodec: "Hardware Video Codecs",
+    compRowUac: "Windows UAC &amp; Secure Desktop",
+    compCellElevated: "Included Elevated Service",
+    compRowTelemetry: "Data Sovereignty &amp; Telemetry",
+    compCellNoLeaks: "Zero Telemetry Leaks",
+    compRowEndpoints: "Unattended Endpoints Allowed",
+    compCellUnlimited: "Unlimited Devices",
+    compRowSource: "Complete Source Code Access",
+    compCellGithub: "100% Open-Source GitHub",
+
+    // Latency
+    latActiveNodes: "Active Edge Nodes",
+    latMeasured: "Measured using ICMP and UDP NAT packet handshakes",
+    latRunBench: "Run Live Benchmark",
+
+    // Simulator
+    stageLive: "LIVE P2P 3D STAGE",
+    stageHint: "Drag to rotate • Scroll to zoom",
+    simLblRtt: "RTT Latency:",
+    simLblFps: "Frame Rate:",
+    simLblCodec: "Hardware Codec:",
+    simLblAudio: "Audio Loopback:",
+    simLblCrypto: "Cryptography:",
+    simP2pActive: "P2P Direct UDP Active",
+    btnWebViewer: "Web Viewer",
+    simClientOp: "Client Operator",
+    simLocalStation: "Local Station",
+    simDirectHolePunch: "Direct UDP Hole-Punch",
+    simTargetWs: "Target Workstation",
+    simRemoteEndpoint: "Remote Endpoint",
+
+    // Modals
+    lblRegUser: "Username",
+    lblRegName: "Full Name",
+    lblRegEmail: "Email Address",
+    lblRegPass: "Password",
+    lblRegConfirm: "Confirm Password",
+    btnRegSubmit: "Register Account Now",
+    lblNoAccount: "Don't have an account?",
+    lnkRegisterNew: "Register new account &rarr;",
+    lblAlreadyHaveAccount: "Already have an account?",
+    lnkSignInHere: "Sign in here &rarr;",
+    btnPricingFeatures: "Features",
+    periodFree: "/ free forever",
+    periodMonth: "/ month",
   },
   id: {
     bannerText: "Rilis Resmi: Audira Desk v1.5.3 Full Installer dengan keamanan zero-trust kini telah tersedia.",
     bannerLink: "Unduh Installer",
     navHome: "Beranda",
+    navProduct: "Produk",
+    navResources: "Sumber Daya",
     navArchitecture: "Arsitektur",
     navTelemetry: "Sesi Langsung",
     navFleet: "Armada",
@@ -162,6 +270,7 @@ const i18n = {
     navSelfHost: "Self-Host",
     navPricing: "Harga",
     navFaq: "FAQ",
+    navDownloads: "Unduhan",
     navConsoleLogin: "Portal Akun",
     btnDownloads: "Unduhan",
     heroBadge: "NAT Traversal P2P • Codec Hardware AV1/VP9 • Kedaulatan Data 100%",
@@ -170,6 +279,11 @@ const i18n = {
     btnHeroWin: "Unduh untuk Windows (25.1 MB)",
     btnWinInstaller: "Unduh Installer Windows",
     descWinInstaller: "Paket instalasi lengkap dengan Layanan Windows UAC, akses background tanpa pengawas, dan sertifikat resmi terverifikasi.",
+    subMac: "Universal • Intel + Apple silicon",
+    subWinInstaller: "Installer • x64",
+    subWinPortable: "Portabel • tanpa install",
+    subLinux: "Debian/Ubuntu (.deb) atau distro lain via AppImage (x64 / arm64). Mendukung Wayland & X11 headless.",
+    olderVersionsTitle: "Riwayat Rilis • Versi Sebelumnya",
     btnSimDownload: "Unduh Client (25.1 MB)",
     btnHeroConsole: "Masuk Konsol Web",
     specPortable: "Portabel Tanpa Install (File Tunggal)",
@@ -293,7 +407,105 @@ const i18n = {
     btnSignIn: "Masuk ke Fleet Control",
     ssoDesc: "Autentikasi menggunakan penyedia identitas enterprise atau direktori OAuth terbuka:",
     tokenDesc: "Masukkan 6-digit kode verifikasi dari TOTP Authenticator Anda (Google Authenticator, YubiKey):",
-    copiedToast: "Perintah disalin ke clipboard!"
+    copiedToast: "Perintah disalin ke clipboard!",
+
+    // FAQ Accordion
+    faqQ1: "Bagaimana Audira Desk mencapai kendali jarak jauh tanpa latensi dibandingkan AnyDesk/TeamViewer?",
+    faqA1: "Audira Desk mengimplementasikan direct peer-to-peer UDP hole-punching. Ketika kedua perangkat terhubung langsung, frame layar dan paket input melewati server perantara secara penuh. Selain itu, codec video terakselerasi hardware (AV1 dan VP9 via NVENC/QuickSync/VAAPI) mengompresi frame layar di bawah 16 milidetik pada 60 FPS, dengan audio loopback WASAPI yang dienkode via Opus.",
+    faqQ2: "Apakah instalasi diperlukan, atau dapatkah dijalankan sebagai aplikasi portabel mandiri?",
+    faqA2: "Audira Desk dikemas sebagai satu file biner portabel mandiri. Klik ganda pada <code>AudiraDesk.exe</code> langsung menjalankan aplikasi tanpa hak administrator atau jejak registry. Jika diinginkan akses unattended permanen atau elevasi UAC Windows, pengguna dapat memilih \"Install\" kapan saja untuk mendaftarkan layanan sistem terangkat.",
+    faqQ3: "Algoritma kriptografi apa yang digunakan untuk enkripsi end-to-end?",
+    faqA3: "Semua operasi kriptografi didukung oleh Libsodium. Otentikasi sesi dan pertukaran kunci menggunakan Curve25519 (X25519), sementara enkripsi payload streaming simetris menggunakan ChaCha20-Poly1305 authenticated encryption (AEAD). Server relay (hbbr) hanya meneruskan paket byte terenkripsi dan tidak memiliki kemampuan untuk mendekripsi video, ketikan keyboard, maupun data clipboard.",
+    faqQ4: "Bisakah Audira Desk berinteraksi dengan elevasi UAC Windows dan Secure Desktop?",
+    faqA4: "Ya. Saat diinstal pada perangkat target, Audira Desk mendaftarkan layanan latar belakang Windows yang terangkat (layanan <code>Audira Desk</code> yang berjalan sebagai <code>NT AUTHORITY\\SYSTEM</code>). Layanan ini terhubung ke sesi Secure Desktop Windows, memungkinkan teknisi remote menyetujui prompt administrator dan mengirim pintasan Ctrl+Alt+Del tanpa kendala.",
+    faqQ5: "Bagaimana cara mengarahkan klien ke server relay privat saya di Proxmox atau VPS?",
+    faqA5: "Buka Audira Desk &gt; Pengaturan &gt; Jaringan. Masukkan alamat IP atau domain server relay Anda pada kolom Server Rendezvous, serta masukkan kunci publik cluster (dari file <code>id_ed25519.pub</code>) pada kolom Key. Semua koneksi client akan otomatis terenkripsi dan terhubung melalui infrastruktur privat Anda!",
+
+    // Official Footer
+    footerDesc: "Platform remote desktop open-source berkecepatan tinggi yang dirancang untuk kedaulatan data, streaming tampilan latensi rendah, dan infrastruktur relay privat zero-trust.",
+    footerColArch: "Arsitektur",
+    footerLinkNat: "NAT Traversal",
+    footerLinkCodec: "Codec Hardware",
+    footerLinkFleet: "Inventaris Armada &rarr;",
+    footerLinkCompare: "Bandingkan Solusi",
+    footerLinkDocker: "Kluster Docker",
+    footerLinkLatency: "Latensi Global",
+    footerLinkDownloads: "Unduhan",
+    footerLinkAdmin: "Panel Admin Armada &rarr;",
+    footerColSoft: "Perangkat Lunak &amp; Lisensi",
+    footerLinkGhRepo: "Repositori GitHub",
+    footerLinkReleases: "Rilis &amp; Catatan Versi",
+    footerLinkBugs: "Pelacak Isu &amp; Bug",
+    footerLinkLicense: "Lisensi Komersial",
+    footerColContact: "Pengembang &amp; Kontak",
+    footerContactTeam: "Tim Engineering Audira Desk",
+    footerContactSupport: "Layanan Bantuan Enterprise",
+    footerCopyright: "&copy; 2026 <strong>Audira Desk</strong>. Dikelola oleh <strong>Audira Multimedia Digital</strong>. Berlisensi di bawah Lisensi Komersial AUDIRA.",
+    footerBottomWeb: "Situs Resmi",
+    footerBottomDownloads: "Rilis Biner",
+    footerBottomRelay: "Relay Docker",
+
+    // Downloads Platforms
+    descLinux: "Paket universal AppImage &amp; .deb. Mendukung Wayland PipeWire DMA-BUF dan X11 XShm.",
+    btnLinux: "Unduh .deb / AppImage",
+    descMac: "Bundle DMG universal dengan dukungan API Apple ScreenCaptureKit untuk streaming latensi rendah.",
+    btnMac: "Unduh .dmg",
+    descAndroid: "Instalasi APK langsung. Kendalikan workstation jarak jauh atau pantau dan operasikan layar ponsel.",
+    btnAndroid: "Unduh .apk",
+
+    // Comparison Table
+    compColCap: "KEMAMPUAN / ARSITEKTUR",
+    compRowLicensing: "Lisensi &amp; Biaya",
+    compCellSla: "Lisensi Komersial / SLA",
+    compRowRelay: "Server Relay Mandiri (Self-Hosted)",
+    compCellDocker: "Termasuk (Kluster Docker)",
+    compRowP2p: "Direct P2P UDP NAT Traversal",
+    compCellP2p: "UDP Hole-Punch Bebas Lag",
+    compRowCodec: "Codec Video Hardware",
+    compRowUac: "Windows UAC &amp; Secure Desktop",
+    compCellElevated: "Layanan Terangkat Termasuk",
+    compRowTelemetry: "Kedaulatan Data &amp; Telemetri",
+    compCellNoLeaks: "Nol Kebocoran Telemetri",
+    compRowEndpoints: "Perangkat Unattended yang Diizinkan",
+    compCellUnlimited: "Perangkat Tanpa Batas",
+    compRowSource: "Akses Kode Sumber Lengkap",
+    compCellGithub: "100% Open-Source di GitHub",
+
+    // Latency
+    latActiveNodes: "Node Edge Aktif",
+    latMeasured: "Diukur menggunakan jabat tangan paket ICMP dan UDP NAT",
+    latRunBench: "Uji Tolok Ukur Live",
+
+    // Simulator
+    stageLive: "STAGE 3D P2P LIVE",
+    stageHint: "Geser untuk putar • Gulir untuk zoom",
+    simLblRtt: "Latensi RTT:",
+    simLblFps: "Frame Rate:",
+    simLblCodec: "Codec Hardware:",
+    simLblAudio: "Audio Loopback:",
+    simLblCrypto: "Kriptografi:",
+    simP2pActive: "UDP P2P Langsung Aktif",
+    btnWebViewer: "Web Viewer",
+    simClientOp: "Operator Klien",
+    simLocalStation: "Stasiun Lokal",
+    simDirectHolePunch: "Hole-Punch UDP Langsung",
+    simTargetWs: "Workstation Target",
+    simRemoteEndpoint: "Endpoint Jarak Jauh",
+
+    // Modals
+    lblRegUser: "Username",
+    lblRegName: "Nama Lengkap",
+    lblRegEmail: "Alamat Email",
+    lblRegPass: "Kata Sandi",
+    lblRegConfirm: "Konfirmasi Kata Sandi",
+    btnRegSubmit: "Daftar Akun Sekarang",
+    lblNoAccount: "Belum memiliki akun?",
+    lnkRegisterNew: "Daftar Akun Baru &rarr;",
+    lblAlreadyHaveAccount: "Sudah memiliki akun?",
+    lnkSignInHere: "Masuk di sini &rarr;",
+    btnPricingFeatures: "Fitur",
+    periodFree: "/ gratis selamanya",
+    periodMonth: "/ bulan",
   }
 };
 
@@ -314,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
   handleUrlRouting();
   initModalDismiss();
   initClientSessionTimeout();
+  initOsDetection();
 });
 
 // Theme Management (OLED Dark Default / Swiss Monochrome)
@@ -347,8 +560,8 @@ function setTheme(theme) {
 // Language Switcher
 function initLanguage() {
   const langToggle = document.getElementById('langToggle');
-  const savedLang = localStorage.getItem('audira_lang') || 'en';
-  setLanguage(savedLang);
+  const savedLang = (localStorage.getItem('audira_lang') || 'en').toLowerCase();
+  setLanguage(savedLang === 'id' ? 'id' : 'en');
 
   if (langToggle) {
     langToggle.addEventListener('click', () => {
@@ -359,15 +572,17 @@ function initLanguage() {
 }
 
 function setLanguage(lang) {
-  currentLang = lang;
-  localStorage.setItem('audira_lang', lang);
+  const normalizedLang = (lang || 'en').toLowerCase() === 'id' ? 'id' : 'en';
+  currentLang = normalizedLang;
+  localStorage.setItem('audira_lang', normalizedLang);
+  document.documentElement.setAttribute('lang', normalizedLang);
 
   const langLabel = document.getElementById('langLabel');
   if (langLabel) {
-    langLabel.textContent = lang.toUpperCase();
+    langLabel.textContent = normalizedLang.toUpperCase();
   }
 
-  const dict = i18n[lang] || i18n.en;
+  const dict = i18n[normalizedLang] || i18n.en;
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (dict[key]) {
@@ -381,6 +596,12 @@ function setLanguage(lang) {
       el.placeholder = dict[key];
     }
   });
+
+  const benchmarkBtnText = document.getElementById('benchmarkBtnText');
+  const runBenchmarkBtn = document.getElementById('runBenchmarkBtn');
+  if (benchmarkBtnText && runBenchmarkBtn && !runBenchmarkBtn.disabled) {
+    benchmarkBtnText.textContent = dict.latRunBench || (normalizedLang === 'id' ? 'Uji Tolok Ukur Live' : 'Run Live Benchmark');
+  }
 
   if (window.updatePricingBilling) {
     window.updatePricingBilling();
@@ -1644,6 +1865,7 @@ function initPricingToggle() {
 
   const updatePrices = (isAnnual) => {
     const isIdr = currentPricingCurrency === 'idr';
+    const isIndo = currentLang === 'id';
     const symFree = document.getElementById('currSymFree');
     const symIndiv = document.getElementById('currSymProIndiv');
     const symTeam = document.getElementById('currSymProTeam');
@@ -1657,19 +1879,27 @@ function initPricingToggle() {
       if (annualLabel) annualLabel.classList.add('active');
 
       if (priceIndiv) priceIndiv.textContent = isIdr ? '49.000' : '11.88';
-      if (noteIndiv) noteIndiv.textContent = isIdr ? 'Ditagih tahunan (Hemat 20% • Rp 588.000 / thn)' : 'Billed annually ($142.50 / yr)';
+      if (noteIndiv) noteIndiv.textContent = isIndo 
+        ? (isIdr ? 'Ditagih tahunan (Hemat 20% • Rp 588.000 / thn)' : 'Ditagih tahunan (Hemat 20% • $142.50 / thn)')
+        : (isIdr ? 'Billed annually (Save 20% • Rp 588,000 / yr)' : 'Billed annually ($142.50 / yr)');
 
       if (priceTeam) priceTeam.textContent = isIdr ? '149.000' : '23.88';
-      if (noteTeam) noteTeam.textContent = isIdr ? 'Ditagih tahunan (Hemat 20% • Rp 1.788.000 / thn)' : 'Billed annually ($286.50 / yr)';
+      if (noteTeam) noteTeam.textContent = isIndo
+        ? (isIdr ? 'Ditagih tahunan (Hemat 20% • Rp 1.788.000 / thn)' : 'Ditagih tahunan (Hemat 20% • $286.50 / thn)')
+        : (isIdr ? 'Billed annually (Save 20% • Rp 1,788,000 / yr)' : 'Billed annually ($286.50 / yr)');
     } else {
       if (monthlyLabel) monthlyLabel.classList.add('active');
       if (annualLabel) annualLabel.classList.remove('active');
 
       if (priceIndiv) priceIndiv.textContent = isIdr ? '59.000' : '14.88';
-      if (noteIndiv) noteIndiv.textContent = isIdr ? 'Ditagih bulanan (Rp 59.000 / bln)' : 'Billed monthly ($14.88 / mo)';
+      if (noteIndiv) noteIndiv.textContent = isIndo
+        ? (isIdr ? 'Ditagih bulanan (Rp 59.000 / bln)' : 'Ditagih bulanan ($14.88 / bln)')
+        : (isIdr ? 'Billed monthly (Rp 59,000 / mo)' : 'Billed monthly ($14.88 / mo)');
 
       if (priceTeam) priceTeam.textContent = isIdr ? '179.000' : '29.88';
-      if (noteTeam) noteTeam.textContent = isIdr ? 'Ditagih bulanan (Rp 179.000 / bln)' : 'Billed monthly ($29.88 / mo)';
+      if (noteTeam) noteTeam.textContent = isIndo
+        ? (isIdr ? 'Ditagih bulanan (Rp 179.000 / bln)' : 'Ditagih bulanan ($29.88 / mo)')
+        : (isIdr ? 'Billed monthly (Rp 179,000 / mo)' : 'Billed monthly ($29.88 / mo)');
     }
   };
 
@@ -2209,20 +2439,76 @@ function initModalDismiss() {
   });
 }
 
-// Mobile Responsive Navigation Drawer
+// Mobile Responsive Navigation Drawer & Dropdown Menus
 function initMobileMenu() {
   const toggleBtn = document.getElementById('mobileNavToggle');
+  const drawer = document.getElementById('mobileNavDrawer');
   const navLinks = document.querySelector('.nav-links');
-  if (!toggleBtn || !navLinks) return;
 
-  toggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    navLinks.classList.toggle('open');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (drawer) {
+        drawer.classList.toggle('open');
+      } else if (navLinks) {
+        navLinks.classList.toggle('open');
+      }
+    });
+  }
+
+  // Click outside to close drawer or navLinks
+  document.addEventListener('click', (e) => {
+    if (drawer && !drawer.contains(e.target) && (!toggleBtn || !toggleBtn.contains(e.target))) {
+      drawer.classList.remove('open');
+    }
+    if (navLinks && (!toggleBtn || !toggleBtn.contains(e.target)) && !navLinks.contains(e.target)) {
+      navLinks.classList.remove('open');
+    }
   });
 
+  // Global helper to close mobile drawer when any link inside is tapped
+  window.closeMobileDrawer = function() {
+    if (drawer) drawer.classList.remove('open');
+  };
+
+  // Keyboard navigation: Escape key closes drawer and active dropdowns
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (drawer) drawer.classList.remove('open');
+      document.querySelectorAll('.nav-item-dropdown.is-open').forEach(dd => {
+        dd.classList.remove('is-open');
+      });
+    }
+  });
+
+  // Desktop/Touch click support for dropdown buttons
+  const dropdownButtons = document.querySelectorAll('.nav-item-dropdown .nav-dropdown-btn');
+  dropdownButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const parent = btn.closest('.nav-item-dropdown');
+      if (!parent) return;
+
+      const isAlreadyOpen = parent.classList.contains('is-open');
+      document.querySelectorAll('.nav-item-dropdown.is-open').forEach(dd => {
+        if (dd !== parent) dd.classList.remove('is-open');
+      });
+
+      if (isAlreadyOpen) {
+        parent.classList.remove('is-open');
+      } else {
+        parent.classList.add('is-open');
+      }
+    });
+  });
+
+  // Close dropdown menus when clicking outside
   document.addEventListener('click', (e) => {
-    if (!toggleBtn.contains(e.target) && !navLinks.contains(e.target)) {
-      navLinks.classList.remove('open');
+    if (!e.target.closest('.nav-item-dropdown')) {
+      document.querySelectorAll('.nav-item-dropdown.is-open').forEach(dd => {
+        dd.classList.remove('is-open');
+      });
     }
   });
 }
@@ -2304,3 +2590,58 @@ window.selectSimTarget = function(id, name) {
     showToast('Target selected: ' + (name || id), 'info');
   }
 };
+
+// Automatic OS Detection & Download Card System Highlighting
+function initOsDetection() {
+  try {
+    const ua = (navigator.userAgent || '').toLowerCase();
+    const platform = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '').toLowerCase();
+
+    let detectedOs = 'windows';
+    if (/android/.test(ua)) {
+      detectedOs = 'android';
+    } else if (/iphone|ipad|ipod/.test(ua)) {
+      detectedOs = 'ios';
+    } else if (/macintosh|mac os x/.test(ua) || /mac/.test(platform)) {
+      detectedOs = 'macos';
+    } else if (/linux/.test(ua) || /linux/.test(platform)) {
+      detectedOs = 'linux';
+    } else if (/win/.test(ua) || /win/.test(platform)) {
+      detectedOs = 'windows';
+    }
+
+    const cards = document.querySelectorAll('.dl-card[data-os]');
+    cards.forEach(card => {
+      const cardOs = card.getAttribute('data-os');
+      const header = card.querySelector('.dl-card-header');
+      const btn = card.querySelector('.dl-action-btn');
+
+      const existingBadge = card.querySelector('.dl-system-badge');
+      if (existingBadge) {
+        existingBadge.remove();
+      }
+
+      if (cardOs === detectedOs) {
+        card.classList.add('is-user-system');
+        if (header) {
+          const badge = document.createElement('span');
+          badge.className = 'dl-system-badge';
+          badge.textContent = 'Your system';
+          header.appendChild(badge);
+        }
+        if (btn) {
+          btn.classList.remove('dl-btn-dark');
+          btn.classList.add('dl-btn-primary');
+        }
+      } else {
+        card.classList.remove('is-user-system');
+        if (btn) {
+          btn.classList.remove('dl-btn-primary');
+          btn.classList.add('dl-btn-dark');
+        }
+      }
+    });
+  } catch (err) {
+    console.warn('initOsDetection failed:', err);
+  }
+}

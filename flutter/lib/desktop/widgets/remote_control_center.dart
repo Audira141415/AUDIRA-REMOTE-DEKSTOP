@@ -388,36 +388,50 @@ class _RemoteSessionHudWidgetState extends State<RemoteSessionHudWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 14),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Signal quality bars (4 green bars: 4, 7, 10, 13 px)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(width: 2.2, height: 4, color: const Color(0xFF10B981)),
-              const SizedBox(width: 1.2),
-              Container(width: 2.2, height: 7, color: const Color(0xFF10B981)),
-              const SizedBox(width: 1.2),
-              Container(width: 2.2, height: 10, color: const Color(0xFF10B981)),
-              const SizedBox(width: 1.2),
-              Container(width: 2.2, height: 13, color: const Color(0xFF10B981)),
-            ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dur = _formatDuration(_secondsElapsed);
+    return Tooltip(
+      message: 'Durasi Sesi: $dur • Enkripsi ChaCha20-Poly1305 Aktif',
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0x33000000) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(
+            color: isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFE2E8F0),
+            width: 0.8,
           ),
-          const SizedBox(width: 6),
-          // Timer
-          Text(
-            _formatDuration(_secondsElapsed),
-            style: const TextStyle(
-              fontSize: 12,
-              fontFamily: 'monospace',
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF334155),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Signal quality bars (4 green bars: 4, 7, 10, 13 px)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(width: 2.2, height: 4, color: const Color(0xFF10B981)),
+                const SizedBox(width: 1.2),
+                Container(width: 2.2, height: 7, color: const Color(0xFF10B981)),
+                const SizedBox(width: 1.2),
+                Container(width: 2.2, height: 10, color: const Color(0xFF10B981)),
+                const SizedBox(width: 1.2),
+                Container(width: 2.2, height: 13, color: const Color(0xFF10B981)),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(width: 5),
+            // Timer
+            Text(
+              dur,
+              style: TextStyle(
+                fontSize: 11,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.w600,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -461,41 +475,52 @@ class _ControlCenterButtonState extends State<ControlCenterButton> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTapDown: (details) {
-        _tapPosition = details.globalPosition;
-      },
-      onTap: () {
-        Offset pos = _tapPosition ?? Offset.zero;
-        if (_tapPosition == null) {
-          final box = context.findRenderObject() as RenderBox?;
-          if (box != null) {
-            pos = box.localToGlobal(box.size.bottomRight(Offset.zero));
+    return Tooltip(
+      message: 'Control Center & Pengaturan Remote (Tools)',
+      child: InkWell(
+        onTapDown: (details) {
+          _tapPosition = details.globalPosition;
+        },
+        onTap: () {
+          Offset pos = _tapPosition ?? Offset.zero;
+          if (_tapPosition == null) {
+            final box = context.findRenderObject() as RenderBox?;
+            if (box != null) {
+              pos = box.localToGlobal(box.size.bottomRight(Offset.zero));
+            }
           }
-        }
-        _showControlCenterMenu(context, pos);
-      },
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.tune_rounded,
-              size: 16,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF334155),
+          _showControlCenterMenu(context, pos);
+        },
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0x33334155) : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFE2E8F0),
+              width: 0.8,
             ),
-            const SizedBox(width: 6),
-            Text(
-              'Control Center',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.tune_rounded,
+                size: 13,
+                color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7),
               ),
-            ),
-          ],
+              const SizedBox(width: 4),
+              Text(
+                'Tools',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -590,6 +615,63 @@ class _ControlCenterDropdown extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Section: Session Security & Tunnel Overview
+                  Obx(() {
+                    final connectionType = ConnectionTypeState.find(peerId);
+                    final isSecure =
+                        connectionType.secure.value == ConnectionType.strSecure;
+                    final isDirect =
+                        connectionType.direct.value == ConnectionType.strDirect;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFCBD5E1),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSecure ? Icons.shield_rounded : Icons.lock_open_rounded,
+                            size: 16,
+                            color: isSecure ? const Color(0xFF10B981) : Colors.orange,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Security: ${isSecure ? "E2EE Authenticated" : "Standard"}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                Text(
+                                  'Channel: ${isDirect ? "Direct P2P" : "Encrypted Relay"} • ID: $peerId',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+
                   Text(
                     'SYSTEM ACTIONS',
                     style: TextStyle(

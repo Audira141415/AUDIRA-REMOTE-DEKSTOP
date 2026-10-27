@@ -40,14 +40,113 @@
 
       <nav class="site-nav">
         <ul class="nav-links">
-          <li><a href="/" class="nav-link active" onclick="navigateToHome(event)" data-i18n="navHome">Home</a></li>
-          <li><a href="#features" class="nav-link" data-i18n="navFeatures">Features</a></li>
-          <li><a href="#architecture" class="nav-link" data-i18n="navArchitecture">Architecture</a></li>
-          <li><a href="#comparison" class="nav-link" data-i18n="navComparison">Compare</a></li>
-          <li><a href="#selfhost" class="nav-link" data-i18n="navSelfHost">Self-Host</a></li>
+          <!-- 1. Product Dropdown -->
+          <li class="nav-item-dropdown">
+            <button class="nav-link nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+              <span data-i18n="navProduct">Product</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="nav-dropdown-menu">
+              <div class="dropdown-menu-inner">
+                <a href="#features" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:var(--color-primary);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" data-i18n="navFeatures">Features</div>
+                    <div class="dropdown-item-desc">60 FPS AV1/VP9, Zero-Trust P2P &amp; UAC Service</div>
+                  </div>
+                </a>
+
+                <a href="#architecture" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:#38bdf8;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" data-i18n="navArchitecture">Architecture</div>
+                    <div class="dropdown-item-desc">Two Halves &bull; Host daemon &amp; Client WebRTC</div>
+                  </div>
+                </a>
+
+                <a href="#vibecode" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:#fb923c;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" style="color:#fb923c;">⚡ Vibe Studio</div>
+                    <div class="dropdown-item-desc">In-browser IDE, Monaco Editor &amp; PTY terminal</div>
+                  </div>
+                </a>
+
+                <a href="#fleet" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:#10b981;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" data-i18n="navFleet">Fleet Orchestration</div>
+                    <div class="dropdown-item-desc">Centralized address book &amp; device inventory</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <!-- 2. Resources Dropdown -->
+          <li class="nav-item-dropdown">
+            <button class="nav-link nav-dropdown-btn" type="button" aria-haspopup="true" aria-expanded="false">
+              <span data-i18n="navResources">Resources</span>
+              <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="nav-dropdown-menu">
+              <div class="dropdown-menu-inner">
+                <a href="#selfhost" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:#a855f7;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" data-i18n="navSelfHost">Self-Host Cluster</div>
+                    <div class="dropdown-item-desc">Deploy hbbs/hbbr Docker cluster in 60s</div>
+                  </div>
+                </a>
+
+                <a href="#comparison" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:#eab308;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" data-i18n="navComparison">Compare Solutions</div>
+                    <div class="dropdown-item-desc">Audira vs AnyDesk, TeamViewer &amp; Chrome Remote</div>
+                  </div>
+                </a>
+
+                <a href="#faq" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:#06b6d4;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title" data-i18n="navFaq">Knowledge Base &amp; FAQ</div>
+                    <div class="dropdown-item-desc">Security audits, ports, cryptography &amp; setup answers</div>
+                  </div>
+                </a>
+
+                <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener" class="dropdown-item">
+                  <div class="dropdown-item-icon" style="color:var(--color-text-heading);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                  </div>
+                  <div class="dropdown-item-content">
+                    <div class="dropdown-item-title">GitHub Repository</div>
+                    <div class="dropdown-item-desc">Open-source codebase, releases &amp; contributions</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <!-- 3. Direct Link: Pricing -->
           <li><a href="#pricing" class="nav-link" data-i18n="navPricing">Pricing</a></li>
+
+          <!-- 4. Direct Link: Downloads -->
           <li><a href="#downloads" class="nav-link" data-i18n="navDownloads">Downloads</a></li>
-          <li><a href="#faq" class="nav-link" data-i18n="navFaq">FAQ</a></li>
         </ul>
       </nav>
 
@@ -63,21 +162,16 @@
           <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         </button>
 
-        <!-- GitHub Repo Link -->
-        <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener" class="icon-btn" title="View Source on GitHub" aria-label="GitHub">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-        </a>
-
         <!-- Console Login Button -->
         <button id="openLoginBtn" class="btn btn-secondary btn-sm" title="Operator Console">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
           <span data-i18n="navConsoleLogin">Console Login</span>
         </button>
 
-        <!-- Primary CTA: Direct Installer Download -->
-        <a href="dist/AudiraDesk-Full-Installer.exe" class="btn btn-primary btn-sm" download title="Download Windows Installer">
+        <!-- Primary CTA: Direct Download Button -->
+        <a href="#downloads" class="btn btn-primary btn-sm" title="Download Audira Desk">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          <span data-i18n="btnDownloads">Downloads</span>
+          <span data-i18n="btnDownloads">Download</span>
         </a>
 
         <!-- Mobile Nav Toggle Hamburger -->
@@ -85,6 +179,24 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
       </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer">
+      <div class="mobile-drawer-group-title">Product</div>
+      <a href="#features" class="mobile-drawer-link" onclick="closeMobileDrawer()">Features</a>
+      <a href="#architecture" class="mobile-drawer-link" onclick="closeMobileDrawer()">Architecture</a>
+      <a href="#vibecode" class="mobile-drawer-link" style="color:#fb923c;" onclick="closeMobileDrawer()">⚡ Vibe Studio</a>
+      <a href="#fleet" class="mobile-drawer-link" onclick="closeMobileDrawer()">Fleet Orchestration</a>
+
+      <div class="mobile-drawer-group-title">Resources</div>
+      <a href="#selfhost" class="mobile-drawer-link" onclick="closeMobileDrawer()">Self-Host Cluster</a>
+      <a href="#comparison" class="mobile-drawer-link" onclick="closeMobileDrawer()">Compare Solutions</a>
+      <a href="#faq" class="mobile-drawer-link" onclick="closeMobileDrawer()">FAQ &amp; Knowledge Base</a>
+
+      <div class="mobile-drawer-group-title">Account &amp; Downloads</div>
+      <a href="#pricing" class="mobile-drawer-link" onclick="closeMobileDrawer()">Pricing Plans</a>
+      <a href="#downloads" class="mobile-drawer-link" onclick="closeMobileDrawer()">Platform Downloads</a>
     </div>
   </header>
 
@@ -105,6 +217,30 @@
         <p class="hero-subtitle" data-i18n="heroSubtitle">
           Direct peer-to-peer UDP streaming at 60 FPS with hardware AV1/VP9 encoding and end-to-end encryption. Run your own private relay cluster in minutes.
         </p>
+
+        <!-- Superpower Badges (Adopted from 9remote) -->
+        <div class="hero-superpowers-row">
+          <span class="superpower-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Vibe Coding Ready
+          </span>
+          <span class="superpower-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg>
+            60fps Remote Desktop
+          </span>
+          <span class="superpower-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            Remote IDE &amp; PTY
+          </span>
+          <span class="superpower-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
+            Jailed File Explorer
+          </span>
+          <span class="superpower-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18h.01M7 21h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z"/></svg>
+            PC &bull; Web &bull; Mobile
+          </span>
+        </div>
 
         <div class="hero-buttons">
           <a href="dist/AudiraDesk-Full-Installer.exe" class="btn btn-primary btn-lg" download style="display:inline-flex; align-items:center; gap:0.55rem; text-decoration:none;">
@@ -131,6 +267,26 @@
             <span data-i18n="specLicense">Audira Commercial License</span>
           </div>
         </div>
+
+        <!-- Live Performance & Sovereignty Stats Strip (Adopted from 9remote) -->
+        <div class="hero-stats-strip">
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">Direct P2P</div>
+            <div class="hero-stat-label">WebRTC &bull; UDP 21116</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">&lt; 16ms</div>
+            <div class="hero-stat-label">Hardware AV1/VP9</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">30+ Agents</div>
+            <div class="hero-stat-label">Vibe Coding &bull; PTY Shell</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-val">Zero Cloud</div>
+            <div class="hero-stat-label">100% Data Sovereignty</div>
+          </div>
+        </div>
       </div>
 
       <!-- Right Column: Dedicated Interactive 3D Remote Workstation Stage -->
@@ -139,11 +295,11 @@
           <div class="hero-3d-badge-bar">
             <div class="stage-tag">
               <span class="live-dot"></span>
-              <span>LIVE P2P 3D STAGE</span>
+              <span data-i18n="stageLive">LIVE P2P 3D STAGE</span>
             </div>
             <div class="stage-hint">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-              <span>Drag to rotate • Scroll to zoom</span>
+              <span data-i18n="stageHint">Drag to rotate • Scroll to zoom</span>
             </div>
           </div>
         </div>
@@ -167,26 +323,26 @@
           </div>
           <div class="sim-network-pill">
             <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;"></span>
-            <span>P2P Direct UDP Active</span>
+            <span data-i18n="simP2pActive">P2P Direct UDP Active</span>
           </div>
         </div>
 
         <!-- Telemetry Strip -->
         <div class="sim-telemetry-strip">
           <div class="telemetry-node">
-            <span class="label">RTT Latency:</span>
+            <span class="label" data-i18n="simLblRtt">RTT Latency:</span>
             <span class="val emerald" id="simRtt">11 ms</span>
           </div>
           <div class="telemetry-node">
-            <span class="label">Frame Rate:</span>
+            <span class="label" data-i18n="simLblFps">Frame Rate:</span>
             <span class="val" id="simFps">60.0 FPS</span>
           </div>
           <div class="telemetry-node">
-            <span class="label">Hardware Codec:</span>
+            <span class="label" data-i18n="simLblCodec">Hardware Codec:</span>
             <span class="val">AV1 NVENC (DXGI)</span>
           </div>
           <div class="telemetry-node">
-            <span class="label">Audio Loopback:</span>
+            <span class="label" data-i18n="simLblAudio">Audio Loopback:</span>
             <span class="val emerald" style="display:flex; align-items:center; gap:5px;">
               <span style="display:inline-flex; gap:2px; height:10px; align-items:flex-end;">
                 <span style="width:2px; height:6px; background:#10b981; animation:eq1 0.6s infinite alternate;"></span>
@@ -197,7 +353,7 @@
             </span>
           </div>
           <div class="telemetry-node">
-            <span class="label">Cryptography:</span>
+            <span class="label" data-i18n="simLblCrypto">Cryptography:</span>
             <span class="val emerald">X25519 E2EE</span>
           </div>
         </div>
@@ -241,7 +397,11 @@
                 <button type="button" id="simConnectBtn" class="btn btn-primary" data-i18n="btnConnect">Connect</button>
                 <button type="button" id="simWebViewerBtn" class="btn" style="background:rgba(56,189,248,0.15); color:var(--color-primary); border:1px solid rgba(56,189,248,0.35);">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px; vertical-align:middle;"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-                  Web Viewer
+                  <span data-i18n="btnWebViewer">Web Viewer</span>
+                </button>
+                <button type="button" id="simVibeBtn" class="btn" onclick="window.location.href='viewer.html?mode=vibe'" style="background:rgba(249,115,22,0.15); color:#fb923c; border:1px solid rgba(249,115,22,0.35);">
+                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f97316; margin-right:4px; vertical-align:middle; box-shadow:0 0 6px #f97316;"></span>
+                  <span>Vibe Studio</span>
                 </button>
                 <button type="button" id="simFileTransferBtn" class="btn btn-secondary" data-i18n="btnFileTransfer">File Transfer</button>
               </div>
@@ -255,13 +415,13 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
                   </div>
                   <div>
-                    <div style="font-size:0.8rem; font-weight:700; color:var(--color-text-heading);">Client Operator</div>
-                    <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">Local Station</div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--color-text-heading);" data-i18n="simClientOp">Client Operator</div>
+                    <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);" data-i18n="simLocalStation">Local Station</div>
                   </div>
                 </div>
 
                 <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; flex:1; min-width:120px;">
-                  <span style="font-size:0.6875rem; color:var(--color-emerald); font-family:var(--font-mono); font-weight:700;">Direct UDP Hole-Punch</span>
+                  <span style="font-size:0.6875rem; color:var(--color-emerald); font-family:var(--font-mono); font-weight:700;" data-i18n="simDirectHolePunch">Direct UDP Hole-Punch</span>
                   <div style="width:100%; height:2px; background:linear-gradient(90deg, var(--color-primary), #10b981); position:relative; border-radius:1px;">
                     <span style="position:absolute; top:-3px; left:50%; transform:translateX(-50%); width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span>
                   </div>
@@ -273,8 +433,8 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                   </div>
                   <div>
-                    <div style="font-size:0.8rem; font-weight:700; color:var(--color-text-heading);">Target Workstation</div>
-                    <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);">Remote Endpoint</div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--color-text-heading);" data-i18n="simTargetWs">Target Workstation</div>
+                    <div style="font-size:0.6875rem; color:var(--color-text-dim); font-family:var(--font-mono);" data-i18n="simRemoteEndpoint">Remote Endpoint</div>
                   </div>
                 </div>
               </div>
@@ -328,6 +488,62 @@
       <p class="section-desc" data-i18n="descArchitecture">
         Designed from the ground up to eliminate commercial SaaS bottlenecks, telemetry surveillance, and arbitrary session time limits.
       </p>
+
+      <!-- Two Halves. One Session. Architecture (Adopted from 9remote) -->
+      <div class="two-halves-container">
+        <!-- Host Half -->
+        <div class="two-halves-card">
+          <div class="two-halves-badge">HOST &bull; ON YOUR WORKSTATION</div>
+          <h3 class="two-halves-title">Runs on Target Machine</h3>
+          <p class="two-halves-desc">
+            Installs as elevated Windows Service (UAC &amp; Secure Desktop) or background headless daemon. Directly captures DXGI desktop frames and serves persistent PTY terminals.
+          </p>
+          <ul class="two-halves-features">
+            <li>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              DXGI / Wayland 60 FPS hardware capture
+            </li>
+            <li>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Persistent PTY daemon shell (keeps running)
+            </li>
+            <li>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Jailed file explorer &amp; host approval gate
+            </li>
+          </ul>
+        </div>
+
+        <!-- WebRTC / P2P UDP Tunnel Connector -->
+        <div class="two-halves-connector">
+          <span class="two-halves-connector-pill">WebRTC &bull; UDP 21116</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-primary);"><path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/></svg>
+          <span style="font-size:0.7rem; font-family:var(--font-mono); color:var(--color-text-muted);">&lt; 16ms Direct</span>
+        </div>
+
+        <!-- Client Half -->
+        <div class="two-halves-card">
+          <div class="two-halves-badge" style="color:var(--color-emerald); background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3);">CLIENT &bull; WITH YOU ANYWHERE</div>
+          <h3 class="two-halves-title">Access from Any Screen</h3>
+          <p class="two-halves-desc">
+            Connect via native Flutter desktop app, in-browser HTML5 WebRTC viewer, or mobile phone. Same live session, instant responsiveness, zero cloud syncing.
+          </p>
+          <ul class="two-halves-features">
+            <li>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Zero install browser viewer (HTML5 Canvas + Monaco)
+            </li>
+            <li>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Native cross-platform Flutter client
+            </li>
+            <li>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              End-to-end encrypted Libsodium ChaCha20 tunnel
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <div class="bento-grid">
         <!-- Card 1: P2P vs Relay Topology (Col 8) -->
@@ -499,6 +715,96 @@
     </div>
   </section>
 
+  <!-- Vibe Coding & Next-Gen Cloud Workstation Section (8 Menus) -->
+  <section id="vibecode" class="section vibecode-section">
+    <div class="container text-center" style="max-width: 1040px; margin: 0 auto; text-align: center;">
+      <div class="section-tag vibecode-tag">
+        <span class="vibecode-tag-dot"></span>
+        <span>AI-FIRST REMOTE DEV WORKSTATION</span>
+      </div>
+
+      <h2 class="section-title vibecode-title">
+        Remote Everything, <br><span class="vibecode-gradient-text">Vibecode Everywhere</span>
+      </h2>
+
+      <!-- 8 Pills Badges Grid / Row -->
+      <div class="vibecode-pills-row">
+        <a href="viewer.html?mode=vibe" class="vibecode-pill vibecode-pill-primary">
+          <span class="vibecode-pill-dot"></span>
+          Every Harness · One UI
+        </a>
+        <a href="viewer.html?mode=ide" class="vibecode-pill">
+          💻 Remote IDE
+        </a>
+        <a href="viewer.html?mode=vibe" class="vibecode-pill vibecode-pill-accent">
+          ⚡ Remote Vibe Coding
+        </a>
+        <a href="viewer.html?mode=desktop" class="vibecode-pill">
+          🖥️ Remote Desktop
+        </a>
+        <a href="viewer.html?mode=ide" class="vibecode-pill">
+          📁 Remote Files
+        </a>
+        <a href="viewer.html?mode=emulator" class="vibecode-pill">
+          📱 Remote Emulator
+        </a>
+        <a href="viewer.html?mode=localhost" class="vibecode-pill">
+          🌐 Remote Localhost
+        </a>
+        <span class="vibecode-pill vibecode-pill-dim">
+          📱 PC · Web · iPad · Mobile
+        </span>
+      </div>
+
+      <!-- Reference Copywriting -->
+      <p class="vibecode-ref-quote">
+        Codex CLI looks like 1995? Claude Code's TUI hurts? Forget them. Same agents, one UI you'll actually love.
+      </p>
+      <p class="section-desc vibecode-subdesc">
+        Leave your laptop behind. Your entire dev workstation goes wherever you go — remote IDE, 60fps desktop, visual file explorer, live mobile emulator, and every AI harness in one UI: Claude Code, Codex, Cursor &amp; 30+ agents on PC, Web, iPad, or phone.
+      </p>
+
+      <!-- 3 Feature Highlight Bento Cards -->
+      <div class="vibecode-grid">
+        <div class="vibecode-card card-orange">
+          <div class="vibecode-icon-wrap icon-orange">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h4 class="vibecode-card-title">Every Harness · One UI</h4>
+          <p class="vibecode-card-desc">
+            Visual wrapper modern untuk Claude Code, OpenAI Codex CLI, Cursor Agent, dan Aider. Menampilkan alur langkah AI, tool calls, serta diff visual interaktif yang bisa disetujui dalam 1 klik.
+          </p>
+        </div>
+
+        <div class="vibecode-card card-cyan">
+          <div class="vibecode-icon-wrap icon-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <h4 class="vibecode-card-title">Remote Monaco IDE &amp; Localhost</h4>
+          <p class="vibecode-card-desc">
+            Monaco Editor terintegrasi langsung di Web Portal. Buka direktori repositori host, edit berkas via hotkey <code>Ctrl+S</code>, dan preview server lokal (port 3000/5173/8080) secara instan.
+          </p>
+        </div>
+
+        <div class="vibecode-card card-emerald">
+          <div class="vibecode-icon-wrap icon-emerald">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <h4 class="vibecode-card-title">60fps Desktop &amp; Touch Bar</h4>
+          <p class="vibecode-card-desc">
+            Mode video Crisp Coding Text untuk kejernihan font pemrograman. Dilengkapi Virtual Dev Touch Bar (<code>Esc</code>, <code>Tab</code>, <code>Ctrl</code>, <code>{}</code>) saat dibuka via iPad atau smartphone.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <a href="viewer.html?mode=vibe" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; padding: 0.85rem 2rem; font-size: 1rem; border-radius: var(--radius-sm); box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);">
+        <span>⚡ Launch Audira Vibe Studio</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+  </section>
+
   <!-- Competitor Comparison Matrix (Focus Pattern) -->
   <section id="comparison" class="comparison-section">
     <div class="container">
@@ -512,7 +818,7 @@
         <table class="comparison-table">
           <thead>
             <tr>
-              <th style="width:28%;">CAPABILITY / ARCHITECTURE</th>
+              <th style="width:28%;" data-i18n="compColCap">CAPABILITY / ARCHITECTURE</th>
               <th class="col-highlight" style="width:26%;">AUDIRA DESK (SELF-HOSTED)</th>
               <th style="width:16%;">TEAMVIEWER</th>
               <th style="width:15%;">ANYDESK</th>
@@ -521,57 +827,57 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>Licensing &amp; Cost</strong></td>
-              <td class="col-highlight"><span class="check-pill">Commercial License / SLA</span></td>
+              <td><strong data-i18n="compRowLicensing">Licensing &amp; Cost</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellSla">Commercial License / SLA</span></td>
               <td><span class="cross-pill">$54.90 / mo / user</span></td>
               <td><span class="cross-pill">$29.90 / mo / user</span></td>
               <td><span class="check-pill">Free Community</span></td>
             </tr>
             <tr>
-              <td><strong>Self-Hosted Relay Server</strong></td>
-              <td class="col-highlight"><span class="check-pill">Included (Docker Cluster)</span></td>
+              <td><strong data-i18n="compRowRelay">Self-Hosted Relay Server</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellDocker">Included (Docker Cluster)</span></td>
               <td><span class="cross-pill">No (Closed Cloud)</span></td>
               <td><span class="cross-pill">Enterprise Tier Only</span></td>
               <td><span class="check-pill">Manual Setup</span></td>
             </tr>
             <tr>
-              <td><strong>Direct P2P UDP NAT Traversal</strong></td>
-              <td class="col-highlight"><span class="check-pill">Zero-Lag UDP Hole-Punch</span></td>
+              <td><strong data-i18n="compRowP2p">Direct P2P UDP NAT Traversal</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellP2p">Zero-Lag UDP Hole-Punch</span></td>
               <td><span class="cross-pill">Proprietary Tunnel</span></td>
               <td><span class="cross-pill">Proprietary Network</span></td>
               <td><span class="check-pill">Supported</span></td>
             </tr>
             <tr>
-              <td><strong>Hardware Video Codecs</strong></td>
-              <td class="col-highlight"><span class="check-pill">AV1 / VP9 / H.265 (60 FPS)</span></td>
+              <td><strong data-i18n="compRowCodec">Hardware Video Codecs</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compRowCodec">AV1 / VP9 / H.265 (60 FPS)</span></td>
               <td><span class="cross-pill">H.264 Proprietary</span></td>
               <td><span class="cross-pill">DeskRT Proprietary</span></td>
               <td><span class="cross-pill">VP8 / H.264 Standard</span></td>
             </tr>
             <tr>
-              <td><strong>Windows UAC &amp; Secure Desktop</strong></td>
-              <td class="col-highlight"><span class="check-pill">Included Elevated Service</span></td>
+              <td><strong data-i18n="compRowUac">Windows UAC &amp; Secure Desktop</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellElevated">Included Elevated Service</span></td>
               <td><span class="check-pill">Supported</span></td>
               <td><span class="check-pill">Supported</span></td>
               <td><span class="check-pill">Supported</span></td>
             </tr>
             <tr>
-              <td><strong>Data Sovereignty &amp; Telemetry</strong></td>
-              <td class="col-highlight"><span class="check-pill">Zero Telemetry Leaks</span></td>
+              <td><strong data-i18n="compRowTelemetry">Data Sovereignty &amp; Telemetry</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellNoLeaks">Zero Telemetry Leaks</span></td>
               <td><span class="cross-pill">Closed Analytics Cloud</span></td>
               <td><span class="cross-pill">Cloud Registry Sync</span></td>
               <td><span class="check-pill">Configurable</span></td>
             </tr>
             <tr>
-              <td><strong>Unattended Endpoints Allowed</strong></td>
-              <td class="col-highlight"><span class="check-pill">Unlimited Devices</span></td>
+              <td><strong data-i18n="compRowEndpoints">Unattended Endpoints Allowed</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellUnlimited">Unlimited Devices</span></td>
               <td><span class="cross-pill">Capped by license</span></td>
               <td><span class="cross-pill">Capped by tier</span></td>
               <td><span class="check-pill">Unlimited</span></td>
             </tr>
             <tr>
-              <td><strong>Complete Source Code Access</strong></td>
-              <td class="col-highlight"><span class="check-pill">100% Open-Source GitHub</span></td>
+              <td><strong data-i18n="compRowSource">Complete Source Code Access</strong></td>
+              <td class="col-highlight"><span class="check-pill" data-i18n="compCellGithub">100% Open-Source GitHub</span></td>
               <td><span class="cross-pill">Closed Source</span></td>
               <td><span class="cross-pill">Closed Source</span></td>
               <td><span class="check-pill">Open Source</span></td>
@@ -671,12 +977,12 @@
       <div class="latency-widget-wrap">
         <div class="latency-widget-header">
           <div>
-            <h3 style="font-size:1.1rem; font-weight:700; color:var(--color-text-heading); margin-bottom:0.25rem;">Active Edge Nodes</h3>
-            <p style="font-size:0.8125rem; color:var(--color-text-muted);">Measured using ICMP and UDP NAT packet handshakes</p>
+            <h3 style="font-size:1.1rem; font-weight:700; color:var(--color-text-heading); margin-bottom:0.25rem;" data-i18n="latActiveNodes">Active Edge Nodes</h3>
+            <p style="font-size:0.8125rem; color:var(--color-text-muted);" data-i18n="latMeasured">Measured using ICMP and UDP NAT packet handshakes</p>
           </div>
           <button id="runBenchmarkBtn" class="btn btn-secondary" style="font-size:0.8125rem; padding:0.5rem 1rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            <span id="benchmarkBtnText">Run Live Benchmark</span>
+            <span id="benchmarkBtnText" data-i18n="latRunBench">Run Live Benchmark</span>
           </button>
         </div>
 
@@ -786,7 +1092,7 @@
             <div class="pricing-price-wrap">
               <span class="pricing-currency" id="currSymFree">Rp</span>
               <span class="pricing-amount">0</span>
-              <span class="pricing-period">/ bebas</span>
+              <span class="pricing-period" data-i18n="periodFree">/ bebas</span>
             </div>
             <div class="pricing-billing-note" data-i18n="noteFree">Standalone Portable (Full Access)</div>
           </div>
@@ -827,7 +1133,7 @@
               <span data-i18n="btnFree">Download Community</span>
             </a>
             <button class="btn btn-outline" onclick="event.stopPropagation(); selectPricingCard('free'); openUpgradeModal('free');" title="Detail Fitur Community" style="padding:0.6rem 0.85rem;">
-              <span>Fitur</span>
+              <span data-i18n="btnPricingFeatures">Fitur</span>
             </button>
           </div>
         </div>
@@ -842,7 +1148,7 @@
             <div class="pricing-price-wrap">
               <span class="pricing-currency" id="currSymProIndiv">Rp</span>
               <span class="pricing-amount" id="priceProIndiv">49.000</span>
-              <span class="pricing-period">/ bulan</span>
+              <span class="pricing-period" data-i18n="periodMonth">/ bulan</span>
             </div>
             <div class="pricing-billing-note" id="noteProIndiv" data-i18n="noteProIndiv">Ditagih tahunan (Hemat 20% • Rp 49.000 / bln)</div>
           </div>
@@ -895,7 +1201,7 @@
             <div class="pricing-price-wrap">
               <span class="pricing-currency" id="currSymProTeam">Rp</span>
               <span class="pricing-amount" id="priceProTeam">149.000</span>
-              <span class="pricing-period">/ bulan</span>
+              <span class="pricing-period" data-i18n="periodMonth">/ bulan</span>
             </div>
             <div class="pricing-billing-note" id="noteProTeam" data-i18n="noteProTeam">Billed annually ($286.50 / yr)</div>
           </div>
@@ -1090,77 +1396,168 @@
         Compiled with Rust and Flutter. High-definition remote control for Windows, Linux, macOS, and Android.
       </p>
 
-      <div class="downloads-grid">
-        <!-- Windows (Featured) -->
-        <div class="download-card featured">
-          <span class="featured-pill">RECOMMENDED</span>
-          <div class="download-os-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
+      <div class="dl-bento-grid">
+        <!-- Top Row: macOS, Windows Installer, Windows Portable -->
+        <div class="dl-row-top">
+          <!-- macOS -->
+          <div class="dl-card" data-os="macos">
+            <div>
+              <div class="dl-card-header">
+                <span class="dl-card-title">macOS</span>
+                <span class="dl-version-pill">v1.5.8</span>
+              </div>
+              <p class="dl-card-subtitle" data-i18n="subMac">Universal &bull; Intel + Apple silicon</p>
+            </div>
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-action-btn dl-btn-dark">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>Download .dmg</span>
+            </a>
           </div>
-          <h3 class="download-title">Windows 10 / 11 / Server</h3>
-          <p class="download-desc" data-i18n="descWinInstaller">
-            Official full installer with Windows UAC Service, unattended background access, and verified code signature.
-          </p>
-          <a href="dist/AudiraDesk-Full-Installer.exe" class="btn btn-primary" download style="display:flex; flex-direction:column; align-items:center; gap:0.2rem; padding:0.65rem 1rem; width:100%; text-decoration:none;">
-            <span style="display:inline-flex; align-items:center; gap:0.45rem; font-weight:700;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              <span data-i18n="btnWinInstaller">Download Windows Installer</span>
+
+          <!-- Windows Installer -->
+          <div class="dl-card is-user-system" data-os="windows">
+            <div>
+              <div class="dl-card-header">
+                <span class="dl-card-title">Windows</span>
+                <span class="dl-version-pill">v1.5.8</span>
+                <span class="dl-system-badge">Your system</span>
+              </div>
+              <p class="dl-card-subtitle" data-i18n="subWinInstaller">Installer &bull; x64</p>
+            </div>
+            <a href="dist/AudiraDesk-Full-Installer.exe" download class="dl-action-btn dl-btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>Download .exe</span>
+            </a>
+          </div>
+
+          <!-- Windows Portable -->
+          <div class="dl-card is-user-system" data-os="windows">
+            <div>
+              <div class="dl-card-header">
+                <span class="dl-card-title">Windows</span>
+                <span class="dl-version-pill">v1.5.8</span>
+                <span class="dl-system-badge">Your system</span>
+              </div>
+              <p class="dl-card-subtitle" data-i18n="subWinPortable">Portable &bull; no install</p>
+            </div>
+            <a href="dist/AudiraDesk-Portable.exe" download class="dl-action-btn dl-btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>Download .exe</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Wide Card: Linux Banner with Architecture Pills -->
+        <div class="dl-card dl-card-wide" data-os="linux">
+          <div>
+            <div class="dl-card-header">
+              <span class="dl-card-title">Linux</span>
+              <span class="dl-version-pill">v1.5.8</span>
+            </div>
+            <p class="dl-card-subtitle" data-i18n="subLinux">
+              Debian/Ubuntu (.deb) or any distro via AppImage (x64 / arm64). Supports Wayland &amp; X11 headless.
+            </p>
+          </div>
+          <div class="dl-pills-row">
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-pill-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              deb &bull; x64
+            </a>
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-pill-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              deb &bull; arm64
+            </a>
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-pill-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              AppImage &bull; x64
+            </a>
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-pill-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              AppImage &bull; arm64
+            </a>
+          </div>
+        </div>
+
+        <!-- Extra Utility Bar: Android APK, Web Client & Signed Certificate Trust -->
+        <div class="dl-extra-bar">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <span style="font-weight:600; color:var(--color-text-heading); display:inline-flex; align-items:center; gap:0.4rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Security &amp; Platforms:
             </span>
-            <span style="font-size:0.75rem; font-family:var(--font-mono); opacity:0.9; font-weight:500;">AudiraDesk.exe &bull; 25.1 MB</span>
-          </a>
-          <div class="download-meta" style="margin-top:0.75rem; font-size:0.75rem; color:var(--color-text-muted); line-height:1.45;">
-            <div>Signed by: <strong>Audira Multimedia Digital (Verified)</strong></div>
-            <div style="margin-top:0.35rem; display:flex; justify-content:center; gap:0.5rem; flex-wrap:wrap;">
-              <a href="dist/AudiraDesk_RootCA.cer" download style="color:var(--color-primary); text-decoration:underline;">Root CA (.cer)</a>
-              <span>&bull;</span>
-              <a href="dist/Trust_Audira_Certificate.bat" download style="color:var(--color-primary); text-decoration:underline;">Trust Script (.bat)</a>
+            <span>Signed by <strong>Audira Multimedia Digital (Verified)</strong></span>
+          </div>
+          <div class="dl-extra-links">
+            <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-extra-link">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.414 13.8533 8.08 12 8.08s-3.5902.334-5.1367.87l-2.0223-3.503a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+              Android APK
+            </a>
+            <span>&bull;</span>
+            <a href="dist/AudiraDesk_RootCA.cer" download class="dl-extra-link">Root CA (.cer)</a>
+            <span>&bull;</span>
+            <a href="dist/Trust_Audira_Certificate.bat" download class="dl-extra-link">Trust Script (.bat)</a>
+          </div>
+        </div>
+
+        <!-- Older Versions Archive (Adopted from 9remote) -->
+        <div class="dl-older-section">
+          <div class="dl-older-title" data-i18n="olderVersionsTitle">Release History &bull; Previous Builds</div>
+          
+          <!-- v1.5.8 (Current) -->
+          <div class="dl-older-row">
+            <div class="dl-older-meta">
+              <span class="dl-older-tag">v1.5.8</span>
+              <span class="dl-older-date">Oct 27, 2026 &bull; Latest Production</span>
+            </div>
+            <div class="dl-older-links">
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">macOS (.dmg)</a>
+              <a href="dist/AudiraDesk-Full-Installer.exe" download class="dl-older-btn" style="color:var(--color-primary); font-weight:700;">Win setup (.exe)</a>
+              <a href="dist/AudiraDesk-Portable.exe" download class="dl-older-btn" style="color:var(--color-primary); font-weight:700;">Win portable (.exe)</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Linux (.deb)</a>
             </div>
           </div>
-        </div>
 
-        <!-- Linux -->
-        <div class="download-card">
-          <div class="download-os-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+          <!-- v1.5.3 -->
+          <div class="dl-older-row">
+            <div class="dl-older-meta">
+              <span class="dl-older-tag">v1.5.3</span>
+              <span class="dl-older-date">Oct 21, 2026</span>
+            </div>
+            <div class="dl-older-links">
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">macOS (.dmg)</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Win setup</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Win portable</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Linux (.deb)</a>
+            </div>
           </div>
-          <h3 class="download-title">Linux (Debian / AppImage)</h3>
-          <p class="download-desc">
-            Universal AppImage &amp; .deb package. Supports Wayland PipeWire DMA-BUF and X11 XShm.
-          </p>
-          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="btn btn-secondary">
-            <span>Download .deb / AppImage</span>
-          </a>
-          <div class="download-meta">Ubuntu 20.04+, Debian 11+, Fedora 38+</div>
-        </div>
 
-        <!-- macOS -->
-        <div class="download-card">
-          <div class="download-os-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.18c.63-.78 1.06-1.85.94-2.93-.91.04-2.02.61-2.67 1.38-.58.68-1.09 1.77-.95 2.83 1.02.08 2.05-.5 2.68-1.28z"/></svg>
+          <!-- v1.5.0 -->
+          <div class="dl-older-row">
+            <div class="dl-older-meta">
+              <span class="dl-older-tag">v1.5.0</span>
+              <span class="dl-older-date">Oct 18, 2026</span>
+            </div>
+            <div class="dl-older-links">
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">macOS (.dmg)</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Win setup</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Win portable</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Linux (.deb)</a>
+            </div>
           </div>
-          <h3 class="download-title">macOS (Apple Silicon & Intel)</h3>
-          <p class="download-desc">
-            Universal DMG bundle with Apple ScreenCaptureKit API support for low-latency streaming.
-          </p>
-          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="btn btn-secondary">
-            <span>Download .dmg</span>
-          </a>
-          <div class="download-meta">macOS 11.0 Big Sur or later</div>
-        </div>
 
-        <!-- Android -->
-        <div class="download-card">
-          <div class="download-os-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.414 13.8533 8.08 12 8.08s-3.5902.334-5.1367.87l-2.0223-3.503a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+          <!-- v1.4.2 -->
+          <div class="dl-older-row">
+            <div class="dl-older-meta">
+              <span class="dl-older-tag">v1.4.2</span>
+              <span class="dl-older-date">Oct 05, 2026</span>
+            </div>
+            <div class="dl-older-links">
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">macOS (.dmg)</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Win setup</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Win portable</a>
+              <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="dl-older-btn">Linux (.deb)</a>
+            </div>
           </div>
-          <h3 class="download-title">Android (Phone & Tablet)</h3>
-          <p class="download-desc">
-            Direct APK install. Control remote workstations or view and touch-operate mobile screens.
-          </p>
-          <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" class="btn btn-secondary">
-            <span>Download .apk</span>
-          </a>
-          <div class="download-meta">Android 7.0 Nougat+ (ARM64)</div>
         </div>
       </div>
     </div>
@@ -1176,61 +1573,61 @@
       <div class="faq-grid">
         <div class="faq-card">
           <div class="faq-header">
-            <span>How does Audira Desk achieve zero-latency remote control compared to AnyDesk/TeamViewer?</span>
+            <span data-i18n="faqQ1">How does Audira Desk achieve zero-latency remote control compared to AnyDesk/TeamViewer?</span>
             <div class="faq-toggle-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
-          <div class="faq-answer">
+          <div class="faq-answer" data-i18n="faqA1">
             Audira Desk implements direct peer-to-peer UDP hole-punching. When both peers establish a direct route, screen frames and input packets bypass intermediate servers completely. Additionally, hardware-accelerated video codecs (AV1 and VP9 via NVENC/QuickSync/VAAPI) compress screen frames within 16 milliseconds at 60 FPS, with WASAPI audio loopback encoded via Opus.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-header">
-            <span>Is installation required, or can it be executed as a standalone portable tool?</span>
+            <span data-i18n="faqQ2">Is installation required, or can it be executed as a standalone portable tool?</span>
             <div class="faq-toggle-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
-          <div class="faq-answer">
+          <div class="faq-answer" data-i18n="faqA2">
             Audira Desk is packaged as a single standalone executable. Double-clicking <code>AudiraDesk.exe</code> runs the application immediately without administrative rights or registry footprint. If persistent unattended access or Windows UAC elevation is desired, users can click "Install" at any time to register the elevated system service.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-header">
-            <span>What cryptographic algorithms are used for end-to-end encryption?</span>
+            <span data-i18n="faqQ3">What cryptographic algorithms are used for end-to-end encryption?</span>
             <div class="faq-toggle-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
-          <div class="faq-answer">
+          <div class="faq-answer" data-i18n="faqA3">
             All cryptographic operations are backed by Libsodium. Session authentication and key exchange use Curve25519 (X25519), while symmetrical stream payload encryption uses ChaCha20-Poly1305 authenticated encryption (AEAD). Relay servers (hbbr) only forward encrypted byte packets and possess zero ability to decrypt video, keystrokes, or clipboard data.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-header">
-            <span>Can Audira Desk interact with Windows UAC elevation and Secure Desktop?</span>
+            <span data-i18n="faqQ4">Can Audira Desk interact with Windows UAC elevation and Secure Desktop?</span>
             <div class="faq-toggle-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
-          <div class="faq-answer">
+          <div class="faq-answer" data-i18n="faqA4">
             Yes. When installed on the target machine, Audira Desk registers an elevated Windows background service (<code>Audira Desk</code> service running as <code>NT AUTHORITY\SYSTEM</code>). This service hooks into Windows Secure Desktop sessions, allowing remote technicians to accept administrator prompts and inject Ctrl+Alt+Del commands seamlessly.
           </div>
         </div>
 
         <div class="faq-card">
           <div class="faq-header">
-            <span>How do I point clients to my private relay server on Proxmox or a VPS?</span>
+            <span data-i18n="faqQ5">How do I point clients to my private relay server on Proxmox or a VPS?</span>
             <div class="faq-toggle-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
-          <div class="faq-answer">
-            Buka Audira Desk &gt; Pengaturan &gt; Jaringan. Masukkan alamat IP atau domain server relay Anda pada kolom Server Rendezvous, serta masukkan kunci publik cluster (dari file <code>id_ed25519.pub</code>) pada kolom Key. Semua koneksi client akan otomatis terenkripsi dan terhubung melalui infrastruktur privat Anda!
+          <div class="faq-answer" data-i18n="faqA5">
+            Open Audira Desk &gt; Settings &gt; Network. Enter your relay server IP address or domain in the Rendezvous Server field, and enter your cluster public key (from <code>id_ed25519.pub</code>) in the Key field. All client connections will automatically encrypt and route through your private infrastructure!
           </div>
         </div>
       </div>
@@ -1251,59 +1648,59 @@
             </div>
             <span>AUDIRA<span class="brand-accent">DESK</span></span>
           </a>
-          <p>
+          <p data-i18n="footerDesc">
             An open-source, high-speed remote desktop platform engineered for data sovereignty, low-latency display streaming, and zero-trust private relay infrastructure.
           </p>
         </div>
 
         <!-- Product Links -->
         <div class="footer-col">
-          <h4>Architecture</h4>
+          <h4 data-i18n="footerColArch">Architecture</h4>
           <ul>
-            <li><a href="#architecture">NAT Traversal</a></li>
-            <li><a href="#telemetry">Hardware Codec</a></li>
-            <li><a href="admin.html">Fleet Inventory &rarr;</a></li>
-            <li><a href="#comparison">Compare Stack</a></li>
-            <li><a href="#selfhost">Docker Stack</a></li>
-            <li><a href="#latency">Global Latency</a></li>
-            <li><a href="#downloads">Downloads</a></li>
-            <li><a href="admin.html" style="color:var(--color-primary); font-weight:600;">Fleet Admin Panel &rarr;</a></li>
+            <li><a href="#architecture" data-i18n="footerLinkNat">NAT Traversal</a></li>
+            <li><a href="#telemetry" data-i18n="footerLinkCodec">Hardware Codec</a></li>
+            <li><a href="admin.html" data-i18n="footerLinkFleet">Fleet Inventory &rarr;</a></li>
+            <li><a href="#comparison" data-i18n="footerLinkCompare">Compare Stack</a></li>
+            <li><a href="#selfhost" data-i18n="footerLinkDocker">Docker Stack</a></li>
+            <li><a href="#latency" data-i18n="footerLinkLatency">Global Latency</a></li>
+            <li><a href="#downloads" data-i18n="footerLinkDownloads">Downloads</a></li>
+            <li><a href="admin.html" style="color:var(--color-primary); font-weight:600;" data-i18n="footerLinkAdmin">Fleet Admin Panel &rarr;</a></li>
           </ul>
         </div>
 
         <!-- Ecosystem -->
         <div class="footer-col">
-          <h4>Software &amp; License</h4>
+          <h4 data-i18n="footerColSoft">Software &amp; License</h4>
           <ul>
-            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener">GitHub Repository</a></li>
-            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener">Releases &amp; Changelog</a></li>
-            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/issues" target="_blank" rel="noopener">Bug Tracker</a></li>
-            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/blob/main/LICENSE" target="_blank" rel="noopener">Commercial License</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener" data-i18n="footerLinkGhRepo">GitHub Repository</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/releases" target="_blank" rel="noopener" data-i18n="footerLinkReleases">Releases &amp; Changelog</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/issues" target="_blank" rel="noopener" data-i18n="footerLinkBugs">Bug Tracker</a></li>
+            <li><a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP/blob/main/LICENSE" target="_blank" rel="noopener" data-i18n="footerLinkLicense">Commercial License</a></li>
           </ul>
         </div>
 
         <!-- Official Contact & Attribution -->
         <div class="footer-col">
-          <h4>Developer &amp; Contact</h4>
+          <h4 data-i18n="footerColContact">Developer &amp; Contact</h4>
           <ul>
-            <li><span style="color:var(--color-text-heading); font-weight:700;">Audira Desk Engineering Team</span></li>
+            <li><span style="color:var(--color-text-heading); font-weight:700;" data-i18n="footerContactTeam">Audira Desk Engineering Team</span></li>
             <li><span style="font-size:0.8125rem; color:var(--color-text-muted);">Audira Multimedia Digital</span></li>
             <li><a href="https://audira.my.id" target="_blank" rel="noopener">https://audira.my.id</a></li>
             <li><a href="mailto:support@audira.my.id">support@audira.my.id</a></li>
-            <li><span style="font-size:0.8125rem; color:var(--color-text-dim);">Enterprise Support Desk</span></li>
+            <li><span style="font-size:0.8125rem; color:var(--color-text-dim);" data-i18n="footerContactSupport">Enterprise Support Desk</span></li>
           </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <div>
+        <div data-i18n="footerCopyright">
           &copy; 2026 <strong>Audira Desk</strong>. Maintained by <strong>Audira Multimedia Digital</strong>. Licensed under AUDIRA Commercial License.
         </div>
         <div class="footer-links">
-          <a href="https://audira.my.id" target="_blank" rel="noopener">Official Website</a>
+          <a href="https://audira.my.id" target="_blank" rel="noopener" data-i18n="footerBottomWeb">Official Website</a>
           <a href="https://github.com/Audira141415/AUDIRA-REMOTE-DEKSTOP" target="_blank" rel="noopener">GitHub</a>
-          <a href="#downloads">Binary Releases</a>
-          <a href="#selfhost">Relay Docker</a>
+          <a href="#downloads" data-i18n="footerBottomDownloads">Binary Releases</a>
+          <a href="#selfhost" data-i18n="footerBottomRelay">Relay Docker</a>
         </div>
       </div>
     </div>
@@ -1329,8 +1726,8 @@
 
       <!-- Modal Tabs (Login, Register, SSO, 2FA) -->
       <div class="modal-tabs">
-        <button class="modal-tab-btn active" data-tab="login" id="modalTabLogin">Masuk</button>
-        <button class="modal-tab-btn" data-tab="register" id="modalTabRegister">Daftar Akun</button>
+        <button class="modal-tab-btn active" data-tab="login" id="modalTabLogin" data-i18n="tabLogin">Masuk</button>
+        <button class="modal-tab-btn" data-tab="register" id="modalTabRegister" data-i18n="tabRegister">Daftar Akun</button>
         <button class="modal-tab-btn" data-tab="sso" data-i18n="tabSso">OIDC / SSO</button>
         <button class="modal-tab-btn" data-tab="token" data-i18n="tabHardwareToken">2FA / Token</button>
       </div>
@@ -1370,7 +1767,7 @@
             </button>
 
             <div style="text-align:center; margin-top:1.25rem; font-size:0.8125rem; color:var(--color-text-dim);">
-              Belum memiliki akun? <a href="javascript:void(0)" onclick="switchToRegister()" style="color:var(--color-primary); font-weight:700; text-decoration:none;">Daftar Akun Baru &rarr;</a>
+              <span data-i18n="lblNoAccount">Belum memiliki akun?</span> <a href="javascript:void(0)" onclick="switchToRegister()" style="color:var(--color-primary); font-weight:700; text-decoration:none;" data-i18n="lnkRegisterNew">Daftar Akun Baru &rarr;</a>
             </div>
           </form>
         </div>
@@ -1380,46 +1777,46 @@
           <form id="adminRegisterForm" onsubmit="event.preventDefault(); handleAdminRegister();">
             <div id="regAlert" style="display:none; padding:0.65rem 0.85rem; border-radius:8px; font-size:0.8rem; margin-bottom:1rem; font-weight:600; line-height:1.4;"></div>
             <div class="form-group">
-              <label for="regUsername" class="form-label">Username</label>
+              <label for="regUsername" class="form-label" data-i18n="lblRegUser">Username</label>
               <div class="form-input-wrap">
                 <input type="text" id="regUsername" class="form-input" required autocomplete="username" placeholder="Huruf/angka unik (min. 3 karakter)" minlength="3">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="regDisplayName" class="form-label">Nama Lengkap</label>
+              <label for="regDisplayName" class="form-label" data-i18n="lblRegName">Nama Lengkap</label>
               <div class="form-input-wrap">
                 <input type="text" id="regDisplayName" class="form-input" required placeholder="Nama lengkap atau panggilan">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="regEmail" class="form-label">Alamat Email</label>
+              <label for="regEmail" class="form-label" data-i18n="lblRegEmail">Alamat Email</label>
               <div class="form-input-wrap">
                 <input type="email" id="regEmail" class="form-input" required autocomplete="email" placeholder="nama@perusahaan.com">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="regPassword" class="form-label">Kata Sandi</label>
+              <label for="regPassword" class="form-label" data-i18n="lblRegPass">Kata Sandi</label>
               <div class="form-input-wrap">
                 <input type="password" id="regPassword" class="form-input" required autocomplete="new-password" placeholder="Minimal 6 karakter" minlength="6">
               </div>
             </div>
 
             <div class="form-group">
-              <label for="regPasswordConfirm" class="form-label">Konfirmasi Kata Sandi</label>
+              <label for="regPasswordConfirm" class="form-label" data-i18n="lblRegConfirm">Konfirmasi Kata Sandi</label>
               <div class="form-input-wrap">
                 <input type="password" id="regPasswordConfirm" class="form-input" required autocomplete="new-password" placeholder="Ulangi kata sandi di atas" minlength="6">
               </div>
             </div>
 
             <button type="submit" id="regSubmitBtn" class="btn btn-primary" style="width:100%; padding:0.75rem; margin-top:0.25rem;">
-              <span id="regBtnLabel">Daftar Akun Sekarang</span>
+              <span id="regBtnLabel" data-i18n="btnRegSubmit">Daftar Akun Sekarang</span>
             </button>
 
             <div style="text-align:center; margin-top:1.25rem; font-size:0.8125rem; color:var(--color-text-dim);">
-              Sudah memiliki akun? <a href="javascript:void(0)" onclick="switchToLogin()" style="color:var(--color-primary); font-weight:700; text-decoration:none;">Masuk di sini &rarr;</a>
+              <span data-i18n="lblAlreadyHaveAccount">Sudah memiliki akun?</span> <a href="javascript:void(0)" onclick="switchToLogin()" style="color:var(--color-primary); font-weight:700; text-decoration:none;" data-i18n="lnkSignInHere">Masuk di sini &rarr;</a>
             </div>
           </form>
         </div>
@@ -1838,7 +2235,7 @@
             </div>
 
             <!-- Dynamic Payment Detail Box -->
-            <div id="qrisDetailBox" style="margin-top:0.85rem; background:rgba(0,0,0,0.3); border:1px solid var(--color-border); border-radius:8px; padding:0.9rem; text-align:center;">
+            <div id="qrisDetailBox" style="margin-top:0.85rem; background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:8px; padding:0.9rem; text-align:center;">
               <div style="display:inline-block; background:#ffffff; padding:0.6rem; border-radius:8px; margin-bottom:0.5rem; box-shadow:0 0 15px rgba(0,240,255,0.25);">
                 <!-- QRIS Barcode SVG -->
                 <svg width="120" height="120" viewBox="0 0 100 100" fill="#000000">
@@ -1858,7 +2255,7 @@
               <div style="font-size:0.72rem; color:var(--color-emerald); margin-top:2px;">● QRIS Dinamis Siap Dipindai (Scan &amp; Bayar Langsung Aktif)</div>
             </div>
 
-            <div id="bankDetailBox" style="display:none; margin-top:0.85rem; background:rgba(0,0,0,0.3); border:1px solid var(--color-border); border-radius:8px; padding:0.9rem;">
+            <div id="bankDetailBox" style="display:none; margin-top:0.85rem; background:var(--color-bg-subtle); border:1px solid var(--color-border); border-radius:8px; padding:0.9rem;">
               <div style="font-size:0.78rem; font-weight:700; color:var(--color-text-heading); margin-bottom:0.4rem;">Nomor Rekening Resmi Perusahaan:</div>
               <div style="display:flex; justify-content:space-between; align-items:center; background:var(--color-bg-elevated); padding:0.5rem 0.75rem; border-radius:6px; margin-bottom:0.4rem;">
                 <div>
@@ -2001,5 +2398,11 @@
   <script src="js/three.min.js"></script>
   <script src="js/hero-3d.js?v=3.0.0-workstation"></script>
   <script src="js/app.js?v=1.5.9"></script>
+  <!-- Audira Digital Signature & Anti-Tamper Shield -->
+  <script src="js/audira_shield.js"></script>
+  <script>
+    AudiraShield.enforce("eyJjcmVhdG9yIjogIkFndXMgRHdpIFIgKEF1ZGlyYSkiLCAib3duZXJfaWQiOiAiQVVESVJBLU9SSUdJTi1BR1VTLURXSS1SIiwgImFwcF9uYW1lIjogIkFVRElSQS1SRU1PVEUtREVLU1RPUCIsICJpc3N1ZWRfZGF0ZSI6ICIyMDI2LTEwLTI0VDIzOjA4OjUxWiIsICJjYW5hcnlfdG9rZW4iOiAiMGFkN2MxNzIxZTgwZTgwNTBjZTgxNGU4IiwgImxlZ2FsX25vdGljZSI6ICJIYWsgQ2lwdGEgRGlsaW5kdW5naSBVbmRhbmctVW5kYW5nLiBIYWsgS2VwZW1pbGlrYW4gRWtza2x1c2lmIEFndXMgRHdpIFIuIiwgImRpZ2l0YWxfc2lnbmF0dXJlIjogIjNhNTczODFiYTNlNjMyZjJmMWVkOWE1OWI4OGRkYzU1MWFjYTY4NGIzOGVhODMzMTNhYjFjOWNlNmI1NDBjNTMiLCAic2lnbmF0dXJlX2FsZ29yaXRobSI6ICJITUFDLVNIQTI1Ni1BVUQtVjEifQ==", "AUDIRA-REMOTE-DEKSTOP");
+  </script>
 </body>
 </html>
+

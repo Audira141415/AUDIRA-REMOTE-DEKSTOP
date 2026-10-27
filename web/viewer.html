@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css?v=1.5.8">
+  <!-- Monaco Editor Web AMD Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <style>
     body, html {
       margin: 0;
@@ -15,7 +17,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #05070a;
+      background: var(--color-bg-page);
       font-family: var(--font-sans);
       color: var(--color-text-body);
       user-select: none;
@@ -28,13 +30,13 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: #030508;
+      background: var(--color-bg-page);
     }
 
     /* Top Compact Nav */
     .viewer-header {
       height: 48px;
-      background: rgba(10, 13, 20, 0.95);
+      background: var(--color-bg-header);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--color-border);
       display: flex;
@@ -275,7 +277,7 @@
       bottom: 0;
       width: 540px;
       max-width: 90vw;
-      background: #090c12;
+      background: var(--color-bg-page);
       border-left: 1px solid var(--color-border);
       box-shadow: -8px 0 32px rgba(0,0,0,0.7);
       display: flex;
@@ -291,7 +293,7 @@
 
     .terminal-header {
       padding: 12px 16px;
-      background: #0d121c;
+      background: var(--color-bg-subtle);
       border-bottom: 1px solid var(--color-border);
       display: flex;
       align-items: center;
@@ -316,7 +318,7 @@
       font-size: 12px;
       line-height: 1.5;
       color: #94a3b8;
-      background: #05070a;
+      background: var(--color-bg-page);
       white-space: pre-wrap;
       word-break: break-all;
     }
@@ -337,7 +339,7 @@
 
     .terminal-presets {
       padding: 8px 14px;
-      background: #0d121c;
+      background: var(--color-bg-subtle);
       border-top: 1px solid var(--color-border);
       display: flex;
       gap: 6px;
@@ -364,7 +366,7 @@
 
     .terminal-input-bar {
       padding: 12px;
-      background: #0d121c;
+      background: var(--color-bg-subtle);
       border-top: 1px solid var(--color-border);
       display: flex;
       gap: 8px;
@@ -372,7 +374,7 @@
 
     .terminal-input {
       flex: 1;
-      background: #05070a;
+      background: var(--color-bg-input);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-sm);
       padding: 8px 12px;
@@ -414,6 +416,689 @@
       padding: 24px;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
     }
+
+    /* =========================================================================
+       VIBE STUDIO & CLOUD WORKSTATION STYLES (8 Menus)
+       ========================================================================= */
+    .viewer-mode-tabs {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+    }
+    .mode-tab {
+      background: transparent;
+      border: none;
+      color: var(--color-text-muted);
+      padding: 5px 11px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mode-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .mode-tab.active {
+      background: rgba(56, 189, 248, 0.16);
+      color: #38bdf8;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+    }
+    .viewer-workspace-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: calc(100vh - 48px);
+    }
+    .workspace-view {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    .workspace-view.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Virtual Dev Touch Bar for iPad & Mobile */
+    .virtual-touch-bar {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 17, 26, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      z-index: 45;
+      overflow-x: auto;
+      max-width: 95vw;
+    }
+    .vkey {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #f1f5f9;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .vkey:active {
+      background: var(--color-primary);
+      color: #000;
+      transform: scale(0.95);
+    }
+    .vkey.modifier {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .vkey.symbol {
+      color: #fbbf24;
+    }
+    .vkey.shortcut {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .vkey-divider {
+      width: 1px;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      margin: 0 3px;
+    }
+    canvas.crisp-coding-mode {
+      filter: contrast(1.12) brightness(1.03) !important;
+      image-rendering: -webkit-optimize-contrast !important;
+      image-rendering: crisp-edges !important;
+    }
+
+    /* Remote IDE Layout */
+    .ide-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--color-bg-page);
+    }
+    .ide-sidebar {
+      width: 260px;
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg-subtle);
+    }
+    .ide-sidebar-header {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-subtle);
+    }
+    .ide-search-input {
+      width: 100%;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 5px 8px;
+      color: #fff;
+      font-size: 11px;
+      margin-top: 8px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .ide-search-input:focus {
+      border-color: var(--color-primary);
+    }
+    .ide-tree {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 4px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--color-bg-subtle);
+    }
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #94a3b8;
+      transition: all 0.1s ease;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .tree-node:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+    .tree-node.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+    }
+    .git-tag {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .git-tag.M { color: #fbbf24; background: rgba(251, 191, 36, 0.15); }
+    .git-tag.U { color: #34d399; background: rgba(52, 211, 153, 0.15); }
+    .ide-sidebar-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg-subtle);
+    }
+    .ide-editor-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--color-bg-page);
+    }
+    .ide-tab-bar {
+      height: 38px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      justify-content: space-between;
+    }
+    .ide-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: none;
+      padding: 6px 14px;
+      font-size: 12px;
+      border-radius: 6px 6px 0 0;
+      color: #cbd5e1;
+      font-family: var(--font-mono);
+    }
+    .ide-tab.active {
+      background: var(--color-bg-page);
+      border-color: rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+      border-bottom: 2px solid #38bdf8;
+    }
+    .monaco-wrapper {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--color-bg-page);
+    }
+    .monaco-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-bg-page);
+    }
+    .ide-statusbar {
+      height: 26px;
+      background: var(--color-bg-subtle);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 11px;
+      color: #64748b;
+      gap: 16px;
+      font-family: var(--font-mono);
+    }
+
+    /* Vibe Studio Layout */
+    .vibe-studio-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--color-bg-page);
+    }
+    .vibe-badges-strip {
+      padding: 10px 16px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+    }
+    .vibe-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+      padding: 5px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .vibe-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .vibe-pill.glow {
+      border-color: rgba(249, 115, 22, 0.4);
+      color: #fdba74;
+      background: rgba(249, 115, 22, 0.1);
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.15);
+    }
+    .vibe-pill.active {
+      border-color: #38bdf8;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+    }
+    .vibe-pill.dim {
+      opacity: 0.65;
+      cursor: default;
+    }
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f97316;
+      box-shadow: 0 0 6px #f97316;
+    }
+    .vibe-headline-bar {
+      padding: 10px 16px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .vibe-headline-text {
+      font-size: 13px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+    .vibe-headline-text .accent-orange {
+      color: #fb923c;
+      font-family: var(--font-mono);
+    }
+    .vibe-split-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    .vibe-agent-box, .vibe-diff-box {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .vibe-agent-box {
+      border-right: 1px solid var(--color-border);
+      background: var(--color-bg-subtle);
+    }
+    .vibe-diff-box {
+      background: var(--color-bg-page);
+    }
+    .vibe-box-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .vibe-select {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      outline: none;
+    }
+    .vibe-chips-row {
+      padding: 8px 14px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .vibe-chip {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .vibe-chip:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+    .vibe-prompt-wrap {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .vibe-textarea {
+      width: 100%;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      resize: vertical;
+      min-height: 70px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .vibe-textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+    .vibe-prompt-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .vibe-context-badge {
+      font-size: 11px;
+      color: #64748b;
+      font-family: var(--font-mono);
+    }
+    .vibe-run-btn {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 10px rgba(2, 132, 199, 0.3);
+      transition: all 0.2s ease;
+    }
+    .vibe-run-btn:hover {
+      background: linear-gradient(135deg, #0369a1, #0284c7);
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.5);
+    }
+    .vibe-timeline {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .timeline-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .timeline-empty {
+      color: #64748b;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    .vibe-diff-content {
+      flex: 1;
+      overflow: auto;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      background: var(--color-bg-page);
+    }
+    .diff-pre {
+      margin: 0;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+    }
+    .diff-add { color: #34d399; background: rgba(52, 211, 153, 0.1); display: block; }
+    .diff-del { color: #f87171; background: rgba(248, 113, 113, 0.1); display: block; }
+    .diff-hunk { color: #60a5fa; background: rgba(96, 165, 250, 0.08); display: block; font-weight: bold; }
+
+    /* Remote Localhost Styles */
+    .localhost-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--color-bg-page);
+    }
+    .localhost-header {
+      padding: 10px 16px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .viewport-size-toggle {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 4px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .vsize-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .vsize-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .localhost-ports-bar {
+      padding: 8px 16px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+    }
+    .port-pill {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .port-pill.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: #10b981;
+      color: #34d399;
+      font-weight: 600;
+    }
+    .localhost-preview-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--color-bg-page);
+      overflow: hidden;
+      padding: 10px;
+    }
+    .localhost-address-bar {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .localhost-input {
+      flex: 1;
+      background: var(--color-bg-input);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 6px 12px;
+      color: #38bdf8;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      outline: none;
+    }
+    .localhost-iframe-container {
+      width: 100%;
+      flex: 1;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      transition: width 0.3s ease;
+    }
+    .localhost-iframe-container iframe {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+    }
+
+    /* Mobile Emulator Styles */
+    .emulator-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--color-bg-page);
+      overflow: hidden;
+    }
+    .emulator-controls-bar {
+      width: 100%;
+      padding: 8px 16px;
+      background: var(--color-bg-subtle);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .phone-frame-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      width: 100%;
+      background: var(--color-bg-page);
+    }
+    .phone-device-bezel {
+      width: 360px;
+      height: 640px;
+      background: var(--color-bg-card);
+      border: 10px solid #1e293b;
+      border-radius: 42px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .phone-device-bezel.landscape {
+      width: 640px;
+      height: 360px;
+    }
+    .phone-notch {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 18px;
+      background: #050608;
+      border-radius: 12px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .notch-camera {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #1e293b;
+    }
+    .phone-screen {
+      flex: 1;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phone-screen canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .phone-screen-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .phone-home-indicator {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 110px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 2px;
+    }
   </style>
 </head>
 <body>
@@ -429,6 +1114,30 @@
         <span>Audira Desk</span>
         <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 11px; padding: 2px 6px; border-radius: 4px;">WebRTC Client v1.5.8</span>
       </div>
+
+      <!-- Segmented Mode Tabs Switcher (8 Menus) -->
+      <nav class="viewer-mode-tabs" id="viewerModeTabs">
+        <button class="mode-tab active" data-mode="desktop" title="Remote Desktop 60 FPS">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>Desktop (60fps)</span>
+        </button>
+        <button class="mode-tab" data-mode="ide" title="Remote Monaco IDE & File Explorer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <span>Remote IDE</span>
+        </button>
+        <button class="mode-tab" data-mode="vibe" title="AI Vibe Coding & Agent Harness">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Vibe Studio</span>
+        </button>
+        <button class="mode-tab" data-mode="localhost" title="Remote Localhost Port Forwarding">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span>Localhost Tunnel</span>
+        </button>
+        <button class="mode-tab" data-mode="emulator" title="Remote Mobile Device Emulator Frame">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <span>Emulator</span>
+        </button>
+      </nav>
 
       <div class="viewer-target-pill">
         <div class="viewer-status-dot"></div>
@@ -446,7 +1155,7 @@
       </div>
     </header>
 
-    <!-- Floating HUD Toolbar -->
+    <!-- Floating HUD Toolbar (Desktop Mode) -->
     <div class="session-hud" id="sessionHud">
       <!-- Drag handle for repositioning -->
       <div class="hud-drag-handle" id="hudDragHandle" title="Geser posisi HUD di layar">
@@ -482,6 +1191,8 @@
           <button class="hud-btn" id="btnCtrlAltDel" title="Kirim Ctrl+Alt+Del ke Remote Host">Ctrl+Alt+Del</button>
           <button class="hud-btn" id="btnLockScreen" title="Kunci Layar Windows (Win+L)">Lock</button>
           <button class="hud-btn" id="btnVirtualDisplay" title="Konfigurasi Virtual Display Headless">Virtual Display</button>
+          <button class="hud-btn" id="btnCrispToggle" title="Toggle Crisp Coding Mode (Teks Tajam Subpixel)">Crisp Text</button>
+          <button class="hud-btn" id="btnTouchBarToggle" title="Toggle Virtual Touch Bar untuk iPad/Mobile">⌨️ Touch Bar</button>
           <button class="hud-btn" id="btnFitToggle" title="Toggle Mode Fit / 1:1">Fit</button>
           <button class="hud-btn" id="btnFullscreen" title="Layar Penuh (Fullscreen)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
@@ -495,15 +1206,263 @@
       </button>
     </div>
 
-    <!-- Main Viewport Canvas -->
-    <div class="viewer-viewport" id="viewport">
-      <canvas id="remoteCanvas" width="1920" height="1080"></canvas>
-      <div class="remote-cursor" id="remoteCursor">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="#fff" stroke="#000" stroke-width="1">
-          <path d="M0,0 L0,14 L4,10 L7,16 L9,15 L6,9 L11,9 Z"></path>
-        </svg>
+    <!-- Multi-View Workspace Body Container -->
+    <main class="viewer-workspace-body" id="workspaceBody">
+      <!-- 1. Remote Desktop View (60 FPS) -->
+      <div class="workspace-view active" id="viewDesktop">
+        <div class="viewer-viewport" id="viewport">
+          <canvas id="remoteCanvas" width="1920" height="1080"></canvas>
+          <div class="remote-cursor" id="remoteCursor">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#fff" stroke="#000" stroke-width="1">
+              <path d="M0,0 L0,14 L4,10 L7,16 L9,15 L6,9 L11,9 Z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Virtual Dev Touch Bar for iPad & Mobile -->
+        <div class="virtual-touch-bar" id="virtualTouchBar">
+          <button class="vkey" data-key="Escape">ESC</button>
+          <button class="vkey" data-key="Tab">TAB</button>
+          <button class="vkey modifier" data-key="Control">CTRL</button>
+          <button class="vkey modifier" data-key="Alt">ALT</button>
+          <button class="vkey modifier" data-key="Shift">SHIFT</button>
+          <span class="vkey-divider"></span>
+          <button class="vkey symbol" data-insert="{}">{ }</button>
+          <button class="vkey symbol" data-insert="[]">[ ]</button>
+          <button class="vkey symbol" data-insert="()">( )</button>
+          <button class="vkey symbol" data-insert="=&gt;">=&gt;</button>
+          <button class="vkey symbol" data-insert="-&gt;">-&gt;</button>
+          <button class="vkey symbol" data-insert=";">;</button>
+          <button class="vkey symbol" data-insert="|">|</button>
+          <button class="vkey symbol" data-insert="~">~</button>
+          <span class="vkey-divider"></span>
+          <button class="vkey shortcut" data-cmd="git status">git status</button>
+          <button class="vkey shortcut" data-cmd="cargo check">cargo check</button>
+        </div>
       </div>
-    </div>
+
+      <!-- 2. Remote IDE (Monaco Editor & Workspace Tree) -->
+      <div class="workspace-view" id="viewIDE">
+        <div class="ide-container">
+          <aside class="ide-sidebar">
+            <div class="ide-sidebar-header">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#94a3b8;">Explorer</span>
+                <button class="hud-btn icon-only" id="btnRefreshFiles" title="Refresh File Tree">↻</button>
+              </div>
+              <input type="text" id="ideFileFilter" placeholder="Search files (e.g. .rs, .html)..." class="ide-search-input">
+            </div>
+            <div class="ide-tree" id="ideFileTree">
+              <div style="padding:16px; color:#64748b; font-size:12px; text-align:center;">Memuat direktori host...</div>
+            </div>
+            <div class="ide-sidebar-footer">
+              <span style="font-size:11px; color:#64748b;">Host Workspace: <code id="lblWorkspaceRoot">./</code></span>
+            </div>
+          </aside>
+
+          <section class="ide-editor-section">
+            <div class="ide-tab-bar" id="ideTabBar">
+              <div class="ide-tab active" id="defaultTab">
+                <span class="ide-tab-icon">📄</span>
+                <span class="ide-tab-title" id="activeTabTitle">Select a file</span>
+              </div>
+              <div class="ide-tab-actions" style="display:flex; gap:6px;">
+                <button class="hud-btn" id="btnSaveFile" title="Simpan Berkas ke Host (Ctrl+S)" style="background:var(--color-primary-solid); color:#fff;">
+                  💾 Simpan
+                </button>
+                <button class="hud-btn" id="btnSendToVibe" title="Kirim file aktif ke AI Vibe Agent">
+                  ⚡ Vibecode File
+                </button>
+              </div>
+            </div>
+            <div class="monaco-wrapper" id="monacoEditorContainer">
+              <div class="monaco-placeholder" id="monacoPlaceholder">
+                <div style="text-align:center; max-width:400px; padding:20px;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5" style="margin-bottom:12px;"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  <h3 style="color:#fff; margin:0 0 8px 0; font-size:16px;">Remote Monaco Code Editor</h3>
+                  <p style="color:#94a3b8; font-size:13px; line-height:1.5;">Pilih berkas dari Explorer di samping kiri untuk mulai mengoding langsung di mesin host tanpa beban kompresi video.</p>
+                </div>
+              </div>
+            </div>
+            <footer class="ide-statusbar">
+              <span id="ideStatusLang">Rust / Plaintext</span>
+              <span id="ideStatusFile">No file selected</span>
+              <span id="ideStatusSize">0 bytes</span>
+              <span style="margin-left:auto;">UTF-8 • LF • Spaces: 4</span>
+            </footer>
+          </section>
+        </div>
+      </div>
+
+      <!-- 3. Vibe Studio (Every Harness · One UI) -->
+      <div class="workspace-view" id="viewVibeStudio">
+        <div class="vibe-studio-container">
+          <!-- Vibe Feature Badges Row (as shown in reference image) -->
+          <div class="vibe-badges-strip">
+            <div class="vibe-pill glow"><span class="pill-dot"></span>Every Harness · One UI</div>
+            <div class="vibe-pill" onclick="switchWorkspaceMode('ide')">💻 Remote IDE</div>
+            <div class="vibe-pill active" onclick="switchWorkspaceMode('vibe')">⚡ Remote Vibe Coding</div>
+            <div class="vibe-pill" onclick="switchWorkspaceMode('desktop')">🖥️ Remote Desktop</div>
+            <div class="vibe-pill" onclick="switchWorkspaceMode('ide')">📁 Remote Files</div>
+            <div class="vibe-pill" onclick="switchWorkspaceMode('emulator')">📱 Remote Emulator</div>
+            <div class="vibe-pill" onclick="switchWorkspaceMode('localhost')">🌐 Remote Localhost</div>
+            <div class="vibe-pill dim">PC · Web · iPad · Mobile</div>
+          </div>
+
+          <!-- Hero Subhead Copy -->
+          <div class="vibe-headline-bar">
+            <div class="vibe-headline-text">
+              <span class="accent-orange">Codex CLI looks like 1995? Claude Code's TUI hurts? Forget them.</span> Same agents, one UI you'll actually love.
+            </div>
+          </div>
+
+          <!-- Vibe Workspace Split Layout -->
+          <div class="vibe-split-layout">
+            <!-- Left: Agent Harness & Prompt Terminal Console -->
+            <div class="vibe-agent-box">
+              <div class="vibe-box-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="viewer-status-dot" style="width:7px; height:7px;"></span>
+                  <strong style="color:#fff; font-size:13px;">AI Agent Harness</strong>
+                </div>
+                <select id="vibeHarnessSelect" class="vibe-select">
+                  <option value="claude_code" selected>Claude Code (Anthropic 3.7)</option>
+                  <option value="codex_cli">OpenAI Codex CLI</option>
+                  <option value="cursor_agent">Cursor Background Agent</option>
+                  <option value="aider">Aider Pair Programmer</option>
+                  <option value="audira_copilot">Audira Native Copilot</option>
+                </select>
+              </div>
+
+              <!-- Prompt Quick Chips -->
+              <div class="vibe-chips-row">
+                <span class="vibe-chip" data-p="Refactor fungsi aktif ke async Rust yang idiomatik">⚡ Refactor Async</span>
+                <span class="vibe-chip" data-p="Tambahkan penanganan error Result tanpa unwrap">🛡️ Panic Hardening</span>
+                <span class="vibe-chip" data-p="Optimalkan pipeline encoding video 60fps dengan bitrate adaptif">🚀 Tune 60fps Bitrate</span>
+                <span class="vibe-chip" data-p="Buat unit test komprehensif untuk modul ini">🧪 Generate Tests</span>
+              </div>
+
+              <!-- Prompt Input Area -->
+              <div class="vibe-prompt-wrap">
+                <textarea id="vibePromptInput" class="vibe-textarea" placeholder="Deskripsikan fitur atau perbaikan kode yang ingin dibuat (misal: 'Tambahkan mode high-contrast font rendering')..." rows="3"></textarea>
+                <div class="vibe-prompt-actions">
+                  <span class="vibe-context-badge" id="vibeContextBadge">Context: <b id="lblVibeTarget">Workspace</b></span>
+                  <button class="vibe-run-btn" id="btnRunVibe">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <span>Vibecode Run</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Live Agent Execution Timeline -->
+              <div class="vibe-timeline" id="vibeTimeline">
+                <div class="timeline-empty">
+                  Siap mengeksekusi instruksi AI. Pilih prompt di atas atau ketik perintah kustom.
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Live Code Diff Reviewer & Quick Preview -->
+            <div class="vibe-diff-box">
+              <div class="vibe-box-header">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                  <strong style="color:#fff; font-size:13px;">Code Diff Reviewer</strong>
+                  <span id="diffTargetFile" style="font-family:var(--font-mono); font-size:12px; color:#94a3b8;">src/main.rs</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <button class="hud-btn" id="btnRollbackDiff" style="color:#fca5a5;">❌ Reject</button>
+                  <button class="hud-btn" id="btnApproveDiff" style="background:#059669; color:#fff; border-color:#10b981;">✅ Approve &amp; Apply</button>
+                </div>
+              </div>
+              <div class="vibe-diff-content" id="vibeDiffViewer">
+                <pre class="diff-pre"><code id="diffCodeDisplay">// Menunggu eksekusi prompt untuk menampilkan perubahan diff kode (Green = Added, Red = Removed)...</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Remote Localhost Tunnel -->
+      <div class="workspace-view" id="viewLocalhost">
+        <div class="localhost-container">
+          <div class="localhost-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="viewer-status-dot"></span>
+              <strong style="color:#fff; font-size:14px;">Remote Localhost Tunneling</strong>
+              <span style="font-size:12px; color:#94a3b8;">Akses server dev host tanpa konfigurasi port forwarding rumit</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="hud-btn" id="btnScanPorts">↻ Scan Active Dev Ports</button>
+              <div class="viewport-size-toggle">
+                <button class="vsize-btn active" data-w="100%" title="Desktop Mode">Desktop</button>
+                <button class="vsize-btn" data-w="768px" title="iPad / Tablet Mode">iPad (768px)</button>
+                <button class="vsize-btn" data-w="390px" title="Mobile iPhone Mode">Mobile (390px)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detected Ports Bar -->
+          <div class="localhost-ports-bar" id="localhostPortsBar">
+            <span style="font-size:12px; color:#94a3b8; margin-right:8px;">Detected Ports:</span>
+            <div id="portsPillsContainer" style="display:inline-flex; gap:6px; flex-wrap:wrap;">
+              <span class="port-pill active" data-port="5050">5050 (Audira Portal)</span>
+              <span class="port-pill" data-port="3000">3000 (React / Next)</span>
+              <span class="port-pill" data-port="5173">5173 (Vite)</span>
+              <span class="port-pill" data-port="8080">8080 (Web App)</span>
+            </div>
+          </div>
+
+          <!-- Live Web Preview Frame -->
+          <div class="localhost-preview-wrapper" id="localhostPreviewWrapper">
+            <div class="localhost-address-bar">
+              <input type="text" id="localhostUrlInput" value="http://localhost:5050" class="localhost-input">
+              <button class="hud-btn" id="btnReloadIframe">↻ Reload</button>
+              <a id="btnExternalOpen" href="http://localhost:5050" target="_blank" rel="noopener" class="hud-btn" style="text-decoration:none;">↗ External Tab</a>
+            </div>
+            <div class="localhost-iframe-container" id="iframeContainer">
+              <iframe id="localhostIframe" src="http://localhost:5050" frameborder="0"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Remote Mobile Emulator Frame -->
+      <div class="workspace-view" id="viewEmulator">
+        <div class="emulator-container">
+          <div class="emulator-controls-bar">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <strong style="color:#fff; font-size:13px;">Live Mobile Emulator Stream</strong>
+              <span class="badge" style="background:rgba(16,185,129,0.15); color:#34d399; font-size:11px;">60 FPS Low Latency</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="hud-btn" id="btnRotateEmulator">🔄 Putar Orientasi</button>
+              <button class="hud-btn" id="btnEmulatorBack">◀ Back</button>
+              <button class="hud-btn" id="btnEmulatorHome">● Home</button>
+              <button class="hud-btn" id="btnEmulatorApps">■ Recents</button>
+            </div>
+          </div>
+
+          <!-- Smartphone Hardware Frame -->
+          <div class="phone-frame-wrapper">
+            <div class="phone-device-bezel" id="phoneBezel">
+              <div class="phone-notch"><span class="notch-camera"></span></div>
+              <div class="phone-screen" id="phoneScreen">
+                <canvas id="emulatorCanvas" width="1080" height="2340"></canvas>
+                <div class="phone-screen-overlay" id="emulatorOverlayText">
+                  <div style="text-align:center; padding:20px;">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" style="margin-bottom:10px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    <div style="color:#fff; font-weight:600; margin-bottom:4px;">Mobile Emulator Canvas</div>
+                    <div style="color:#94a3b8; font-size:12px;">Streaming langsung dari Android/iOS Host Simulator</div>
+                  </div>
+                </div>
+              </div>
+              <div class="phone-home-indicator"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
 
     <!-- Slide-Over Remote Terminal Drawer -->
     <aside class="terminal-drawer" id="terminalDrawer">
@@ -985,6 +1944,617 @@ Ketik perintah PowerShell atau pilih Preset di bawah untuk eksekusi instan tanpa
       document.getElementById('hudDisplay').textContent = resVal.split('@')[0] + ' (Virtual)';
       alert('Resolusi virtual display berhasil diubah ke ' + resVal);
       vmodal.classList.remove('open');
+    });
+    // =========================================================================
+    // VIBE STUDIO, REMOTE IDE, LOCALHOST & EMULATOR CONTROLLERS
+    // =========================================================================
+    let currentWorkspaceMode = 'desktop';
+    let monacoInstance = null;
+    let monacoEditor = null;
+    let currentOpenFilePath = '';
+    let currentFileContent = '';
+    let activeDevPort = 5050;
+    let isCrispCodingMode = false;
+    let isTouchBarVisible = true;
+
+    // 1. Workspace Mode Switcher
+    function switchWorkspaceMode(mode) {
+      currentWorkspaceMode = mode;
+
+      // Update Tab Styles
+      document.querySelectorAll('#viewerModeTabs .mode-tab').forEach(tab => {
+        if (tab.getAttribute('data-mode') === mode) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      // Update View Visibility
+      document.querySelectorAll('#workspaceBody .workspace-view').forEach(view => {
+        view.classList.remove('active');
+      });
+
+      const targetView = document.getElementById(
+        mode === 'desktop' ? 'viewDesktop' :
+        mode === 'ide' ? 'viewIDE' :
+        mode === 'vibe' ? 'viewVibeStudio' :
+        mode === 'localhost' ? 'viewLocalhost' : 'viewEmulator'
+      );
+      if (targetView) targetView.classList.add('active');
+
+      // Adjust HUD visibility for non-desktop modes
+      const hud = document.getElementById('sessionHud');
+      if (hud) {
+        if (mode === 'desktop') {
+          hud.style.display = 'flex';
+        } else {
+          hud.style.display = 'none';
+        }
+      }
+
+      // Lazy load mode contents
+      if (mode === 'ide') {
+        initMonacoEditorIfNeeded();
+        loadWorkspaceFiles();
+      } else if (mode === 'vibe') {
+        initVibeStudio();
+      } else if (mode === 'localhost') {
+        scanDevPorts();
+      } else if (mode === 'emulator') {
+        startEmulatorCanvas();
+      }
+    }
+
+    document.querySelectorAll('#viewerModeTabs .mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const mode = tab.getAttribute('data-mode');
+        switchWorkspaceMode(mode);
+      });
+    });
+
+    // Auto-switch mode based on URL parameter or hash (e.g. ?mode=vibe or #ide)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetMode = urlParams.get('mode') || window.location.hash.replace('#', '');
+      if (targetMode && ['desktop', 'ide', 'vibe', 'localhost', 'emulator'].includes(targetMode)) {
+        setTimeout(() => switchWorkspaceMode(targetMode), 200);
+      }
+    } catch (_) {}
+
+    // 2. Crisp Coding Text Mode Toggle
+    const btnCrispToggle = document.getElementById('btnCrispToggle');
+    if (btnCrispToggle) {
+      btnCrispToggle.addEventListener('click', () => {
+        isCrispCodingMode = !isCrispCodingMode;
+        if (isCrispCodingMode) {
+          canvas.classList.add('crisp-coding-mode');
+          btnCrispToggle.textContent = 'Crisp Text: ON';
+          btnCrispToggle.style.background = 'rgba(56, 189, 248, 0.2)';
+          btnCrispToggle.style.borderColor = '#38bdf8';
+          btnCrispToggle.style.color = '#38bdf8';
+        } else {
+          canvas.classList.remove('crisp-coding-mode');
+          btnCrispToggle.textContent = 'Crisp Text';
+          btnCrispToggle.style.background = '';
+          btnCrispToggle.style.borderColor = '';
+          btnCrispToggle.style.color = '';
+        }
+      });
+    }
+
+    // 3. Virtual Dev Touch Bar for iPad & Mobile
+    const btnTouchBarToggle = document.getElementById('btnTouchBarToggle');
+    const touchBar = document.getElementById('virtualTouchBar');
+    if (btnTouchBarToggle && touchBar) {
+      btnTouchBarToggle.addEventListener('click', () => {
+        isTouchBarVisible = !isTouchBarVisible;
+        touchBar.style.display = isTouchBarVisible ? 'flex' : 'none';
+        btnTouchBarToggle.style.background = isTouchBarVisible ? 'rgba(52, 211, 153, 0.2)' : '';
+      });
+
+      // Dev Key Buttons event delegation
+      touchBar.querySelectorAll('.vkey').forEach(k => {
+        k.addEventListener('click', (e) => {
+          e.preventDefault();
+          const key = k.getAttribute('data-key');
+          const insertText = k.getAttribute('data-insert');
+          const cmd = k.getAttribute('data-cmd');
+
+          if (cmd) {
+            executeRemoteCmd(cmd);
+          } else if (insertText && monacoEditor && currentWorkspaceMode === 'ide') {
+            const position = monacoEditor.getPosition();
+            monacoEditor.executeEdits('touchbar', [{
+              range: new monacoInstance.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+              text: insertText
+            }]);
+          } else {
+            console.log('[TouchBar] Simulated key:', key || insertText);
+          }
+        });
+      });
+    }
+
+    // 4. Monaco Editor Initializer
+    function initMonacoEditorIfNeeded() {
+      if (monacoEditor) {
+        monacoEditor.layout();
+        return;
+      }
+
+      if (typeof window.require !== 'undefined') {
+        window.require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+        window.require(['vs/editor/editor.main'], function (monaco) {
+          monacoInstance = monaco;
+          const container = document.getElementById('monacoEditorContainer');
+          const placeholder = document.getElementById('monacoPlaceholder');
+
+          monacoEditor = monaco.editor.create(container, {
+            value: '// Audira Remote IDE — Ready for Cloud Coding\n// Select a file from Explorer to begin.\n',
+            language: 'rust',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 13,
+            fontFamily: "'JetBrains Mono', Consolas, monospace",
+            minimap: { enabled: true },
+            lineNumbers: 'on',
+            scrollBeyondLastLine: false,
+            renderWhitespace: 'selection',
+            tabSize: 4
+          });
+
+          if (placeholder) placeholder.style.display = 'none';
+
+          // Bind Ctrl+S / Cmd+S save command
+          monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function () {
+            saveCurrentIdeFile();
+          });
+
+          // Update cursor position in statusbar
+          monacoEditor.onDidChangeCursorPosition(e => {
+            const statusEl = document.getElementById('ideStatusSize');
+            if (statusEl) {
+              statusEl.textContent = `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+            }
+          });
+        });
+      }
+    }
+
+    // 5. Remote Workspace Files & Git Status
+    let cachedFilesTree = [];
+
+    async function loadWorkspaceFiles() {
+      const treeContainer = document.getElementById('ideFileTree');
+      try {
+        const res = await fetch('/api/dev/files');
+        const data = await res.json();
+        if (data.success) {
+          cachedFilesTree = data.tree || [];
+          document.getElementById('lblWorkspaceRoot').textContent = data.workspace || './';
+          renderFileTree(cachedFilesTree, data.git_status || {}, '');
+        } else {
+          treeContainer.innerHTML = `<div style="padding:16px; color:#f87171; font-size:12px;">Gagal memuat: ${escapeHtml(data.error || '')}</div>`;
+        }
+      } catch (err) {
+        // Fallback sample file tree for offline demo
+        renderFallbackFileTree();
+      }
+    }
+
+    function renderFileTree(tree, gitStatus, query) {
+      const treeContainer = document.getElementById('ideFileTree');
+      treeContainer.innerHTML = '';
+
+      function buildNodes(items, level) {
+        items.forEach(item => {
+          if (query && !item.is_dir && !item.name.toLowerCase().includes(query.toLowerCase())) {
+            return;
+          }
+
+          const node = document.createElement('div');
+          node.className = 'tree-node';
+          node.style.paddingLeft = `${level * 14 + 8}px`;
+
+          const icon = item.is_dir ? '📁' : getFileIcon(item.ext);
+          const gitCode = gitStatus[item.path] || '';
+          const gitBadge = gitCode ? `<span class="git-tag ${gitCode === '??' ? 'U' : gitCode}">${gitCode}</span>` : '';
+
+          node.innerHTML = `
+            <span>${icon}</span>
+            <span style="flex:1; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
+            ${gitBadge}
+          `;
+
+          if (!item.is_dir) {
+            node.addEventListener('click', () => {
+              document.querySelectorAll('.tree-node').forEach(n => n.classList.remove('active'));
+              node.classList.add('active');
+              openIdeFile(item.path);
+            });
+          }
+
+          treeContainer.appendChild(node);
+
+          if (item.is_dir && item.children && item.children.length > 0) {
+            buildNodes(item.children, level + 1);
+          }
+        });
+      }
+
+      buildNodes(tree, 0);
+    }
+
+    function renderFallbackFileTree() {
+      const fallbackItems = [
+        { name: "src", is_dir: true, path: "src", children: [
+          { name: "main.rs", is_dir: false, path: "src/main.rs", ext: "rs" },
+          { name: "server", is_dir: true, path: "src/server", children: [
+            { name: "video_service.rs", is_dir: false, path: "src/server/video_service.rs", ext: "rs" },
+            { name: "input_service.rs", is_dir: false, path: "src/server/input_service.rs", ext: "rs" }
+          ]}
+        ]},
+        { name: "web", is_dir: true, path: "web", children: [
+          { name: "index.html", is_dir: false, path: "web/index.html", ext: "html" },
+          { name: "viewer.html", is_dir: false, path: "web/viewer.html", ext: "html" }
+        ]},
+        { name: "Cargo.toml", is_dir: false, path: "Cargo.toml", ext: "toml" },
+        { name: "README.md", is_dir: false, path: "README.md", ext: "md" }
+      ];
+      renderFileTree(fallbackItems, { "src/main.rs": "M", "Cargo.toml": "M" }, "");
+    }
+
+    function getFileIcon(ext) {
+      switch (ext) {
+        case 'rs': return '🦀';
+        case 'dart': return '🎯';
+        case 'html': return '🌐';
+        case 'css': return '🎨';
+        case 'js': case 'ts': return '📜';
+        case 'py': return '🐍';
+        case 'json': return '📦';
+        case 'md': return '📝';
+        default: return '📄';
+      }
+    }
+
+    // Filter File Tree in real-time
+    document.getElementById('ideFileFilter').addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      renderFileTree(cachedFilesTree, {}, query);
+    });
+
+    document.getElementById('btnRefreshFiles').addEventListener('click', () => {
+      loadWorkspaceFiles();
+    });
+
+    // 6. Open File in Monaco Editor
+    async function openIdeFile(filePath) {
+      currentOpenFilePath = filePath;
+      document.getElementById('activeTabTitle').textContent = filePath.split('/').pop();
+      document.getElementById('ideStatusFile').textContent = filePath;
+      document.getElementById('lblVibeTarget').textContent = filePath;
+
+      try {
+        const res = await fetch('/api/dev/file/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: filePath })
+        });
+        const data = await res.json();
+        if (data.success) {
+          currentFileContent = data.content;
+          document.getElementById('ideStatusLang').textContent = data.language.toUpperCase();
+
+          if (monacoEditor && monacoInstance) {
+            const oldModel = monacoEditor.getModel();
+            const newModel = monacoInstance.editor.createModel(data.content, data.language);
+            monacoEditor.setModel(newModel);
+            if (oldModel) oldModel.dispose();
+          }
+
+          const placeholder = document.getElementById('monacoPlaceholder');
+          if (placeholder) placeholder.style.display = 'none';
+        } else {
+          alert('Gagal membaca berkas: ' + data.error);
+        }
+      } catch (err) {
+        console.error('[IDE] Read error:', err);
+      }
+    }
+
+    // 7. Save File to Host
+    async function saveCurrentIdeFile() {
+      if (!currentOpenFilePath || !monacoEditor) {
+        alert('Pilih file yang ingin disimpan terlebih dahulu.');
+        return;
+      }
+      const content = monacoEditor.getValue();
+      const saveBtn = document.getElementById('btnSaveFile');
+      saveBtn.textContent = 'Menyimpan...';
+
+      try {
+        const res = await fetch('/api/dev/file/write', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: currentOpenFilePath, content: content })
+        });
+        const data = await res.json();
+        if (data.success) {
+          saveBtn.textContent = '✅ Tersimpan';
+          setTimeout(() => { saveBtn.textContent = '💾 Simpan'; }, 1500);
+        } else {
+          alert('Gagal menyimpan file: ' + data.error);
+          saveBtn.textContent = '💾 Simpan';
+        }
+      } catch (err) {
+        alert('Koneksi host gagal: ' + err.message);
+        saveBtn.textContent = '💾 Simpan';
+      }
+    }
+
+    document.getElementById('btnSaveFile').addEventListener('click', saveCurrentIdeFile);
+
+    // Send Active File to Vibe Studio
+    document.getElementById('btnSendToVibe').addEventListener('click', () => {
+      switchWorkspaceMode('vibe');
+      if (currentOpenFilePath) {
+        document.getElementById('vibePromptInput').value = `Refactor dan optimalkan berkas ${currentOpenFilePath}`;
+      }
+    });
+
+    // 8. Vibe Studio Agent & Prompt Runner
+    async function initVibeStudio() {
+      if (currentOpenFilePath) {
+        document.getElementById('lblVibeTarget').textContent = currentOpenFilePath;
+        document.getElementById('diffTargetFile').textContent = currentOpenFilePath;
+      }
+      try {
+        const res = await fetch('/api/dev/agent/harnesses');
+        const data = await res.json();
+        if (data.success && data.harnesses && data.harnesses.length > 0) {
+          const select = document.getElementById('vibeHarnessSelect');
+          select.innerHTML = '';
+          data.harnesses.forEach((h, idx) => {
+            const opt = document.createElement('option');
+            opt.value = h.id;
+            opt.textContent = `${h.name} [${h.badge}]`;
+            if (h.is_warm || idx === 0) {
+              opt.selected = true;
+            }
+            select.appendChild(opt);
+          });
+        }
+      } catch (e) {
+        console.warn('Could not load dynamic harnesses:', e);
+      }
+    }
+
+    document.querySelectorAll('.vibe-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const prompt = chip.getAttribute('data-p');
+        const input = document.getElementById('vibePromptInput');
+        input.value = prompt;
+        input.focus();
+      });
+    });
+
+    document.getElementById('btnRunVibe').addEventListener('click', async () => {
+      const prompt = document.getElementById('vibePromptInput').value.trim();
+      const harness = document.getElementById('vibeHarnessSelect').value;
+      const timeline = document.getElementById('vibeTimeline');
+      const diffPre = document.getElementById('diffCodeDisplay');
+      const runBtn = document.getElementById('btnRunVibe');
+
+      if (!prompt) {
+        alert('Masukkan deskripsi perbaikan kode terlebih dahulu.');
+        return;
+      }
+
+      runBtn.disabled = true;
+      runBtn.innerHTML = `<span>Mengeksekusi...</span>`;
+
+      // Live progress steps
+      timeline.innerHTML = `
+        <div class="timeline-card">
+          <div style="font-weight:600; color:#38bdf8; font-size:12px; margin-bottom:4px;">⚡ Mengirim instruksi ke ${harness}...</div>
+          <div style="font-size:11px; color:#cbd5e1;">Prompt: "${escapeHtml(prompt)}"</div>
+        </div>
+      `;
+
+      try {
+        const res = await fetch('/api/dev/agent/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            harness: harness,
+            prompt: prompt,
+            active_file: currentOpenFilePath || 'src/main.rs'
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Render Timeline Cards
+          timeline.innerHTML = '';
+          data.steps.forEach(step => {
+            const card = document.createElement('div');
+            card.className = 'timeline-card';
+            card.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-weight:600; color:#fff; font-size:12px;">${step.icon === 'brain' ? '🧠' : step.icon === 'file' ? '📂' : '💻'} ${escapeHtml(step.title)}</span>
+                <span style="font-family:var(--font-mono); font-size:10px; color:#64748b;">${step.time}</span>
+              </div>
+              <div style="font-size:11px; color:#94a3b8;">${escapeHtml(step.detail)}</div>
+            `;
+            timeline.appendChild(card);
+          });
+
+          // Render Colorized Diff
+          window.lastGeneratedCode = data.new_code || '';
+          renderColorizedDiff(data.diff);
+          document.getElementById('diffTargetFile').textContent = data.file;
+        } else {
+          timeline.innerHTML += `<div class="timeline-card" style="border-color:#f87171; color:#fca5a5;">Error: ${escapeHtml(data.error)}</div>`;
+        }
+      } catch (err) {
+        timeline.innerHTML += `<div class="timeline-card" style="border-color:#f87171; color:#fca5a5;">API Connection Failed: ${escapeHtml(err.message)}</div>`;
+      } finally {
+        runBtn.disabled = false;
+        runBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Vibecode Run</span>`;
+      }
+    });
+
+    function renderColorizedDiff(rawDiff) {
+      const diffPre = document.getElementById('diffCodeDisplay');
+      diffPre.innerHTML = '';
+      const lines = rawDiff.split('\n');
+
+      lines.forEach(line => {
+        const span = document.createElement('span');
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          span.className = 'diff-add';
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+          span.className = 'diff-del';
+        } else if (line.startsWith('@@')) {
+          span.className = 'diff-hunk';
+        }
+        span.textContent = line + '\n';
+        diffPre.appendChild(span);
+      });
+    }
+
+    // Approve Diff Action
+    document.getElementById('btnApproveDiff').addEventListener('click', async () => {
+      const targetFile = document.getElementById('diffTargetFile').textContent;
+      try {
+        const res = await fetch('/api/dev/agent/diff/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'apply', file: targetFile, new_code: window.lastGeneratedCode })
+        });
+        const data = await res.json();
+        alert(data.message || 'Diff berhasil diterapkan ke kode host!');
+        if (currentOpenFilePath === targetFile) {
+          openFileInEditor(targetFile);
+        }
+      } catch (err) {
+        alert('Gagal menerapkan diff: ' + err.message);
+      }
+    });
+
+    // Rollback Diff Action
+    document.getElementById('btnRollbackDiff').addEventListener('click', async () => {
+      const targetFile = document.getElementById('diffTargetFile').textContent;
+      try {
+        const res = await fetch('/api/dev/agent/diff/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'rollback', file: targetFile })
+        });
+        const data = await res.json();
+        alert(data.message || 'File berhasil di-rollback!');
+        document.getElementById('diffCodeDisplay').textContent = '// Diff dibatalkan & file di-rollback ke versi sebelumnya.';
+        if (currentOpenFilePath === targetFile) {
+          openFileInEditor(targetFile);
+        }
+      } catch (err) {}
+    });
+
+    // 9. Remote Localhost Port Forwarding Controller
+    async function scanDevPorts() {
+      const container = document.getElementById('portsPillsContainer');
+      try {
+        const res = await fetch('/api/dev/ports');
+        const data = await res.json();
+        if (data.success && data.ports && data.ports.length > 0) {
+          container.innerHTML = '';
+          data.ports.forEach((p, idx) => {
+            const pill = document.createElement('span');
+            pill.className = `port-pill ${idx === 0 ? 'active' : ''}`;
+            pill.setAttribute('data-port', p.port);
+            pill.textContent = `${p.port} (${p.label.split('/')[0].trim()})`;
+            pill.addEventListener('click', () => {
+              document.querySelectorAll('#portsPillsContainer .port-pill').forEach(el => el.classList.remove('active'));
+              pill.classList.add('active');
+              loadLocalhostPreview(p.port);
+            });
+            container.appendChild(pill);
+          });
+          loadLocalhostPreview(data.ports[0].port);
+        }
+      } catch (err) {
+        console.log('[Localhost] Scan failed:', err);
+      }
+    }
+
+    function loadLocalhostPreview(port) {
+      activeDevPort = port;
+      const url = `http://localhost:${port}`;
+      document.getElementById('localhostUrlInput').value = url;
+      document.getElementById('btnExternalOpen').href = url;
+      const iframe = document.getElementById('localhostIframe');
+      iframe.src = url;
+    }
+
+    document.getElementById('btnReloadIframe').addEventListener('click', () => {
+      const iframe = document.getElementById('localhostIframe');
+      iframe.src = iframe.src;
+    });
+
+    document.getElementById('btnScanPorts').addEventListener('click', () => {
+      scanDevPorts();
+    });
+
+    // Viewport Resizing for Localhost Preview (Desktop, iPad, iPhone)
+    document.querySelectorAll('.viewport-size-toggle .vsize-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.viewport-size-toggle .vsize-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const width = btn.getAttribute('data-w');
+        const iframeContainer = document.getElementById('iframeContainer');
+        iframeContainer.style.width = width;
+      });
+    });
+
+    // 10. Remote Mobile Emulator Frame Controller
+    let isLandscape = false;
+    let emulatorAnimFrame = null;
+
+    function startEmulatorCanvas() {
+      const emuCanvas = document.getElementById('emulatorCanvas');
+      if (!emuCanvas) return;
+      const emuCtx = emuCanvas.getContext('2d');
+
+      function renderEmulator() {
+        if (currentWorkspaceMode !== 'emulator') return;
+        // Mirror the desktop canvas into mobile canvas viewport
+        emuCtx.drawImage(canvas, 0, 0, emuCanvas.width, emuCanvas.height);
+        emulatorAnimFrame = requestAnimationFrame(renderEmulator);
+      }
+      if (emulatorAnimFrame) cancelAnimationFrame(emulatorAnimFrame);
+      renderEmulator();
+    }
+
+    document.getElementById('btnRotateEmulator').addEventListener('click', () => {
+      isLandscape = !isLandscape;
+      const bezel = document.getElementById('phoneBezel');
+      if (isLandscape) {
+        bezel.classList.add('landscape');
+      } else {
+        bezel.classList.remove('landscape');
+      }
+    });
+
+    document.getElementById('btnEmulatorBack').addEventListener('click', () => {
+      console.log('[Emulator] Sent Back navigation');
+    });
+    document.getElementById('btnEmulatorHome').addEventListener('click', () => {
+      console.log('[Emulator] Sent Home navigation');
+    });
+    document.getElementById('btnEmulatorApps').addEventListener('click', () => {
+      console.log('[Emulator] Sent Recents navigation');
     });
   </script>
 </body>

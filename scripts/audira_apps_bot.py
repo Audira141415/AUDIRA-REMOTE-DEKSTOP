@@ -3,6 +3,13 @@ import sys
 import json
 import time
 import socket
+
+# Force IPv4 resolution to prevent connection reset by peer on broken IPv6 routes
+_orig_getaddrinfo = socket.getaddrinfo
+def _ipv4_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+socket.getaddrinfo = _ipv4_getaddrinfo
+
 import hashlib
 import threading
 import urllib.request
@@ -145,6 +152,10 @@ def build_release_card_html(info):
         f"• 📡 Relay &amp; ID Server: <code>{RELAY_HOST}</code>\n"
         f"• 🔑 Public Key: <code>{PUBLIC_KEY_RUSTDESK}</code>\n"
         "• 🛡️ Digital Signature: <code>AgusDwiR_Audira.cer</code> (Audira Certified)\n\n"
+        "✨ <b>Pembaruan &amp; Perbaikan Terbaru:</b>\n"
+        "• <b>Penyatuan Toolbar Cepat:</b> Menghilangkan toolbar ganda; HUD Telemetri (Ping &amp; FPS) kini menyatu dalam 1 floating bar terpadu.\n"
+        "• <b>Tools Anotasi &amp; Diagnostik:</b> On-Screen Whiteboard dan System Drawer terintegrasi mulus di toolbar utama.\n"
+        "• <b>Pusat Kontrol (Control Center):</b> Dilengkapi identitas keamanan enkripsi E2EE dan mode channel P2P/Relay.\n\n"
         "📥 <b>Tautan Unduhan:</b> Klik tombol di bawah untuk mengunduh installer resmi:"
     )
     reply_markup = {

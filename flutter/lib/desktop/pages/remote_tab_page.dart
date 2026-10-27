@@ -11,12 +11,12 @@ import 'package:flutter_hbb/models/input_model.dart';
 import 'package:flutter_hbb/models/state_model.dart';
 import 'package:flutter_hbb/desktop/pages/remote_page.dart';
 import 'package:flutter_hbb/desktop/widgets/remote_toolbar.dart';
-import 'package:flutter_hbb/desktop/widgets/remote_control_center.dart';
 import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
 import 'package:flutter_hbb/desktop/widgets/material_mod_popup_menu.dart'
     as mod_menu;
 import 'package:flutter_hbb/desktop/widgets/popup_menu.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:bot_toast/bot_toast.dart';
 
@@ -140,38 +140,63 @@ class _ConnectionTabPageState extends State<ConnectionTabPage> {
         unSelectedTabBackgroundColor: Colors.transparent,
         selectedBorderColor: Colors.transparent,
         onWindowCloseButton: handleWindowCloseButton,
-        tail: Obx(() {
-          final tabs = tabController.state.value.tabs;
-          final sel = tabController.state.value.selected;
-          if (tabs.isEmpty || sel >= tabs.length) {
-            return const SizedBox.shrink();
-          }
-          final currentTab = tabs[sel];
-          final remotePage = currentTab.page is RemotePage
-              ? (currentTab.page as RemotePage)
-              : null;
-          final ffi = remotePage?.ffi;
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _RelativeMouseModeHint(tabController: tabController),
-              if (ffi != null) ...[
-                RemoteSessionHudWidget(peerId: currentTab.key, ffi: ffi),
-                ControlCenterButton(peerId: currentTab.key, ffi: ffi),
-              ],
-            ],
-          );
-        }),
+        tail: _RelativeMouseModeHint(tabController: tabController),
         pageViewBuilder: (pageView) => pageView,
         labelGetter: DesktopTab.tablabelGetter,
         tabBuilder: (key, icon, label, themeConf) => Obx(() {
-          final tabs = tabController.state.value.tabs;
-          final tabInfo = tabs.firstWhereOrNull((t) => t.key == key);
-          final remotePage = tabInfo?.page is RemotePage
-              ? (tabInfo!.page as RemotePage)
-              : null;
+          final connectionType = ConnectionTypeState.find(key);
+          if (!connectionType.isValid()) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                label,
+              ],
+            );
+          } else {
+            bool secure =
+                connectionType.secure.value == ConnectionType.strSecure;
+            bool direct =
+                connectionType.direct.value == ConnectionType.strDirect;
+            String msgConn = getConnectionText(
+                secure, direct, connectionType.stream_type.value);
+            var msgFingerprint = '${translate('Fingerprint')}:\n';
+            var fingerprint = FingerprintState.find(key).value;
+            if (fingerprint.isEmpty) {
+              fingerprint = 'N/A';
+            }
+            if (fingerprint.length > 5 * 8) {
+              var first = fingerprint.substring(0, 39);
+              var second = fingerprint.substring(40);
+              msgFingerprint += '$first\n$second';
+            } else {
+              msgFingerprint += fingerprint;
+            }
 
-          if (remotePage != null) {
+            final tab = Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                icon,
+                Tooltip(
+                  message: '$msgConn\n$msgFingerprint',
+                  child: SvgPicture.asset(
+                    'assets/${connectionType.secure.value}${connectionType.direct.value}.svg',
+                    width: themeConf.iconSize,
+                    height: themeConf.iconSize,
+                  ).paddingOnly(right: 5),
+                ),
+                label,
+                unreadMessageCountBuilder(UnreadChatCountState.find(key))
+                    .marginOnly(left: 4),
+              ],
+            );
+
+            final remotePage = tabController.state.value.tabs
+                .firstWhereOrNull((tab) => tab.key == key)
+                ?.page;
+            if (remotePage is! RemotePage) {
+              return tab;
+            }
             return Listener(
               onPointerDown: (e) {
                 if (e.kind != ui.PointerDeviceKind.mouse) {
@@ -186,20 +211,9 @@ class _ConnectionTabPageState extends State<ConnectionTabPage> {
                   );
                 }
               },
-              child: RemoteHeaderTabsWidget(
-                peerId: key,
-                ffi: remotePage.ffi,
-              ),
+              child: tab,
             );
           }
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              icon,
-              label,
-            ],
-          );
         }),
       ),
     );

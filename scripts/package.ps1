@@ -103,6 +103,8 @@ if (-not (Test-Path $webDist)) { New-Item -ItemType Directory -Path $webDist -Fo
 if (Test-Path $standaloneExe) {
     Copy-Item -Path $standaloneExe -Destination $rootExe -Force -ErrorAction SilentlyContinue
     Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-Full-Installer.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $distDir "AudiraDesk-Portable.exe") -Force -ErrorAction SilentlyContinue
+    Copy-Item -Path $standaloneExe -Destination (Join-Path $webDist "AudiraDesk-Portable.exe") -Force -ErrorAction SilentlyContinue
 }
 
 # Sign the binaries with official certificate

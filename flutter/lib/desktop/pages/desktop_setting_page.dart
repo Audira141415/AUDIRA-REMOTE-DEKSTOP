@@ -29,6 +29,7 @@ import 'package:flutter_hbb/models/user_model.dart';
 import '../widgets/diagnostics_dialog.dart';
 import '../widgets/audit_log_dialog.dart';
 import '../widgets/system_info_dialog.dart';
+import 'package:flutter_hbb/common/audira_digital_signature.dart';
 
 const double _kTabWidth = 200;
 const double _kTabHeight = 42;
@@ -3201,6 +3202,8 @@ class _AboutState extends State<_About> {
                 label: const Text('Info Spesifikasi & Diagnostik Sistem'),
                 onPressed: () => showSystemInfoDialog(context),
               ).marginSymmetric(vertical: 6.0),
+              const SizedBox(height: 8),
+              AudiraDigitalSignature.buildSignatureCard(context),
               const SizedBox(height: 8),
               Container(
                 decoration: const BoxDecoration(color: Color(0xFF2c8cff)),

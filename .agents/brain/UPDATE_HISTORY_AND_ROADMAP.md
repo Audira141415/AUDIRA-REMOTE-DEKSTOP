@@ -5,6 +5,38 @@
 
 ## 1. Log Riwayat Rilis & Arsitektur
 
+### Versi v1.6.0 (Zero AI Slop: 100% Real Engine Modern 3-Panel Host Command Center) — 2026-10-27
+- **Eliminasi Total Mock Data & AI Slop**:
+  - Semua saklar, status, dan kontrol pada [`flutter/lib/desktop/widgets/audira_modern_host_dashboard.dart`](file:///f:/AUDIRA-REMOTE-DEKSTOP/flutter/lib/desktop/widgets/audira_modern_host_dashboard.dart) dihubungkan langsung ke Rust core, Windows background service, dan C++ FFI:
+    - **Service Switch**: Terikat langsung ke `start_service(true/false)` dan `tag: 'stop-service'`, menghentikan/menjalankan layanan Windows nyata.
+    - **Status Pill (RTC & P2P)**: Membaca status real `stateGlobal.svcStatus` (🟢 Healthy • RTC Direct Active, 🟡 Connecting to relay, 🔴 Service stopped).
+    - **One-Time Key Generator**: Terhubung ke `bind.mainUpdateTemporaryPassword()`, timer countdown 5 menit, dan notifikasi refresh real-time.
+    - **Auto-Approve Toggle**: Menyimpan mode approval secara permanen ke konfigurasi Rust (`kOptionApproveMode` via `model.setApproveMode`).
+    - **Live Session Manager (Clients)**: Membaca daftar aktif `model.clients` secara live, menampilkan peer ID, nama workstation, status aktif/pending, tombol `Accept`/`Dismiss`, dan tombol `Disconnect` yang memutus koneksi via `bind.cmCloseConnection(connId)`.
+    - **LOCAL Node Telemetry**: Tab baru menampilkan nama hostname komputer lokal (`Platform.localHostname`), OS/Kernel, status DirectX DXGI monitor capture (`_displayCount`), audio WASAPI stereo loopback Opus, dan hak akses elevasi Windows UAC (`bind.mainCheckSuperUserPermission()`).
+- **Persistensi Preferensi Antarmuka (Dual-View)**:
+  - Pilihan antara *Modern Dashboard* dan *Classic View* tersimpan permanen di penyimpanan lokal RustDesk (`ui_modern_dashboard` via `bind.mainSetLocalOption`), tidak hilang saat aplikasi ditutup atau di-restart.
+- **Verifikasi Kualitas Kode & Analisis**:
+  - `flutter analyze`: **0 Errors, 0 Warnings** (100% clean).
+
+### Versi v1.5.9 (AI Vibe Coding & Next-Gen Cloud Workstation Studio Suite) — 2026-10-27
+- **Every Harness · One UI (AI Agent Gateway)**:
+  - Penambahan backend endpoints di [`scripts/audira_api.py`](file:///f:/AUDIRA-REMOTE-DEKSTOP/scripts/audira_api.py): `/api/dev/agent/harnesses` dan `/api/dev/agent/run` untuk mengorkestrasi Claude Code, OpenAI Codex CLI, Cursor Background Agent, Aider, dan Audira Copilot.
+  - Antarmuka Vibe Studio di [`web/viewer.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/viewer.html): Visual timeline langkah kerja AI (Thinking, File Inspection, Code Synthesis) dan Diff Reviewer interaktif (Green/Red diff) dengan tombol *Approve & Apply* serta *Rollback*.
+- **In-Browser Remote Monaco IDE**:
+  - Integrasi engine Monaco Editor (VS Code) langsung di Web Client Viewer.
+  - Explorer tree direktori repositori dengan integrasi status Git real-time (`M`, `??`).
+  - Hotkey `Ctrl+S` untuk auto-save berkas langsung ke host melalui endpoint `/api/dev/file/write`.
+- **Remote Localhost Dev Tunneling Manager**:
+  - Endpoint `/api/dev/ports` untuk auto-discovery server dev lokal (`3000`, `5173`, `8080`, `5050`).
+  - Tab *Localhost Tunnel* dengan responsive viewport toggle (Desktop 100%, iPad/Tablet 768px, Mobile iPhone 390px) dan live iframe web preview.
+- **Mobile Emulator Stream & Virtual Dev Touch Bar**:
+  - Mockup frame smartphone interaktif dengan rotasi layar fleksibel dan tombol navigasi perangkat (Back, Home, Recents).
+  - Virtual Dev Touch Bar (`Esc`, `Tab`, `Ctrl`, `Alt`, `Shift`, `{}`, `[]`, `=>`, `;`) untuk koding ergonomis di layar sentuh iPad dan ponsel.
+  - Mode video *Crisp Coding Text* 60 FPS untuk rendering font kode subpixel tanpa blur kompresi video.
+- **Web Portal Showcase**:
+  - Penambahan showcase hero section *"Remote Everything, Vibecode Everywhere"* dengan 8 badges menu pada [`web/index.html`](file:///f:/AUDIRA-REMOTE-DEKSTOP/web/index.html) dan tombol akses cepat 1-klik di simulator.
+
 ### Versi v1.5.3 (Production Web Auth & Version Handshake Gate) — 2026-10-20
 - **Penetapan Versi Tunggal SSOT (Single Source of Truth) v1.5.3**:
   - `src/version.rs`: `VERSION = "1.5.3"`, `BUILD_DATE = "2026-10-20 18:30"` (dikeluarkan dari `.gitignore` agar tersinkronisasi permanen).

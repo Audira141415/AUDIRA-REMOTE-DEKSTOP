@@ -1268,7 +1268,7 @@ class RustdeskImpl {
   }
 
   Future<bool> mainIsRoot({dynamic hint}) {
-    throw UnimplementedError("mainIsRoot");
+    return Future.value(false);
   }
 
   int getDoubleClickTime({dynamic hint}) {

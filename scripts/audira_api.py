@@ -19,6 +19,9 @@ import hashlib
 import base64
 import re
 import subprocess
+import shutil
+import difflib
+import urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -718,6 +721,237 @@ def send_wol_magic_packet(mac_address, broadcast_ip="255.255.255.255", port=9):
     formatted_mac = ":".join(clean_mac[i:i+2].upper() for i in range(0, 12, 2))
     return formatted_mac, sent_count
 
+# ==============================================================================
+# 25. VIBE CODING & CLOUD WORKSTATION ENGINE (Audira Vibe Studio)
+# ==============================================================================
+DEV_WORKSPACE_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+def get_dev_listening_ports():
+    """Detects active dev servers listening on localhost (e.g. 3000, 5173, 8080, etc.)"""
+    candidate_ports = [
+        (3000, "Node / React / Next.js"),
+        (3001, "Dev Service 3001"),
+        (4000, "API Gateway / Hexo"),
+        (4200, "Angular / Dev 4200"),
+        (5000, "Flask / Python Web"),
+        (5050, "Audira Web Portal"),
+        (5173, "Vite / Svelte / Vue"),
+        (5174, "Vite Secondary"),
+        (8000, "FastAPI / Django / PHP"),
+        (8080, "Webpack / Tomcat / Spring"),
+        (8081, "Metro Bundler (React Native)"),
+        (8888, "Jupyter / Python Dev"),
+        (9000, "PHP-FPM / Microservice"),
+        (21114, "Audira Management API"),
+        (21116, "Audira Rendezvous (hbbs)"),
+        (21117, "Audira Relay (hbbr)")
+    ]
+    detected = []
+    for port, label in candidate_ports:
+        is_open = False
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.06)
+                res = s.connect_ex(("127.0.0.1", port))
+                if res == 0:
+                    is_open = True
+        except Exception:
+            pass
+        if is_open:
+            detected.append({
+                "port": port,
+                "label": label,
+                "url": f"http://localhost:{port}",
+                "status": "online",
+                "is_dev": port not in (21114, 21116, 21117)
+            })
+    return detected
+
+def get_git_status_map(workspace_path):
+    """Runs git status --porcelain to get file statuses (M, ??, A, D)"""
+    status_map = {}
+    try:
+        res = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=workspace_path,
+            capture_output=True,
+            text=True,
+            timeout=3,
+            errors="replace"
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                if len(line) >= 4:
+                    code = line[:2].strip()
+                    file_path = line[3:].strip().replace('"', '')
+                    norm_path = os.path.normpath(file_path).replace("\\", "/")
+                    status_map[norm_path] = code
+    except Exception:
+        pass
+    return status_map
+
+def list_workspace_tree(root_dir, max_depth=3, current_depth=0):
+    """Recursively lists directory tree with size and file type tags"""
+    items = []
+    if current_depth > max_depth or not os.path.exists(root_dir):
+        return items
+    
+    ignored_names = {".git", "target", "node_modules", ".cargo", "dist", "__pycache__", ".vscode", ".idea"}
+    
+    try:
+        with os.scandir(root_dir) as entries:
+            sorted_entries = sorted(entries, key=lambda e: (not e.is_dir(), e.name.lower()))
+            for entry in sorted_entries:
+                if entry.name in ignored_names and current_depth > 0:
+                    continue
+                is_directory = entry.is_dir(follow_symlinks=False)
+                rel_path = os.path.relpath(entry.path, DEV_WORKSPACE_DIR).replace("\\", "/")
+                
+                item = {
+                    "name": entry.name,
+                    "path": rel_path,
+                    "is_dir": is_directory,
+                }
+                
+                if is_directory:
+                    if entry.name in ignored_names:
+                        item["children"] = []
+                        item["skipped"] = True
+                    else:
+                        item["children"] = list_workspace_tree(entry.path, max_depth, current_depth + 1)
+                else:
+                    try:
+                        stat = entry.stat(follow_symlinks=False)
+                        item["size"] = stat.st_size
+                    except Exception:
+                        item["size"] = 0
+                    _, ext = os.path.splitext(entry.name)
+                    item["ext"] = ext.lower().lstrip(".")
+                items.append(item)
+    except Exception as e:
+        print(f"[!] Error scanning {root_dir}: {e}")
+    return items
+
+def detect_language_by_filename(filename):
+    ext = os.path.splitext(filename)[1].lower().lstrip(".")
+    mapping = {
+        "rs": "rust",
+        "dart": "dart",
+        "js": "javascript",
+        "mjs": "javascript",
+        "jsx": "javascript",
+        "ts": "typescript",
+        "tsx": "typescript",
+        "py": "python",
+        "html": "html",
+        "css": "css",
+        "json": "json",
+        "md": "markdown",
+        "toml": "toml",
+        "yaml": "yaml",
+        "yml": "yaml",
+        "sh": "shell",
+        "bat": "bat",
+        "ps1": "powershell",
+        "sql": "sql",
+        "c": "c",
+        "cpp": "cpp",
+        "h": "cpp"
+    }
+    return mapping.get(ext, "plaintext")
+
+def get_installed_ai_harnesses():
+    """Lists available AI agent harnesses and their status (including Local GPU Ollama models)"""
+    harnesses = []
+
+    # 1. Dynamically probe local Ollama LLM engine
+    try:
+        req = urllib.request.Request("http://127.0.0.1:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            tags = json.loads(resp.read().decode("utf-8"))
+            local_models = tags.get("models", [])
+            
+            # Check currently loaded VRAM model
+            active_model_name = ""
+            try:
+                with urllib.request.urlopen("http://127.0.0.1:11434/api/ps", timeout=1.0) as ps_resp:
+                    ps_data = json.loads(ps_resp.read().decode("utf-8"))
+                    active_models = ps_data.get("models", [])
+                    if active_models:
+                        active_model_name = active_models[0].get("name", "")
+            except Exception:
+                pass
+
+            for m in local_models:
+                m_name = m.get("name", "")
+                is_warm = (m_name == active_model_name)
+                badge_text = "⚡ GPU VRAM Active" if is_warm else "Local GPU Engine"
+                model_icon = "deepseek" if "deepseek" in m_name.lower() else ("qwen" if "qwen" in m_name.lower() else "ollama")
+                harnesses.append({
+                    "id": f"ollama:{m_name}",
+                    "name": f"{m_name.upper()} (Local Neural Engine)",
+                    "description": f"Real-time AI running on host GPU CUDA (Offline, Zero Cloud Cost, Uncapped)",
+                    "installed": True,
+                    "active": True,
+                    "is_local_gpu": True,
+                    "is_warm": is_warm,
+                    "badge": badge_text,
+                    "icon": model_icon
+                })
+    except Exception:
+        pass
+
+    # 2. Cloud CLI Agent Harnesses
+    harnesses.extend([
+        {
+            "id": "claude_code",
+            "name": "Claude Code (Anthropic)",
+            "description": "Agentic coding CLI with tool-use, multi-file edits, and reasoning",
+            "installed": bool(shutil.which("claude")),
+            "active": True,
+            "badge": "Anthropic Claude 3.7",
+            "icon": "claude"
+        },
+        {
+            "id": "codex_cli",
+            "name": "OpenAI Codex CLI",
+            "description": "Fast code generation, terminal reasoning, and function completion",
+            "installed": bool(shutil.which("codex")),
+            "active": True,
+            "badge": "OpenAI Codex",
+            "icon": "openai"
+        },
+        {
+            "id": "cursor_agent",
+            "name": "Cursor Background Agent",
+            "description": "Multi-file semantic search, agentic refactor, and codebase indexer",
+            "installed": bool(shutil.which("cursor")),
+            "active": True,
+            "badge": "Cursor Core",
+            "icon": "cursor"
+        },
+        {
+            "id": "aider",
+            "name": "Aider Pair Programmer",
+            "description": "Git-integrated terminal pair programmer with automatic commits",
+            "installed": bool(shutil.which("aider")),
+            "active": True,
+            "badge": "Aider CLI",
+            "icon": "aider"
+        },
+        {
+            "id": "audira_copilot",
+            "name": "Audira Desk Native Copilot",
+            "description": "Embedded AI assistant for Audira Remote Desktop, network diagnostics & scripts",
+            "installed": True,
+            "active": True,
+            "badge": "Audira Engine",
+            "icon": "audira"
+        }
+    ])
+    return harnesses
+
+
 
 class AudiraAPIHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
@@ -1223,6 +1457,48 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"success": True, "state": state}).encode())
+            return
+
+        # 15. DEV PORTS DISCOVERY: Scanning localhost dev ports (/api/dev/ports)
+        if path == "/api/dev/ports":
+            ports = get_dev_listening_ports()
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "ports": ports, "count": len(ports)}).encode())
+            return
+
+        # 16. DEV AI AGENT HARNESSES: Supported & detected coding agents (/api/dev/agent/harnesses)
+        if path == "/api/dev/agent/harnesses":
+            harnesses = get_installed_ai_harnesses()
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": True, "harnesses": harnesses}).encode())
+            return
+
+        # 17. DEV WORKSPACE FILES: File tree & Git status (/api/dev/files)
+        if path == "/api/dev/files":
+            query = parse_qs(parsed.query)
+            sub_path = query.get("dir", [""])[0].strip()
+            target_dir = os.path.normpath(os.path.join(DEV_WORKSPACE_DIR, sub_path))
+            if not target_dir.startswith(DEV_WORKSPACE_DIR):
+                target_dir = DEV_WORKSPACE_DIR
+            tree = list_workspace_tree(target_dir, max_depth=3)
+            git_statuses = get_git_status_map(DEV_WORKSPACE_DIR)
+            self.send_response(200)
+            self.send_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "success": True,
+                "workspace": DEV_WORKSPACE_DIR,
+                "current_dir": os.path.relpath(target_dir, DEV_WORKSPACE_DIR).replace("\\", "/"),
+                "tree": tree,
+                "git_status": git_statuses
+            }).encode())
             return
 
         self.send_response(404)
@@ -2774,6 +3050,318 @@ class AudiraAPIHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
                 return
+
+        # 25. DEV FILE OPERATIONS: Read File Content for Remote IDE (/api/dev/file/read)
+        if path == "/api/dev/file/read":
+            try:
+                data = json.loads(body) if body else {}
+                rel_file = data.get("file", "").strip().lstrip("/\\")
+                full_path = os.path.normpath(os.path.join(DEV_WORKSPACE_DIR, rel_file))
+                if not full_path.startswith(DEV_WORKSPACE_DIR) or not os.path.isfile(full_path):
+                    self.send_response(404)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Berkas tidak ditemukan."}).encode())
+                    return
+
+                file_size = os.path.getsize(full_path)
+                if file_size > 2 * 1024 * 1024:
+                    content = f"[File exceeds 2MB limit: {file_size} bytes. Please use file manager to download.]"
+                else:
+                    with open(full_path, "r", encoding="utf-8", errors="replace") as f:
+                        content = f.read()
+
+                lang = detect_language_by_filename(full_path)
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "file": rel_file.replace("\\", "/"),
+                    "filename": os.path.basename(full_path),
+                    "language": lang,
+                    "size": file_size,
+                    "content": content
+                }).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 26. DEV FILE OPERATIONS: Write & Save File from Remote IDE (/api/dev/file/write)
+        if path == "/api/dev/file/write":
+            try:
+                data = json.loads(body) if body else {}
+                rel_file = data.get("file", "").strip().lstrip("/\\")
+                content = data.get("content", "")
+                full_path = os.path.normpath(os.path.join(DEV_WORKSPACE_DIR, rel_file))
+                if not full_path.startswith(DEV_WORKSPACE_DIR):
+                    self.send_response(403)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Akses path berkas di luar workspace ditolak."}).encode())
+                    return
+
+                os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                with open(full_path, "w", encoding="utf-8") as f:
+                    f.write(content)
+
+                add_audit_log("REMOTE_IDE_FILE_WRITE", rel_file, client_ip, "IDE_USER", f"Saved {rel_file} ({len(content)} chars)")
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "file": rel_file, "message": "Berkas berhasil disimpan ke host."}).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 27. DEV VIBE CODING & AGENT HARNESS: Run AI coding instruction (/api/dev/agent/run)
+        if path == "/api/dev/agent/run":
+            try:
+                data = json.loads(body) if body else {}
+                harness = data.get("harness", "ollama:deepseek-r1:8b")
+                prompt = data.get("prompt", "").strip()
+                active_file = data.get("active_file", "").replace("\\", "/").strip().lstrip("/\\")
+
+                if not prompt:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Prompt tidak boleh kosong."}).encode())
+                    return
+
+                now_ts = datetime.datetime.now().strftime("%H:%M:%S")
+
+                # Read existing file content if available
+                orig_content = ""
+                if active_file:
+                    target_full_path = os.path.normpath(os.path.join(DEV_WORKSPACE_DIR, active_file))
+                    if target_full_path.startswith(DEV_WORKSPACE_DIR) and os.path.isfile(target_full_path):
+                        try:
+                            with open(target_full_path, "r", encoding="utf-8", errors="ignore") as f:
+                                orig_content = f.read()
+                        except Exception:
+                            pass
+
+                # Resolve target model (Local GPU Ollama vs Cloud)
+                target_model = "deepseek-r1:8b"
+                if harness.startswith("ollama:"):
+                    target_model = harness[len("ollama:"):]
+                
+                # Check if Ollama is accessible
+                ollama_online = False
+                try:
+                    with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=1.5) as r:
+                        ollama_online = (r.status == 200)
+                except Exception:
+                    ollama_online = False
+
+                if ollama_online:
+                    # Construct genuine prompt for code refactoring/enhancement
+                    ext = active_file.split(".")[-1] if "." in active_file else "rust"
+                    ai_prompt = (
+                        f"You are an expert AI software engineer for AUDIRA Remote Desktop.\n"
+                        f"Target File: `{active_file or 'src/main.rs'}`\n\n"
+                    )
+                    if orig_content:
+                        ai_prompt += (
+                            f"Existing Source Code:\n"
+                            f"```{ext}\n{orig_content[:6000]}\n```\n\n"
+                        )
+                    ai_prompt += (
+                        f"User Request: {prompt}\n\n"
+                        f"Instructions:\n"
+                        f"1. Provide the complete modified file content or function with the requested changes applied.\n"
+                        f"2. Return the code enclosed inside a single ```{ext} ... ``` code block.\n"
+                        f"3. Do not include conversational greetings or explanations outside the code block."
+                    )
+
+                    payload = json.dumps({
+                        "model": target_model,
+                        "prompt": ai_prompt,
+                        "stream": False
+                    }).encode("utf-8")
+
+                    t0 = time.time()
+                    req = urllib.request.Request(
+                        "http://127.0.0.1:11434/api/generate",
+                        data=payload,
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=90) as resp:
+                        gen_data = json.loads(resp.read().decode("utf-8"))
+                    t_gen = time.time() - t0
+
+                    eval_count = gen_data.get("eval_count", 0)
+                    eval_dur = gen_data.get("eval_duration", 1) / 1e9
+                    tok_sec = eval_count / eval_dur if eval_dur > 0 else 0
+                    raw_resp = gen_data.get("response", "")
+
+                    # Extract code block
+                    code_matches = re.findall(r"```(?:\w+)?\s*([\s\S]*?)```", raw_resp)
+                    new_code = code_matches[-1].strip() if code_matches else raw_resp.strip()
+
+                    # Compute real unified diff
+                    if orig_content:
+                        orig_lines = orig_content.splitlines(keepends=True)
+                        new_lines = [l if l.endswith('\n') else l + '\n' for l in new_code.splitlines()]
+                        diff_lines = list(difflib.unified_diff(
+                            orig_lines,
+                            new_lines,
+                            fromfile=f"a/{active_file}",
+                            tofile=f"b/{active_file}"
+                        ))
+                        diff_text = "".join(diff_lines)
+                        if not diff_text:
+                            diff_text = f"--- a/{active_file}\n+++ b/{active_file}\n@@ -1 +1 @@\n // AI menegaskan tidak ada perubahan yang diperlukan atau kode identik."
+                    else:
+                        diff_text = f"--- /dev/null\n+++ b/{active_file or 'src/main.rs'}\n" + "\n".join(f"+{l}" for l in new_code.splitlines())
+
+                    steps = [
+                        {"time": now_ts, "icon": "brain", "title": f"Real Neural Inference ({target_model})", "detail": f"GPU CUDA | {tok_sec:.1f} tokens/s ({eval_count} tokens generated in {t_gen:.2f}s)"},
+                        {"time": now_ts, "icon": "file", "title": "Repo Context Analyzed", "detail": f"Target: {active_file or 'Workspace Root'} ({len(orig_content)} bytes read)"},
+                        {"time": now_ts, "icon": "code", "title": "Real Unified Diff Computed", "detail": f"Diff nyata berhasil dikalkulasi dari output inferensi neural network"}
+                    ]
+
+                    summary = f"Perubahan untuk '{prompt[:45]}' berhasil dirumuskan secara nyata oleh neural engine {target_model} ({tok_sec:.1f} tok/s di GPU VRAM)."
+                else:
+                    # Fallback if Ollama service is stopped
+                    new_code = f"// Audira Vibe Coding: {prompt}\n// Target: {active_file}\n"
+                    diff_text = (
+                        f"--- a/{active_file or 'src/main.rs'}\n"
+                        f"+++ b/{active_file or 'src/main.rs'}\n"
+                        f"@@ -1,5 +1,7 @@\n"
+                        f" // Audira Vibe Coding Generated Enhancement\n"
+                        f"+// Optimized by {harness.replace('_', ' ').title()}\n"
+                        f"+// Notice: Local Ollama service is offline on port 11434.\n"
+                    )
+                    steps = [
+                        {"time": now_ts, "icon": "brain", "title": f"Ollama Offline ({harness})", "detail": "Service Ollama lokal belum aktif pada http://127.0.0.1:11434."},
+                        {"time": now_ts, "icon": "file", "title": "Instruksi Aktivasi", "detail": "Jalankan 'ollama serve' pada terminal host untuk mengaktifkan AI GPU."},
+                        {"time": now_ts, "icon": "code", "title": "Mode Simulasi Aktif", "detail": "Menampilkan template diff hingga Ollama dijalankan."}
+                    ]
+                    summary = "Local Ollama service offline. Jalankan 'ollama serve' untuk inferensi nyata."
+
+                add_audit_log("VIBE_AGENT_RUN", harness, client_ip, "VIBE_STUDIO", f"Prompt: {prompt[:60]}")
+
+                self.send_response(200)
+                self.send_cors_headers()
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "harness": harness,
+                    "model": target_model,
+                    "prompt": prompt,
+                    "steps": steps,
+                    "diff": diff_text,
+                    "new_code": new_code,
+                    "file": active_file or "src/main.rs",
+                    "summary": summary
+                }).encode())
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
+        # 28. DEV VIBE CODING: Apply or Rollback Diff (/api/dev/agent/diff/apply)
+        if path == "/api/dev/agent/diff/apply":
+            try:
+                data = json.loads(body) if body else {}
+                action = data.get("action", "apply")
+                target_file = data.get("file", "").strip().lstrip("/\\")
+                new_code = data.get("new_code", "")
+
+                if not target_file:
+                    self.send_response(400)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Target file diperlukan."}).encode())
+                    return
+
+                full_path = os.path.normpath(os.path.join(DEV_WORKSPACE_DIR, target_file))
+                if not full_path.startswith(DEV_WORKSPACE_DIR):
+                    self.send_response(403)
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "Path traversal ditolak."}).encode())
+                    return
+
+                if action == "apply":
+                    if not new_code:
+                        self.send_response(400)
+                        self.send_cors_headers()
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"error": "Payload kode baru (new_code) kosong."}).encode())
+                        return
+
+                    # Create backup file (.bak)
+                    if os.path.isfile(full_path):
+                        try:
+                            shutil.copy2(full_path, full_path + ".bak")
+                        except Exception:
+                            pass
+
+                    # Ensure parent dir exists & write file
+                    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                    with open(full_path, "w", encoding="utf-8") as f:
+                        f.write(new_code)
+
+                    add_audit_log("VIBE_DIFF_APPLIED", "VIBE_STUDIO", client_ip, "WORKSPACE", f"Applied AI changes to {target_file}")
+
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "success": True,
+                        "action": "apply",
+                        "file": target_file,
+                        "message": f"Diff berhasil diterapkan ke file host: {target_file}! (Backup otomatis tersimpan di {target_file}.bak)"
+                    }).encode())
+                    return
+
+                elif action == "rollback":
+                    bak_path = full_path + ".bak"
+                    if os.path.isfile(bak_path):
+                        shutil.copy2(bak_path, full_path)
+                        os.remove(bak_path)
+                        add_audit_log("VIBE_DIFF_ROLLBACK", "VIBE_STUDIO", client_ip, "WORKSPACE", f"Rolled back {target_file}")
+                        msg = f"Rollback berhasil: {target_file} dikembalikan ke versi sebelum diff diterapkan."
+                    else:
+                        msg = f"Tidak ada cadangan .bak ditemukan untuk {target_file}."
+
+                    self.send_response(200)
+                    self.send_cors_headers()
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "success": True,
+                        "action": "rollback",
+                        "file": target_file,
+                        "message": msg
+                    }).encode())
+                    return
+            except Exception as e:
+                self.send_response(500)
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+                return
+
 
         self.send_response(404)
         self.send_cors_headers()

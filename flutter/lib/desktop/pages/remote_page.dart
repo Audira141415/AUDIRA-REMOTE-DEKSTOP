@@ -24,9 +24,9 @@ import '../widgets/kb_layout_type_chooser.dart';
 import '../widgets/tabbar_widget.dart';
 import '../widgets/whiteboard_overlay.dart';
 import '../widgets/remote_system_drawer.dart';
-import '../widgets/session_hud_bar.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'macos_full_screen_focus_recovery.dart';
+import '../widgets/audira_native_workspaces.dart';
 
 import 'package:flutter_hbb/native/custom_cursor.dart'
     if (dart.library.html) 'package:flutter_hbb/web/custom_cursor.dart';
@@ -709,6 +709,7 @@ class _RemotePageState extends State<RemotePage>
     _ffi.cursorModel.disposeImages();
     _rawKeyFocusNode.dispose();
     if (closeSession) {
+      AudiraWorkspaceModeState.delete(widget.id);
       clearWaylandKeyboardPromptSuppressedForConnection(sessionId.toString());
     }
     await _ffi.close(closeSession: closeSession);
@@ -750,6 +751,18 @@ class _RemotePageState extends State<RemotePage>
             }
           },
           setRemoteState: setState,
+          onToggleWhiteboard: () {
+            setState(() {
+              _whiteboardController.toggleActive();
+            });
+          },
+          onToggleDiagnostics: () {
+            setState(() {
+              _isDiagnosticsDrawerOpen = !_isDiagnosticsDrawerOpen;
+            });
+          },
+          isWhiteboardActive: _whiteboardController.isActive,
+          isDiagnosticsActive: _isDiagnosticsDrawerOpen,
         );
 
     bodyWidget() {
@@ -867,62 +880,25 @@ class _RemotePageState extends State<RemotePage>
               _ffi.ffiModel.pi.isSet.isFalse ? emptyOverlay() : Offstage(),
             ],
           ),
-          // Floating Live Session HUD Bar & Telemetry (Draggable anywhere)
+          // Detailed Quality Monitor (toggled from toolbar telemetry badge)
           Positioned(
             top: _hudTop,
             left: _hudLeft,
             right: _hudLeft == null ? 14 : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SessionHudBar(
-                  ffi: _ffi,
-                  onDrag: (delta) {
-                    setState(() {
-                      final screenWidth = MediaQuery.of(context).size.width;
-                      final curLeft = _hudLeft ??
-                          (screenWidth - 230.0)
-                              .clamp(10.0, screenWidth - 120.0);
-                      _hudLeft =
-                          (curLeft + delta.dx).clamp(10.0, screenWidth - 120.0);
-                      _hudTop = (_hudTop + delta.dy)
-                          .clamp(6.0, MediaQuery.of(context).size.height - 60.0);
-                    });
-                  },
-                  isWhiteboardActive: _whiteboardController.isActive,
-                  isDiagnosticsActive: _isDiagnosticsDrawerOpen,
-                  onToggleWhiteboard: () {
-                    setState(() {
-                      _whiteboardController.toggleActive();
-                    });
-                  },
-                  onToggleDiagnostics: () {
-                    setState(() {
-                      _isDiagnosticsDrawerOpen = !_isDiagnosticsDrawerOpen;
-                    });
-                  },
-                ),
-                // Detailed Quality Monitor sits attached below HUD when enabled and moves together
-                Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: QualityMonitor(
-                    _ffi.qualityMonitorModel,
-                    onDrag: (delta) {
-                      setState(() {
-                        final screenWidth = MediaQuery.of(context).size.width;
-                        final curLeft = _hudLeft ??
-                            (screenWidth - 230.0)
-                                .clamp(10.0, screenWidth - 120.0);
-                        _hudLeft =
-                            (curLeft + delta.dx).clamp(10.0, screenWidth - 120.0);
-                        _hudTop = (_hudTop + delta.dy)
-                            .clamp(6.0, MediaQuery.of(context).size.height - 60.0);
-                      });
-                    },
-                  ),
-                ),
-              ],
+            child: QualityMonitor(
+              _ffi.qualityMonitorModel,
+              onDrag: (delta) {
+                setState(() {
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final curLeft = _hudLeft ??
+                      (screenWidth - 230.0)
+                          .clamp(10.0, screenWidth - 120.0);
+                  _hudLeft =
+                      (curLeft + delta.dx).clamp(10.0, screenWidth - 120.0);
+                  _hudTop = (_hudTop + delta.dy)
+                      .clamp(6.0, MediaQuery.of(context).size.height - 60.0);
+                });
+              },
             ),
           ),
           // Interactive Whiteboard Overlay
@@ -972,7 +948,7 @@ class _RemotePageState extends State<RemotePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return WillPopScope(
+    final remoteDesktopView = WillPopScope(
         onWillPop: () async {
           clientClose(sessionId, _ffi);
           return false;
@@ -984,6 +960,24 @@ class _RemotePageState extends State<RemotePage>
           ChangeNotifierProvider.value(value: _ffi.canvasModel),
           ChangeNotifierProvider.value(value: _ffi.recordingModel),
         ], child: buildBody(context)));
+
+    return Obx(() {
+      final mode = AudiraWorkspaceModeState.find(widget.id).value;
+      if (mode == 'ide') {
+        return AudiraNativeIdeWorkspace(peerId: widget.id, ffi: _ffi);
+      } else if (mode == 'vibe') {
+        return AudiraNativeVibeWorkspace(peerId: widget.id, ffi: _ffi);
+      } else if (mode == 'localhost') {
+        return AudiraNativeLocalhostWorkspace(peerId: widget.id, ffi: _ffi);
+      } else if (mode == 'emulator') {
+        return AudiraNativeEmulatorWorkspace(
+          peerId: widget.id,
+          ffi: _ffi,
+          remoteChild: remoteDesktopView,
+        );
+      }
+      return remoteDesktopView;
+    });
   }
 
   void enterView(PointerEnterEvent evt) {

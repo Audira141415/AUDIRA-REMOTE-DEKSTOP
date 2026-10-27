@@ -1,0 +1,11 @@
+{
+  "creator": "Agus Dwi R (Audira)",
+  "owner_id": "AUDIRA-ORIGIN-AGUS-DWI-R",
+  "app_name": "AUDIRA-REMOTE-DEKSTOP",
+  "issued_date": "2026-10-24T23:08:51Z",
+  "canary_token": "0ad7c1721e80e8050ce814e8",
+  "legal_notice": "Hak Cipta Dilindungi Undang-Undang. Hak Kepemilikan Eksklusif Agus Dwi R.",
+  "digital_signature": "3a57381ba3e632f2f1ed9a59b88ddc551aca684b38ea83313ab1c9ce6b540c53",
+  "signature_algorithm": "HMAC-SHA256-AUD-V1",
+  "compact_token": "eyJjcmVhdG9yIjogIkFndXMgRHdpIFIgKEF1ZGlyYSkiLCAib3duZXJfaWQiOiAiQVVESVJBLU9SSUdJTi1BR1VTLURXSS1SIiwgImFwcF9uYW1lIjogIkFVRElSQS1SRU1PVEUtREVLU1RPUCIsICJpc3N1ZWRfZGF0ZSI6ICIyMDI2LTEwLTI0VDIzOjA4OjUxWiIsICJjYW5hcnlfdG9rZW4iOiAiMGFkN2MxNzIxZTgwZTgwNTBjZTgxNGU4IiwgImxlZ2FsX25vdGljZSI6ICJIYWsgQ2lwdGEgRGlsaW5kdW5naSBVbmRhbmctVW5kYW5nLiBIYWsgS2VwZW1pbGlrYW4gRWtza2x1c2lmIEFndXMgRHdpIFIuIiwgImRpZ2l0YWxfc2lnbmF0dXJlIjogIjNhNTczODFiYTNlNjMyZjJmMWVkOWE1OWI4OGRkYzU1MWFjYTY4NGIzOGVhODMzMTNhYjFjOWNlNmI1NDBjNTMiLCAic2lnbmF0dXJlX2FsZ29yaXRobSI6ICJITUFDLVNIQTI1Ni1BVUQtVjEifQ=="
+}

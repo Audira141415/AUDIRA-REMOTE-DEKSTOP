@@ -1196,6 +1196,10 @@ pub fn supported_hwdecodings() -> (bool, bool) {
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[inline]
 pub fn is_root() -> bool {
+    #[cfg(windows)]
+    return crate::platform::is_elevated(None).unwrap_or_default()
+        || crate::platform::is_root();
+    #[cfg(not(windows))]
     crate::platform::is_root()
 }
 

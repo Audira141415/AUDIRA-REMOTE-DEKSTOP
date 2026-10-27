@@ -56,12 +56,12 @@ def main():
         sys.exit(1)
 
     # 1. Ensure remote directories exist
-    ssh.exec_command(f"mkdir -p {REMOTE_PROJECT_DIR}/web/js {REMOTE_PROJECT_DIR}/web/css {REMOTE_PROJECT_DIR}/web/dist {REMOTE_PROJECT_DIR}/web/images")
+    ssh.exec_command(f"mkdir -p {REMOTE_PROJECT_DIR}/web/js {REMOTE_PROJECT_DIR}/web/css {REMOTE_PROJECT_DIR}/web/dist {REMOTE_PROJECT_DIR}/web/images {REMOTE_PROJECT_DIR}/scripts")
     time.sleep(1)
 
     sftp = ssh.open_sftp()
 
-    # 2. Upload Web Portal Files
+    # 2. Upload Web Portal Files & Core Scripts
     files_to_sync = [
         ("index.html", f"{REMOTE_PROJECT_DIR}/web/index.html"),
         ("admin.html", f"{REMOTE_PROJECT_DIR}/web/admin.html"),
@@ -71,7 +71,14 @@ def main():
         (r"js\hero-3d.js", f"{REMOTE_PROJECT_DIR}/web/js/hero-3d.js"),
         (r"js\app.js", f"{REMOTE_PROJECT_DIR}/web/js/app.js"),
         (r"js\admin.js", f"{REMOTE_PROJECT_DIR}/web/js/admin.js"),
+        (r"js\audira_shield.js", f"{REMOTE_PROJECT_DIR}/web/js/audira_shield.js"),
+        ("viewer.html", f"{REMOTE_PROJECT_DIR}/web/viewer.html"),
         ("nginx.conf", f"{REMOTE_PROJECT_DIR}/web/nginx.conf"),
+        (r"dist\AudiraDesk-Full-Installer.exe", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk-Full-Installer.exe"),
+        (r"dist\AudiraDesk-Portable.exe", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk-Portable.exe"),
+        (r"dist\AudiraDesk_RootCA.cer", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk_RootCA.cer"),
+        (r"dist\Trust_Audira_Certificate.bat", f"{REMOTE_PROJECT_DIR}/web/dist/Trust_Audira_Certificate.bat"),
+        (r"..\scripts\audira_api.py", f"{REMOTE_PROJECT_DIR}/scripts/audira_api.py"),
     ]
 
     print("\n[*] Starting SFTP file synchronization...")

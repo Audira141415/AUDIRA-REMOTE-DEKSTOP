@@ -26,6 +26,7 @@ import 'package:flutter_hbb/common/widgets/dialog.dart';
 import 'package:flutter_hbb/utils/http_service.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
 import '../widgets/system_info_dialog.dart';
+import '../widgets/audira_modern_host_dashboard.dart';
 
 class DesktopHomePage extends StatefulWidget {
   const DesktopHomePage({Key? key}) : super(key: key);
@@ -54,6 +55,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   final RxBool _editHover = false.obs;
   final RxBool _block = false.obs;
+  static final RxBool useModernDashboard =
+      (bind.mainGetLocalOption(key: 'ui_modern_dashboard') != 'N').obs;
+
+  static void setModernDashboard(bool enabled) {
+    useModernDashboard.value = enabled;
+    bind.mainSetLocalOption(
+        key: 'ui_modern_dashboard', value: enabled ? 'Y' : 'N');
+  }
 
   final GlobalKey _childKey = GlobalKey();
 
@@ -62,14 +71,22 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
     return _buildBlock(
-        child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildLeftPane(context),
-        if (!isIncomingOnly) const VerticalDivider(width: 1),
-        if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
-      ],
-    ));
+      child: Obx(() {
+        if (!isIncomingOnly && useModernDashboard.value) {
+          return AudiraModernHostDashboard(
+            onSwitchToClassicView: () => setModernDashboard(false),
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildLeftPane(context),
+            if (!isIncomingOnly) const VerticalDivider(width: 1),
+            if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
+          ],
+        );
+      }),
+    );
   }
 
   Widget _buildBlock({required Widget child}) {
@@ -130,6 +147,45 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           ),
         ),
       ),
+      if (!isIncomingOnly)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => setModernDashboard(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0284C7), Color(0xFF0369A1)],
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0284C7).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.dashboard_customize_rounded, color: Colors.white, size: 15),
+                  SizedBox(width: 8),
+                  Text(
+                    '⚡ Modern Hub',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       buildTip(context),
       if (!isOutgoingOnly) buildIDBoard(context),
       if (!isOutgoingOnly) buildPasswordBoard(context),

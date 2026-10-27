@@ -24,6 +24,8 @@ import './popup_menu.dart';
 import './kb_layout_type_chooser.dart';
 import 'package:flutter_hbb/utils/scale.dart';
 import 'package:flutter_hbb/common/widgets/custom_scale_base.dart';
+import 'package:bot_toast/bot_toast.dart';
+import 'audira_native_workspaces.dart';
 
 enum _ToolbarEdge { top, right, bottom, left }
 
@@ -452,6 +454,11 @@ class RemoteToolbar extends StatefulWidget {
   final Function(int) onEnterOrLeaveImageCleaner;
   final Function(VoidCallback) setRemoteState;
 
+  final VoidCallback? onToggleWhiteboard;
+  final VoidCallback? onToggleDiagnostics;
+  final bool isWhiteboardActive;
+  final bool isDiagnosticsActive;
+
   RemoteToolbar({
     Key? key,
     required this.id,
@@ -460,6 +467,10 @@ class RemoteToolbar extends StatefulWidget {
     required this.onEnterOrLeaveImageSetter,
     required this.onEnterOrLeaveImageCleaner,
     required this.setRemoteState,
+    this.onToggleWhiteboard,
+    this.onToggleDiagnostics,
+    this.isWhiteboardActive = false,
+    this.isDiagnosticsActive = false,
   }) : super(key: key);
 
   @override
@@ -469,7 +480,7 @@ class RemoteToolbar extends StatefulWidget {
 class _RemoteToolbarState extends State<RemoteToolbar> {
   late Debouncer<int> _debouncerHide;
   bool _isCursorOverImage = false;
-  final _fraction = 0.5.obs;
+  final _fraction = 0.85.obs;
   final _edge = _ToolbarEdge.top.obs;
   final _dragging = false.obs;
   // Live drag preview: where the toolbar would dock if the user dropped now.
@@ -579,7 +590,7 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
         1.0;
     final fractionBounds =
         _fractionBoundsForEdge(nextEdge, dragLeft, dragRight);
-    final nextFraction = (double.tryParse(rawFraction) ?? 0.5)
+    final nextFraction = (double.tryParse(rawFraction) ?? 0.85)
         .clamp(fractionBounds.left, fractionBounds.right)
         .toDouble();
     if (!mounted || syncSerial != _dockingOptionSyncSerial) return;
@@ -811,6 +822,8 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
       BuildContext context, _ToolbarEdge edge, bool isHorizontal) {
     final List<Widget> toolbarItems = [];
     toolbarItems.add(_PinMenu(state: widget.state));
+    toolbarItems.add(_AudiraWorkspaceModeMenu(id: widget.id, ffi: widget.ffi));
+    toolbarItems.add(_buildToolbarDivider(isHorizontal));
     toolbarItems.add(Obx(() {
       final privacyModeState = PrivacyModeState.find(widget.id);
       if ((privacyModeState.isEmpty ||
@@ -858,6 +871,32 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
       toolbarItems.add(_VoiceCallMenu(id: widget.id, ffi: widget.ffi));
     }
     if (!isWeb) toolbarItems.add(_RecordMenu());
+
+    // Divider before telemetry & utilities
+    toolbarItems.add(_buildToolbarDivider(isHorizontal));
+
+    // Live Telemetry: Ping & FPS Badge
+    toolbarItems.add(_LatencyFpsBadge(ffi: widget.ffi, isHorizontal: isHorizontal));
+
+    // Whiteboard Annotation
+    if (widget.onToggleWhiteboard != null) {
+      toolbarItems.add(_WhiteboardMenuButton(
+        onToggle: widget.onToggleWhiteboard,
+        isActive: widget.isWhiteboardActive,
+      ));
+    }
+
+    // Performance & System Diagnostics
+    if (widget.onToggleDiagnostics != null) {
+      toolbarItems.add(_DiagnosticsMenuButton(
+        onToggle: widget.onToggleDiagnostics,
+        isActive: widget.isDiagnosticsActive,
+      ));
+    }
+
+    // Divider before Close
+    toolbarItems.add(_buildToolbarDivider(isHorizontal));
+
     toolbarItems.add(_CloseMenu(id: widget.id, ffi: widget.ffi));
     final toolbarBorderRadius = BorderRadius.all(Radius.circular(10.0));
     // innerAxis: how the toolbar icons themselves flow.
@@ -2975,6 +3014,193 @@ class _RecordMenu extends StatelessWidget {
   }
 }
 
+Widget _buildToolbarDivider(bool isHorizontal) {
+  return Container(
+    width: isHorizontal ? 1 : 16,
+    height: isHorizontal ? 18 : 1,
+    margin: EdgeInsets.symmetric(
+      horizontal: isHorizontal ? 4 : 0,
+      vertical: isHorizontal ? 0 : 4,
+    ),
+    color: const Color(0xFF334155),
+  );
+}
+
+class _LatencyFpsBadge extends StatelessWidget {
+  final FFI ffi;
+  final bool isHorizontal;
+  const _LatencyFpsBadge({Key? key, required this.ffi, required this.isHorizontal}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: ffi.qualityMonitorModel,
+      child: Consumer<QualityMonitorModel>(
+        builder: (context, qModel, _) {
+          final data = qModel.data;
+          final delayMs = int.tryParse(data.delay ?? '') ?? 0;
+          final fps = data.fps ?? '60';
+
+          return Tooltip(
+            message: 'Klik untuk ${qModel.show ? "sembunyikan" : "tampilkan"} rincian telemetri',
+            child: InkWell(
+              borderRadius: BorderRadius.circular(6),
+              onTap: () async {
+                await bind.sessionToggleOption(
+                    sessionId: ffi.sessionId,
+                    value: 'show-quality-monitor');
+                ffi.qualityMonitorModel
+                    .checkShowQualityMonitor(ffi.sessionId);
+              },
+              child: Container(
+                height: isHorizontal ? _ToolbarTheme.buttonSize : null,
+                width: isHorizontal ? null : _ToolbarTheme.buttonSize,
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                margin: const EdgeInsets.symmetric(
+                    horizontal: _ToolbarTheme.buttonHMargin,
+                    vertical: _ToolbarTheme.buttonVMargin),
+                decoration: BoxDecoration(
+                  color: qModel.show
+                      ? const Color(0xFF334155)
+                      : const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: qModel.show
+                        ? const Color(0xFF00D2FF)
+                        : const Color(0xFF334155),
+                    width: 0.8,
+                  ),
+                ),
+                child: isHorizontal
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: delayMs < 60
+                                  ? const Color(0xFF10B981)
+                                  : (delayMs < 120
+                                      ? const Color(0xFFF59E0B)
+                                      : const Color(0xFFEF4444)),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${delayMs}ms',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${fps}fps',
+                            style: const TextStyle(
+                              color: Color(0xFF38BDF8),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 5,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: delayMs < 60
+                                  ? const Color(0xFF10B981)
+                                  : (delayMs < 120
+                                      ? const Color(0xFFF59E0B)
+                                      : const Color(0xFFEF4444)),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '$delayMs',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _WhiteboardMenuButton extends StatelessWidget {
+  final VoidCallback? onToggle;
+  final bool isActive;
+  const _WhiteboardMenuButton({
+    Key? key,
+    this.onToggle,
+    this.isActive = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (onToggle == null) return const Offstage();
+    return _IconMenuButton(
+      icon: Icon(
+        Icons.draw_outlined,
+        size: 16,
+        color: isActive ? const Color(0xFFFF2A6D) : Colors.white,
+      ),
+      tooltip: 'On-Screen Whiteboard / Anotasi',
+      onPressed: onToggle,
+      color: isActive
+          ? const Color(0xFFFF2A6D).withOpacity(0.3)
+          : const Color(0xFF1E293B),
+      hoverColor: const Color(0xFFFF2A6D).withOpacity(0.5),
+    );
+  }
+}
+
+class _DiagnosticsMenuButton extends StatelessWidget {
+  final VoidCallback? onToggle;
+  final bool isActive;
+  const _DiagnosticsMenuButton({
+    Key? key,
+    this.onToggle,
+    this.isActive = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (onToggle == null) return const Offstage();
+    return _IconMenuButton(
+      icon: Icon(
+        Icons.analytics_outlined,
+        size: 16,
+        color: isActive ? const Color(0xFF05D9E8) : Colors.white,
+      ),
+      tooltip: 'System Info & Diagnostics Drawer',
+      onPressed: onToggle,
+      color: isActive
+          ? const Color(0xFF05D9E8).withOpacity(0.3)
+          : const Color(0xFF1E293B),
+      hoverColor: const Color(0xFF05D9E8).withOpacity(0.5),
+    );
+  }
+}
+
 class _CloseMenu extends StatelessWidget {
   final String id;
   final FFI ffi;
@@ -2994,6 +3220,62 @@ class _CloseMenu extends StatelessWidget {
       },
       color: _ToolbarTheme.redColor,
       hoverColor: _ToolbarTheme.hoverRedColor,
+    );
+  }
+}
+
+class _AudiraWorkspaceModeMenu extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+
+  const _AudiraWorkspaceModeMenu({
+    Key? key,
+    required this.id,
+    required this.ffi,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconSubmenuButton(
+      tooltip: 'Audira Workspace Modes',
+      icon: const Icon(
+        Icons.auto_awesome,
+        size: 16,
+        color: Colors.white,
+      ),
+      ffi: ffi,
+      color: const Color(0xFF6366F1),
+      hoverColor: const Color(0xFF4F46E5),
+      menuChildrenGetter: (state) {
+        return kAudiraModes.map((mode) {
+          final isCurrent = AudiraWorkspaceModeState.find(id).value == mode.key;
+          return MenuItemButton(
+            leadingIcon: Icon(
+              mode.icon,
+              size: 16,
+              color: isCurrent ? const Color(0xFF38BDF8) : const Color(0xFF94A3B8),
+            ),
+            trailingIcon: isCurrent
+                ? const Icon(Icons.check, size: 14, color: Color(0xFF38BDF8))
+                : null,
+            onPressed: () {
+              AudiraWorkspaceModeState.find(id).value = mode.key;
+              BotToast.showText(
+                text: 'Beralih ke mode ${mode.label}',
+                duration: const Duration(seconds: 2),
+              );
+            },
+            child: Text(
+              mode.label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                color: isCurrent ? const Color(0xFF38BDF8) : Colors.white,
+              ),
+            ),
+          );
+        }).toList();
+      },
     );
   }
 }
