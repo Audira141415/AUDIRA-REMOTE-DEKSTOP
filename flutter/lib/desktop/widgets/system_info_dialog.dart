@@ -76,7 +76,7 @@ void showSystemInfoDialog(BuildContext context, {OverlayDialogManager? dialogMan
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: MyTheme.accent.withOpacity(0.15),
+              color: MyTheme.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.info_outline_rounded, color: MyTheme.accent, size: 24),
@@ -92,7 +92,7 @@ void showSystemInfoDialog(BuildContext context, {OverlayDialogManager? dialogMan
                 ),
                 Text(
                   'Identitas perangkat keras, sistem operasi, dan status konektivitas',
-                  style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7)),
+                  style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7)),
                 ),
               ],
             ),

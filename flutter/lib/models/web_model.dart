@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
-import 'dart:typed_data';
 import 'dart:js';
 import 'dart:html';
 import 'dart:async';

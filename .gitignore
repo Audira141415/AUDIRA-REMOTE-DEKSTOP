@@ -4,6 +4,7 @@
 .idea
 .DS_Store
 .env
+scratch/
 libsciter-gtk.so
 src/ui/inline.rs
 extractor
@@ -72,6 +73,8 @@ flutter/windows/flutter/ephemeral/
 flutter/build/**
 /flutter/build/
 scripts/cloudflare_ddns.json
+scripts/keys/
+scripts/data/telegram_apps_config.json
 /dist/
 /web/dist/
 *.cer

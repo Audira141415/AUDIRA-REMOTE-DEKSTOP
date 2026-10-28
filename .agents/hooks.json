@@ -1,19 +1,29 @@
 {
-  "$schema": "https://json.schemastore.org/partial-config.json",
-  "version": "1.0",
-  "hooks": {
-    "audit_check": {
-      "description": "Runs comprehensive health audit of .agents skills, rules, and brain documents",
-      "command": "python scripts/audit_agents.py",
-      "trigger": "pre-commit"
-    },
-    "i18n_guard": {
-      "description": "Prevents unauthorized modifications to template.rs and it.rs",
-      "paths": [
-        "src/lang/template.rs",
-        "src/lang/it.rs"
-      ],
-      "action": "warn"
-    }
-  }
+    "audira-auto-skill-injector":  {
+                                       "PreInvocation":  [
+                                                             {
+                                                                 "command":  "node -e \"const fs=require(\u0027fs\u0027);for(const d of[\u0027F:\u0027,\u0027D:\u0027,\u0027E:\u0027,\u0027C:\u0027,\u0027G:\u0027]){const p=d+\u0027/AUDIRA-ALL-SKILL/scripts/auto-skill-injector.js\u0027;if(fs.existsSync(p)){require(p);break;}}\"",
+                                                                 "timeout":  10,
+                                                                 "type":  "command"
+                                                             }
+                                                         ],
+                                       "enabled":  true
+                                   },
+    "hooks":  {
+                  "audit_check":  {
+                                      "description":  "Runs comprehensive health audit of .agents skills, rules, and brain documents",
+                                      "command":  "python scripts/audit_agents.py",
+                                      "trigger":  "pre-commit"
+                                  },
+                  "i18n_guard":  {
+                                     "description":  "Prevents unauthorized modifications to template.rs and it.rs",
+                                     "paths":  [
+                                                   "src/lang/template.rs",
+                                                   "src/lang/it.rs"
+                                               ],
+                                     "action":  "warn"
+                                 }
+              },
+    "$schema":  "https://json.schemastore.org/partial-config.json",
+    "version":  "1.0"
 }

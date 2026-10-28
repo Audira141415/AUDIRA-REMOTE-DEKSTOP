@@ -1,8 +1,18 @@
+import os
 import paramiko
+try:
+    import env_loader
+except ImportError:
+    pass
+
+HOST = os.getenv("AUDIRA_SSH_HOST", "192.168.100.175")
+PORT = int(os.getenv("AUDIRA_SSH_PORT", "22"))
+USER = os.getenv("AUDIRA_SSH_USER", "audira")
+PASS = os.getenv("AUDIRA_SSH_PASS", "")
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect('192.168.100.175', port=22, username='audira', password='Sigma1993', timeout=15)
+ssh.connect(HOST, port=PORT, username=USER, password=PASS or None, timeout=15)
 sftp = ssh.open_sftp()
 
 print("[*] Uploading audira_api.py...")
@@ -51,7 +61,7 @@ with sftp.file('/tmp/audira-api.service', 'w') as f:
 sftp.close()
 
 def run_sudo(cmd):
-    full_cmd = f"echo Sigma1993 | sudo -S {cmd}"
+    full_cmd = f"echo {PASS} | sudo -S {cmd}" if PASS else f"sudo -n {cmd}"
     stdin, stdout, stderr = ssh.exec_command(full_cmd)
     out = stdout.read().decode()
     err = stderr.read().decode()

@@ -1,16 +1,20 @@
 import os
 import paramiko
+try:
+    import env_loader
+except ImportError:
+    pass
 
-HOST = "192.168.100.175"
-PORT = 22
-USER = "audira"
-PASS = "Sigma1993"
+HOST = os.getenv("AUDIRA_SSH_HOST", "192.168.100.175")
+PORT = int(os.getenv("AUDIRA_SSH_PORT", "22"))
+USER = os.getenv("AUDIRA_SSH_USER", "audira")
+PASS = os.getenv("AUDIRA_SSH_PASS", "")
 REMOTE_PROJECT_DIR = "/home/audira/projects/audira-remote-desktop"
 
 print(f"[*] Connecting to {USER}@{HOST}:{PORT}...")
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(HOST, port=PORT, username=USER, password=PASS, timeout=15)
+ssh.connect(HOST, port=PORT, username=USER, password=PASS or None, timeout=15)
 print("[+] SSH connection established successfully!")
 
 # 1. Create directories

@@ -245,27 +245,35 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
                         openMonitorInTheSameTab(i, ffi, ffi.ffiModel.pi);
                       }
                     },
-                    hoverColor: Colors.black.withOpacity(0.04),
+                    onSecondaryTap: () {
+                      if (d != null) {
+                        openMonitorInNewTabOrWindow(i, peerId, ffi.ffiModel.pi);
+                      }
+                    },
+                    hoverColor: Colors.black.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      height: 30,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const _MonitorTabIcon(isSelected: false),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.normal,
-                              color: isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF334155),
+                    child: Tooltip(
+                      message: 'Klik untuk beralih ke Monitor ${i + 1}\nKlik kanan untuk buka di jendela baru',
+                      child: Container(
+                        height: 30,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const _MonitorTabIcon(isSelected: false),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal,
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF334155),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -283,8 +291,101 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
                     height: 14,
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     color: isDark
-                        ? const Color(0xFF475569).withOpacity(0.5)
+                        ? const Color(0xFF475569).withValues(alpha: 0.5)
                         : const Color(0xFFB0B7BE),
+                  ),
+                ),
+              );
+            }
+          }
+
+          // All Monitors tab if multi-monitor
+          if (count > 1) {
+            final isAll = curDisplay == kAllDisplayValue;
+            if (tabs.isNotEmpty) {
+              tabs.add(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Container(
+                    width: 1,
+                    height: 14,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    color: isDark
+                        ? const Color(0xFF475569).withValues(alpha: 0.5)
+                        : const Color(0xFFB0B7BE),
+                  ),
+                ),
+              );
+            }
+            if (isAll) {
+              tabs.add(
+                CustomPaint(
+                  painter: ChromeTabPainter(
+                    color: isDark ? const Color(0xFF334155) : Colors.white,
+                  ),
+                  child: Container(
+                    height: 31,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.grid_view_rounded,
+                            size: 13, color: Color(0xFF38BDF8)),
+                        const SizedBox(width: 5),
+                        Text(
+                          translate('All monitors'),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : const Color(0xFF1E293B),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              tabs.add(
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 1),
+                  child: InkWell(
+                    onTap: () {
+                      openMonitorInTheSameTab(
+                          kAllDisplayValue, ffi, ffi.ffiModel.pi);
+                    },
+                    hoverColor: Colors.black.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Tooltip(
+                      message: translate('All monitors'),
+                      child: Container(
+                        height: 30,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.grid_view_rounded,
+                                size: 13,
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B)),
+                            const SizedBox(width: 5),
+                            Text(
+                              translate('All monitors'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal,
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF334155),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -300,7 +401,7 @@ class RemoteHeaderTabsWidget extends StatelessWidget {
                 height: 14,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 color: isDark
-                    ? const Color(0xFF475569).withOpacity(0.5)
+                    ? const Color(0xFF475569).withValues(alpha: 0.5)
                     : const Color(0xFFB0B7BE),
               ),
             ),
@@ -399,7 +500,7 @@ class _RemoteSessionHudWidgetState extends State<RemoteSessionHudWidget> {
           color: isDark ? const Color(0x33000000) : const Color(0xFFF1F5F9),
           borderRadius: BorderRadius.circular(5),
           border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.06) : const Color(0xFFE2E8F0),
+            color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE2E8F0),
             width: 0.8,
           ),
         ),
@@ -498,7 +599,7 @@ class _ControlCenterButtonState extends State<ControlCenterButton> {
             color: isDark ? const Color(0x33334155) : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : const Color(0xFFE2E8F0),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
               width: 0.8,
             ),
           ),
@@ -555,7 +656,7 @@ class _ControlCenterDropdown extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.18),
+              color: Colors.black.withValues(alpha: 0.18),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),

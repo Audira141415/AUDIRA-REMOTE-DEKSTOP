@@ -108,7 +108,16 @@ Write-Host "      Registri BuildDate diperbarui: $buildDateStr" -ForegroundColor
 
 # 6. Start Service
 if (-not $NoStart) {
-    Write-Host "[6/6] Menjalankan kembali Windows Service 'Audira Desk'..." -ForegroundColor Yellow
+    Write-Host "[6/6] Memastikan & menjalankan Windows Service 'Audira Desk'..." -ForegroundColor Yellow
+    $svcCheck = Get-Service -Name "Audira Desk" -ErrorAction SilentlyContinue
+    if (-not $svcCheck) {
+        Write-Host "      Mendaftarkan background service 'Audira Desk' (start=auto)..." -ForegroundColor Cyan
+        $targetExe = Join-Path $installDir "AudiraDesk.exe"
+        if (-not (Test-Path $targetExe)) { $targetExe = Join-Path $installDir "Audira Desk.exe" }
+        $binPath = "`"$targetExe`" --service"
+        & sc.exe create "Audira Desk" binpath= $binPath start= auto DisplayName= "Audira Desk Service" | Out-Null
+        & sc.exe description "Audira Desk" "AUDIRA Remote Desktop Host & Rendezvous Service" | Out-Null
+    }
     Start-Service -Name "Audira Desk" -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 1
     $finalSvc = Get-Service -Name "Audira Desk" -ErrorAction SilentlyContinue

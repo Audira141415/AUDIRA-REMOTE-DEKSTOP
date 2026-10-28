@@ -1687,11 +1687,11 @@ Widget build_more(BuildContext context, {bool invert = false}) {
           radius: 14,
           backgroundColor: hover.value
               ? (invert
-                  ? Theme.of(context).colorScheme.background
+                  ? Theme.of(context).colorScheme.surface
                   : Theme.of(context).scaffoldBackgroundColor)
               : (invert
                   ? Theme.of(context).scaffoldBackgroundColor
-                  : Theme.of(context).colorScheme.background),
+                  : Theme.of(context).colorScheme.surface),
           child: Icon(Icons.more_vert,
               size: 18,
               color: hover.value
@@ -1700,7 +1700,7 @@ Widget build_more(BuildContext context, {bool invert = false}) {
                       .textTheme
                       .titleLarge
                       ?.color
-                      ?.withOpacity(0.5)))));
+                      ?.withValues(alpha: 0.5)))));
 }
 
 class TagPainter extends CustomPainter {

@@ -9,11 +9,15 @@ import os
 import sys
 import time
 import paramiko
+try:
+    import env_loader
+except ImportError:
+    pass
 
-HOST = "192.168.100.175"
-PORT = 22
-USER = "audira"
-PASS = "Sigma1993"
+HOST = os.getenv("AUDIRA_SSH_HOST", "192.168.100.175")
+PORT = int(os.getenv("AUDIRA_SSH_PORT", "22"))
+USER = os.getenv("AUDIRA_SSH_USER", "audira")
+PASS = os.getenv("AUDIRA_SSH_PASS", "")
 REMOTE_PROJECT_DIR = "/home/audira/projects/audira-remote-desktop"
 LOCAL_WEB_DIR = r"f:\AUDIRA-REMOTE-DEKSTOP\web"
 

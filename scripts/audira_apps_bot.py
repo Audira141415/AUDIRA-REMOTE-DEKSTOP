@@ -48,12 +48,16 @@ def load_config():
                 return json.load(f)
         except Exception:
             pass
+    try:
+        import env_loader
+    except ImportError:
+        pass
     return {
-        "bot_token": "8536577910:AAFOwjhdV2TCTgkcLSTGmvslhon7RANJJCM",
-        "chat_id": "-1003961181911",
-        "thread_id": 2,
+        "bot_token": os.getenv("AUDIRA_TELEGRAM_BOT_TOKEN", ""),
+        "chat_id": os.getenv("AUDIRA_TELEGRAM_CHAT_ID", "-1003961181911"),
+        "thread_id": int(os.getenv("AUDIRA_TELEGRAM_THREAD_ID", "2")),
         "group_name": "Audira NEXUS | App Operations & Fleet Gateway",
-        "api_url": "http://127.0.0.1:5050"
+        "api_url": os.getenv("AUDIRA_API_URL", "http://127.0.0.1:5050")
     }
 
 def save_config(cfg):

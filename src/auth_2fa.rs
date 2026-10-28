@@ -248,6 +248,21 @@ pub async fn send_password_to_telegram(id: &str, password: &str) -> ResultType<(
     Ok(())
 }
 
+pub async fn send_brute_force_alert_to_telegram(attacker_ip: &str, attempts: i32) -> ResultType<()> {
+    let bot = match TelegramBot::get()? {
+        Some(b) => b,
+        None => return Ok(()),
+    };
+    let hostname = crate::common::hostname();
+    let my_id = Config::get_id();
+    let text = format!(
+        "🚨 *PERINGATAN KEAMANAN AUDIRA*\n━━━━━━━━━━━━━━━━━━━━━━\n⚠️ Terdeteksi *{}* kali percobaan password salah berturut-turut!\n💻 *Host:* `{}`\n🆔 *Device ID:* `{}`\n🌐 *IP Penyerang:* `{}`\n🔄 _Password sementara telah otomatis dirotasi demi keamanan._\n━━━━━━━━━━━━━━━━━━━━━━",
+        attempts, hostname, my_id, attacker_ip
+    );
+    send_message_to_telegram(&text, &bot, None).await?;
+    Ok(())
+}
+
 pub async fn send_approval_request_to_telegram(
     conn_id: i32,
     peer_id: &str,

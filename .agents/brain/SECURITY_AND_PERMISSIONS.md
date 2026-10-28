@@ -85,3 +85,31 @@ Host memiliki kontrol mutlak untuk memberikan atau mencabut izin berikut secara 
 - **Display Blanking:** Mengirim perintah ke driver display target untuk mematikan monitor fisik atau menampilkan gambar overlay hitam solid tak bertuan.
 - **Local Input Suppression:** Memblokir input fisik dari keyboard dan mouse lokal host untuk mencegah pihak ketiga melihat data rahasia atau mengganggu sesi perbaikan.
 - **Auto-Recovery Safe Release:** Jika koneksi jaringan terputus, monitor host dan input fisik otomatis dipulihkan ke status aktif dalam waktu < 2 detik.
+
+---
+
+## 6. Telegram Bot Anti-Brute-Force & Real-Time Security Alerts
+- **Real-Time Threshold Monitoring:** Diimplementasikan pada `src/server/connection.rs` dan `src/auth_2fa.rs`.
+- **Automatic Password Rotation:** Jika terjadi kegagalan password sementara berturut-turut melebihi ambang batas, host langsung me-rotate password sementara secara otomatis.
+- **Instant Security Dispatch:** Host mengirimkan pesan darurat berformat Markdown ke Telegram Bot pemilik PC yang memuat:
+  - Jumlah upaya serangan brute-force.
+  - Device ID host.
+  - Alamat IP penyerang.
+  - Konfirmasi rotasi instan password.
+
+---
+
+## 7. Disconnect Workstation Auto-Lock Policy
+- **Variabel Kunci:** `OPTION_LOCK_AFTER_SESSION_END` (`lock_after_session_end`).
+- **Enforcement di Level Host:** Selain dapat dipicu oleh klien, host dapat mewajibkan penguncian otomatis stasiun kerja Windows (`LockWorkStation()`) setiap kali sesi remote selesai atau terputus.
+- **UI Setting:** Tersedia di menu **Pengaturan -> Keamanan -> Kunci setelah sesi berakhir** (`desktop_setting_page.dart`).
+
+---
+
+## 8. Hardened Client Seeding Defaults (Least Privilege)
+Pada file seeder konfigurasi awal (`libs/portable/src/main.rs`):
+- `direct-server = ''`: Port listening TCP 21118 dinonaktifkan secara default untuk menutup celah discovery di jaringan publik/WiFi terbuka.
+- `temporary-password-length = '8'`: Default panjang password OTP sementara ditingkatkan menjadi 8 karakter.
+- `allow-remote-config-modification = 'N'`: Menonaktifkan perubahan pengaturan keamanan host oleh operator remote.
+- `enable-terminal = 'N'`: Menonaktifkan akses command prompt/terminal remote secara default.
+

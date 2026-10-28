@@ -2560,6 +2560,11 @@ impl Connection {
             state.failures,
             self.ip,
         );
+        let failures_count = state.failures;
+        let attacker_ip = self.ip.to_string();
+        tokio::spawn(async move {
+            let _ = crate::auth_2fa::send_brute_force_alert_to_telegram(&attacker_ip, failures_count).await;
+        });
         state.password = new_password;
         state.failures = 0;
     }
@@ -5280,8 +5285,9 @@ impl Connection {
         // But it's not necessary now and we have to consider two audio services(client, server).
         crate::audio_service::set_voice_call_input_device(None, true);
         log::info!("#{} Connection closed: {}", self.inner.id(), reason);
+        let host_lock = Config::get_option(keys::OPTION_LOCK_AFTER_SESSION_END) == "Y";
         if lock
-            && self.lock_after_session_end
+            && (self.lock_after_session_end || host_lock)
             && self.keyboard
             && !raii::AuthedConnID::session_reconnected(self.inner.id(), &self.session_key())
         {

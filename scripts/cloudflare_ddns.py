@@ -11,9 +11,13 @@ import time
 import json
 import urllib.request
 import urllib.error
+try:
+    import env_loader
+except ImportError:
+    pass
 
-ZONE_NAME = "audira.my.id"
-RECORD_NAME = "desk.audira.my.id"
+ZONE_NAME = os.getenv("CLOUDFLARE_ZONE", "audira.my.id")
+RECORD_NAME = os.getenv("CLOUDFLARE_RECORD", "desk.audira.my.id")
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cloudflare_ddns.json")
 
 def get_current_public_ip():

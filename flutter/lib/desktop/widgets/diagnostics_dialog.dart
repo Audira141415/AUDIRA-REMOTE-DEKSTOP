@@ -17,7 +17,7 @@ void showDiagnosticsDialog(BuildContext context, {OverlayDialogManager? dialogMa
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: MyTheme.accent.withOpacity(0.15),
+              color: MyTheme.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.speed_rounded, color: MyTheme.accent, size: 24),
@@ -39,7 +39,7 @@ void showDiagnosticsDialog(BuildContext context, {OverlayDialogManager? dialogMa
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.7)),
+                          ?.withValues(alpha: 0.7)),
                 ),
               ],
             ),
@@ -214,13 +214,13 @@ class _DiagnosticsBodyState extends State<_DiagnosticsBody> {
       grade = 'Grade B- (P2P Aktif, API Offline)';
       gradeColor = const Color(0xFFFB8C00);
       nat = 'Direct P2P (UDP Punching)';
-      advice = '⚡ Sesi remote desktop P2P siap digunakan dengan latensi ${rttRendezvous} ms, namun layanan API Gateway (Port 21114) saat ini sedang offline.';
+      advice = '⚡ Sesi remote desktop P2P siap digunakan dengan latensi $rttRendezvous ms, namun layanan API Gateway (Port 21114) saat ini sedang offline.';
     } else if (!isRendOnline && isApiOnline) {
       score = 50;
       grade = 'Grade C (API Aktif, Rendezvous Timeout)';
       gradeColor = const Color(0xFFF57C00);
       nat = 'Relay Server (hbbr)';
-      advice = '⚠️ API Gateway aktif (${rttApi} ms), namun port rendezvous UDP (21116) timeout. Sesi streaming akan dialihkan via protokol TCP Relay.';
+      advice = '⚠️ API Gateway aktif ($rttApi ms), namun port rendezvous UDP (21116) timeout. Sesi streaming akan dialihkan via protokol TCP Relay.';
     } else {
       // Both online
       final primaryLatency = rttRendezvous < rttApi ? rttRendezvous : rttApi;
@@ -303,9 +303,9 @@ class _DiagnosticsBodyState extends State<_DiagnosticsBody> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _gradeColor.withOpacity(0.1),
+                color: _gradeColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _gradeColor.withOpacity(0.4)),
+                border: Border.all(color: _gradeColor.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
@@ -313,7 +313,7 @@ class _DiagnosticsBodyState extends State<_DiagnosticsBody> {
                     width: 54,
                     height: 54,
                     decoration: BoxDecoration(
-                      color: _gradeColor.withOpacity(0.2),
+                      color: _gradeColor.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                       border: Border.all(color: _gradeColor, width: 2),
                     ),
@@ -446,12 +446,12 @@ class _DiagnosticsBodyState extends State<_DiagnosticsBody> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    MyTheme.accent.withOpacity(0.08),
-                    Colors.indigo.withOpacity(0.05),
+                    MyTheme.accent.withValues(alpha: 0.08),
+                    Colors.indigo.withValues(alpha: 0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: MyTheme.accent.withOpacity(0.3)),
+                border: Border.all(color: MyTheme.accent.withValues(alpha: 0.3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

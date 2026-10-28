@@ -308,7 +308,7 @@ custom-rendezvous-server = 'desk.audira.my.id'\n\
 relay-server = 'desk.audira.my.id'\n\
 api-server = 'http://desk.audira.my.id:21114'\n\
 key = 'SiWmWlEqQ8xr6zvf59wKFzR4eHN5yABIydqpFouvnb8='\n\
-direct-server = 'Y'\n\
+direct-server = ''\n\
 allow-lan = 'Y'\n\
 enable-directx-capture = 'Y'\n\
 enable-hwcodec = 'Y'\n\
@@ -318,7 +318,10 @@ enable-tcp-punch = 'Y'\n\
 enable-ipv6-punch = 'Y'\n\
 allow-kcp-congestion-control = 'Y'\n\
 image_quality = 'balanced'\n\
-view_style = 'adaptive'\n";
+view_style = 'adaptive'\n\
+allow-remote-config-modification = 'N'\n\
+enable-terminal = 'N'\n\
+temporary-password-length = '8'\n";
 
     if let Some(config_dir) = dirs::config_dir() {
         let audira_cfg_dir = config_dir.join("Audira Desk").join("config");

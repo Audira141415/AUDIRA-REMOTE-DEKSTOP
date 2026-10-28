@@ -238,7 +238,7 @@ class _PeersViewState extends State<_PeersView>
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: MyTheme.accent.withOpacity(0.12),
+                color: MyTheme.accent.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: MyTheme.accent, size: 30),
@@ -254,7 +254,7 @@ class _PeersViewState extends State<_PeersView>
               desc,
               style: TextStyle(
                 fontSize: 13,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                 height: 1.4,
               ),
               textAlign: TextAlign.center,

@@ -17,7 +17,7 @@ void showAuditLogDialog(BuildContext context, {OverlayDialogManager? dialogManag
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: MyTheme.accent.withOpacity(0.15),
+              color: MyTheme.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.history_edu_rounded, color: MyTheme.accent, size: 24),
@@ -39,7 +39,7 @@ void showAuditLogDialog(BuildContext context, {OverlayDialogManager? dialogManag
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.7)),
+                          ?.withValues(alpha: 0.7)),
                 ),
               ],
             ),
@@ -287,9 +287,9 @@ class _AuditLogBodyState extends State<_AuditLogBody> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                       decoration: BoxDecoration(
-                                        color: badgeColor.withOpacity(0.15),
+                                        color: badgeColor.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(color: badgeColor.withOpacity(0.4)),
+                                        border: Border.all(color: badgeColor.withValues(alpha: 0.4)),
                                       ),
                                       child: Text(
                                         item['event_type'] ?? 'EVENT',
@@ -334,7 +334,7 @@ class _AuditLogBodyState extends State<_AuditLogBody> {
                                   const SizedBox(height: 4),
                                   Text(
                                     item['details'] ?? '',
-                                    style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8)),
+                                    style: TextStyle(fontSize: 12, color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8)),
                                   ),
                                 ],
                               ],

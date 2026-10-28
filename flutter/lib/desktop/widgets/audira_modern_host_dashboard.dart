@@ -299,7 +299,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                   borderRadius: BorderRadius.circular(9),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0284C7).withOpacity(0.35),
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.35),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     )
@@ -343,7 +343,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                     margin: const EdgeInsets.only(top: 1),
                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0284C7).withOpacity(0.12),
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Obx(() => Text(
@@ -409,7 +409,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isDark ? const Color(0xFF334155).withOpacity(0.6) : const Color(0xFFCBD5E1),
+                  color: isDark ? const Color(0xFF334155).withValues(alpha: 0.6) : const Color(0xFFCBD5E1),
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -539,7 +539,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -572,7 +572,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 10,
-                        color: isActive ? Colors.white.withOpacity(0.8) : const Color(0xFF64748B),
+                        color: isActive ? Colors.white.withValues(alpha: 0.8) : const Color(0xFF64748B),
                       ),
                     ),
                 ],
@@ -640,7 +640,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.45 : 0.1),
+                      color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.1),
                       blurRadius: 28,
                       offset: const Offset(0, 10),
                     )
@@ -675,7 +675,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0F172A).withOpacity(0.06),
+                          color: const Color(0xFF0F172A).withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -747,8 +747,8 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: isExpired
-                              ? const Color(0xFFEF4444).withOpacity(0.12)
-                              : const Color(0xFF10B981).withOpacity(0.12),
+                              ? const Color(0xFFEF4444).withValues(alpha: 0.12)
+                              : const Color(0xFF10B981).withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -906,7 +906,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                       Switch(
                         value: !isStopped,
                         onChanged: (val) => _toggleService(val),
-                        activeColor: const Color(0xFF10B981),
+                        activeThumbColor: const Color(0xFF10B981),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ],
@@ -987,7 +987,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0284C7).withOpacity(0.12),
+                            color: const Color(0xFF0284C7).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(Icons.dns_rounded, color: Color(0xFF0284C7), size: 22),
@@ -1019,7 +1019,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withOpacity(0.12),
+                            color: const Color(0xFF10B981).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -1206,7 +1206,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -1371,7 +1371,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0284C7).withOpacity(0.12),
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -1417,7 +1417,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                     return Switch(
                       value: !_svcStopped.value,
                       onChanged: (val) => _toggleService(val),
-                      activeColor: const Color(0xFF0284C7),
+                      activeThumbColor: const Color(0xFF0284C7),
                     );
                   }),
                 ],
@@ -1478,7 +1478,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                   Switch(
                     value: model.approveMode != 'click',
                     onChanged: (val) => _toggleAutoApprove(val),
-                    activeColor: const Color(0xFF0284C7),
+                    activeThumbColor: const Color(0xFF0284C7),
                   ),
                 ],
               ),
@@ -1492,7 +1492,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF111827).withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                  color: isDark ? const Color(0xFF111827).withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
@@ -1645,8 +1645,8 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: client.authorized
-              ? const Color(0xFF10B981).withOpacity(0.4)
-              : const Color(0xFFF59E0B).withOpacity(0.4),
+              ? const Color(0xFF10B981).withValues(alpha: 0.4)
+              : const Color(0xFFF59E0B).withValues(alpha: 0.4),
         ),
       ),
       child: Column(
@@ -1671,8 +1671,8 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                 decoration: BoxDecoration(
                   color: client.authorized
-                      ? const Color(0xFF10B981).withOpacity(0.12)
-                      : const Color(0xFFF59E0B).withOpacity(0.12),
+                      ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                      : const Color(0xFFF59E0B).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -1733,7 +1733,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withOpacity(0.12),
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(5),
                     ),
                     child: const Text(
@@ -1808,7 +1808,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

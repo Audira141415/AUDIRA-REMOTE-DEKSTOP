@@ -270,7 +270,7 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
         ),
         if (videoConnBlock)
           Container(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
           )
       ]);
     });
@@ -280,7 +280,7 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: _buildBlock(
         children: <Widget>[
           SizedBox(
@@ -1067,12 +1067,12 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
           margin: const EdgeInsets.only(left: _kCheckBoxLeftMargin, top: 12, bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor.withOpacity(0.5),
+            color: Theme.of(context).cardColor.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isBotActive
-                  ? const Color(0xFF0088CC).withOpacity(0.5)
-                  : Theme.of(context).dividerColor.withOpacity(0.3),
+                  ? const Color(0xFF0088CC).withValues(alpha: 0.5)
+                  : Theme.of(context).dividerColor.withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1105,7 +1105,7 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
                             fontSize: 12,
                             color: isBotActive
                                 ? const Color(0xFF10B981)
-                                : disabledTextColor(context, enabled)?.withOpacity(0.7),
+                                : disabledTextColor(context, enabled)?.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -1218,7 +1218,7 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
                         style: TextStyle(
                             fontSize: 11,
                             fontStyle: FontStyle.italic,
-                            color: disabledTextColor(context, enabled)?.withOpacity(0.6)),
+                            color: disabledTextColor(context, enabled)?.withValues(alpha: 0.6)),
                       ),
                     ),
                   ],
@@ -1538,6 +1538,9 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
       ...autoDisconnect(context),
       _OptionCheckBox(context, 'keep-awake-during-incoming-sessions-label',
           kOptionKeepAwakeDuringIncomingSessions,
+          reverse: false, enabled: enabled),
+      _OptionCheckBox(context, 'Lock after session end',
+          kOptionLockAfterSessionEnd,
           reverse: false, enabled: enabled),
       if (bind.mainIsInstalled())
         _OptionCheckBox(context, 'allow-only-conn-window-open-tip',
@@ -1945,7 +1948,7 @@ class _NetworkState extends State<_Network> with AutomaticKeepAliveClientMixin {
                             .textTheme
                             .titleLarge
                             ?.color
-                            ?.withOpacity(0.7),
+                            ?.withValues(alpha: 0.7),
                       ),
                     ],
                   ),
@@ -2369,8 +2372,8 @@ class _Account extends StatefulWidget {
 
 class _AccountState extends State<_Account> {
   final _scrollController = ScrollController();
-  final _usernameController = TextEditingController(text: 'audira');
-  final _passwordController = TextEditingController(text: 'Sigma1993');
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
   String _statusMessage = '';
@@ -2454,12 +2457,6 @@ class _AccountState extends State<_Account> {
     }
   }
 
-  void _quickLoginAdmin() {
-    _usernameController.text = 'audira';
-    _passwordController.text = 'Sigma1993';
-    _handleLogin(username: 'audira', password: 'Sigma1993');
-  }
-
   Future<void> _syncAddressBook() async {
     setState(() {
       _isLoading = true;
@@ -2534,10 +2531,10 @@ class _AccountState extends State<_Account> {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.3),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -2562,7 +2559,7 @@ class _AccountState extends State<_Account> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.15),
+                      color: Colors.blue.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -2602,7 +2599,7 @@ class _AccountState extends State<_Account> {
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username / ID Akun',
-                  hintText: 'audira',
+                  hintText: 'Masukkan username',
                   prefixIcon: const Icon(Icons.person_outline, size: 20),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -2629,7 +2626,7 @@ class _AccountState extends State<_Account> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: _isError ? Colors.red.withOpacity(0.12) : Colors.green.withOpacity(0.12),
+                    color: _isError ? Colors.red.withValues(alpha: 0.12) : Colors.green.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: _isError ? Colors.red.shade400 : Colors.green.shade400),
                   ),
@@ -2675,14 +2672,7 @@ class _AccountState extends State<_Account> {
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     ),
                   ),
-                  FilledButton.tonalIcon(
-                    icon: const Icon(Icons.flash_on_rounded, size: 18, color: Colors.amber),
-                    label: const Text('⚡ Quick Login (Admin AUDIRA)'),
-                    onPressed: _isLoading ? null : _quickLoginAdmin,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  ),
+
                   OutlinedButton.icon(
                     icon: const Icon(Icons.open_in_new, size: 16),
                     label: const Text('Dialog Standar'),
@@ -2737,18 +2727,20 @@ class _AccountState extends State<_Account> {
                               gFFI.userModel.displayNameOrUserName,
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.amber.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(4),
+                            if (gFFI.userModel.isAdmin.value) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  '👑 Administrator',
+                                  style: TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold),
+                                ),
                               ),
-                              child: const Text(
-                                '👑 Administrator',
-                                style: TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold),
-                              ),
-                            ),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 3),
@@ -2772,7 +2764,7 @@ class _AccountState extends State<_Account> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: _isError ? Colors.red.withOpacity(0.12) : Colors.green.withOpacity(0.12),
+                    color: _isError ? Colors.red.withValues(alpha: 0.12) : Colors.green.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: _isError ? Colors.red.shade400 : Colors.green.shade400),
                   ),
@@ -2879,7 +2871,7 @@ class _AccountState extends State<_Account> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
@@ -2966,7 +2958,7 @@ class _CheckboxState extends State<_Checkbox> {
 }
 
 class _Printer extends StatefulWidget {
-  const _Printer({super.key});
+  const _Printer();
 
   @override
   State<_Printer> createState() => __PrinterState();
@@ -3493,8 +3485,8 @@ class _WaylandCardState extends State<WaylandCard> {
       showConfirmMsgBox,
       tip: 'clear_Wayland_screen_selection_tip',
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(
-            Theme.of(context).colorScheme.error.withOpacity(0.75)),
+        backgroundColor: WidgetStateProperty.all<Color>(
+            Theme.of(context).colorScheme.error.withValues(alpha: 0.75)),
       ),
     );
   }
@@ -3536,8 +3528,8 @@ class _WaylandCardState extends State<WaylandCard> {
         showConfirmMsgBox,
         tip: 'clear-shortcuts-inhibitor-permission-tip',
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(
-              Theme.of(context).colorScheme.error.withOpacity(0.75)),
+          backgroundColor: WidgetStateProperty.all<Color>(
+              Theme.of(context).colorScheme.error.withValues(alpha: 0.75)),
         ),
       ),
     ]);
@@ -3839,7 +3831,7 @@ void changeSocks5Proxy() async {
                                     .textTheme
                                     .titleLarge
                                     ?.color
-                                    ?.withOpacity(0.5),
+                                    ?.withValues(alpha: 0.5),
                               ),
                             ),
                           ],

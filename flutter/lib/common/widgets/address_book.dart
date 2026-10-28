@@ -92,7 +92,7 @@ class _AddressBookState extends State<AddressBook> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00C853).withOpacity(0.15),
+                  color: const Color(0xFF00C853).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFF00C853)),
                 ),
@@ -145,7 +145,7 @@ class _AddressBookState extends State<AddressBook> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: MyTheme.accent.withOpacity(0.12),
+                    color: MyTheme.accent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.devices_other_rounded,
@@ -167,7 +167,7 @@ class _AddressBookState extends State<AddressBook> {
                         style: TextStyle(
                             fontSize: 12,
                             color: theme.textTheme.bodyMedium?.color
-                                ?.withOpacity(0.7)),
+                                ?.withValues(alpha: 0.7)),
                       ),
                     ],
                   ),
@@ -258,7 +258,7 @@ class _AddressBookState extends State<AddressBook> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: MyTheme.accent.withOpacity(0.12),
+                    color: MyTheme.accent.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.cloud_sync_rounded,
@@ -280,7 +280,7 @@ class _AddressBookState extends State<AddressBook> {
                         style: TextStyle(
                             fontSize: 12,
                             color: theme.textTheme.bodyMedium?.color
-                                ?.withOpacity(0.7)),
+                                ?.withValues(alpha: 0.7)),
                       ),
                     ],
                   ),
@@ -409,7 +409,7 @@ class _AddressBookState extends State<AddressBook> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: MyTheme.accent.withOpacity(0.1),
+                color: MyTheme.accent.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child:
@@ -442,7 +442,7 @@ class _AddressBookState extends State<AddressBook> {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: Theme.of(context).colorScheme.background)),
+                      color: Theme.of(context).colorScheme.surface)),
               child: Container(
                 width: 200,
                 height: double.infinity,
@@ -480,7 +480,7 @@ class _AddressBookState extends State<AddressBook> {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                      color: Theme.of(context).colorScheme.background)),
+                      color: Theme.of(context).colorScheme.surface)),
               child: Container(
                 padding:
                     const EdgeInsets.fromLTRB(padding, 0, padding, padding),
@@ -614,7 +614,7 @@ class _AddressBookState extends State<AddressBook> {
           )),
       underline: Container(
         height: 0.7,
-        color: Theme.of(context).dividerColor.withOpacity(0.1),
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
       ),
       menuItemStyleData: menuItemStyleData,
       items: items,
@@ -1147,7 +1147,7 @@ class AddressBookTag extends StatelessWidget {
             decoration: BoxDecoration(
                 color: tags.contains(name)
                     ? gFFI.abModel.getCurrentAbTagColor(name)
-                    : Theme.of(context).colorScheme.background,
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(4)),
             margin: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
             padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 6.0),

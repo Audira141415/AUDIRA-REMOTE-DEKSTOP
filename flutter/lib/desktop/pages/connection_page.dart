@@ -169,9 +169,9 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
                 margin: EdgeInsets.only(right: em),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.white.withOpacity(0.12)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                 ),
                 child: Text(
                   'v${snap.data ?? "1.5.3"}',
@@ -179,7 +179,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
-                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -409,10 +409,10 @@ class _ConnectionPageState extends State<ConnectionPage>
           color: isDark ? const Color(0xFF1E293B) : Theme.of(context).cardColor,
           borderRadius: const BorderRadius.all(Radius.circular(16)),
           border: Border.all(
-              color: isDark ? const Color(0xFF334155) : Theme.of(context).dividerColor.withOpacity(0.5)),
+              color: isDark ? const Color(0xFF334155) : Theme.of(context).dividerColor.withValues(alpha: 0.5)),
           boxShadow: [
             BoxShadow(
-              color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.04),
+              color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.04),
               blurRadius: 16,
               offset: const Offset(0, 4),
             )
@@ -427,9 +427,9 @@ class _ConnectionPageState extends State<ConnectionPage>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF10B981).withOpacity(0.12),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+                    border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -614,7 +614,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 5,
                                 spreadRadius: 1,
                               ),
@@ -688,7 +688,7 @@ class _ConnectionPageState extends State<ConnectionPage>
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.35),
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         )
@@ -844,7 +844,7 @@ class _ConnectionPageState extends State<ConnectionPage>
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withOpacity(0.25) : Colors.black.withOpacity(0.04),
+            color: isDark ? Colors.black.withValues(alpha: 0.25) : Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 3),
           )
@@ -899,9 +899,9 @@ class _ConnectionPageState extends State<ConnectionPage>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF38BDF8).withOpacity(0.12),
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF38BDF8).withOpacity(0.3)),
+                    border: Border.all(color: const Color(0xFF38BDF8).withValues(alpha: 0.3)),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1012,7 +1012,7 @@ class _ConnectionPageState extends State<ConnectionPage>
           color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: accentColor.withOpacity(isDark ? 0.35 : 0.25),
+            color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
           ),
         ),
         child: Column(
@@ -1050,9 +1050,9 @@ class _ConnectionPageState extends State<ConnectionPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: color.withOpacity(0.2), width: 0.8),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 0.8),
       ),
       child: Text(
         label,

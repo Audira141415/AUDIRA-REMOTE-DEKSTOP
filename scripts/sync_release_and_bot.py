@@ -2,11 +2,15 @@ import os
 import sys
 import time
 import paramiko
+try:
+    import env_loader
+except ImportError:
+    pass
 
-HOST = "192.168.100.175"
-PORT = 22
-USER = "audira"
-PASS = "Sigma1993"
+HOST = os.getenv("AUDIRA_SSH_HOST", "192.168.100.175")
+PORT = int(os.getenv("AUDIRA_SSH_PORT", "22"))
+USER = os.getenv("AUDIRA_SSH_USER", "audira")
+PASS = os.getenv("AUDIRA_SSH_PASS", "")
 REMOTE_DIR = "/home/audira/projects/audira-remote-desktop"
 
 def upload_with_progress(sftp, local_path, remote_path):
@@ -59,10 +63,18 @@ def main():
     if os.path.exists(local_bat):
         upload_with_progress(sftp, local_bat, f"{REMOTE_DIR}/web/dist/Trust_Audira_Certificate.bat")
         
-    # 3. Upload updated bot script
+    # 3. Upload updated bot script and env_loader
     local_bot = r"F:\AUDIRA-REMOTE-DEKSTOP\scripts\audira_apps_bot.py"
     remote_bot = f"{REMOTE_DIR}/audira_apps_bot.py"
     upload_with_progress(sftp, local_bot, remote_bot)
+
+    local_env_loader = r"F:\AUDIRA-REMOTE-DEKSTOP\scripts\env_loader.py"
+    if os.path.exists(local_env_loader):
+        upload_with_progress(sftp, local_env_loader, f"{REMOTE_DIR}/env_loader.py")
+
+    local_env = r"F:\AUDIRA-REMOTE-DEKSTOP\.env"
+    if os.path.exists(local_env):
+        upload_with_progress(sftp, local_env, f"{REMOTE_DIR}/.env")
     
     # 4. Remove old mtime tracker to force release announcement
     print("[*] Resetting last_build_mtime.txt on server to trigger announcement...")

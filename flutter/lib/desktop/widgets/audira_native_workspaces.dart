@@ -272,7 +272,7 @@ Capabilities: 60 FPS Remote Desktop, Native IDE, Vibe Studio, Localhost Tunnel.
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF38BDF8).withOpacity(0.15) : Colors.transparent,
+                            color: isSelected ? const Color(0xFF38BDF8).withValues(alpha: 0.15) : Colors.transparent,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(
@@ -533,7 +533,7 @@ class _AudiraNativeVibeWorkspaceState extends State<AudiraNativeVibeWorkspace> {
   bool _isRunning = false;
   final List<String> _timeline = [];
 
-  String _diffContent = '''--- a/src/server/video.rs
+  final String _diffContent = '''--- a/src/server/video.rs
 +++ b/src/server/video.rs
 @@ -102,7 +102,9 @@ impl VideoStream {
 -    let bitrate = 2000;
@@ -697,8 +697,8 @@ class _AudiraNativeVibeWorkspaceState extends State<AudiraNativeVibeWorkspace> {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.05),
-                                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                                  color: Colors.white.withValues(alpha: 0.05),
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(chip, style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
@@ -1158,7 +1158,7 @@ class _AudiraNativeEmulatorWorkspaceState
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.15),
+                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text('60 FPS Native Low Latency', style: TextStyle(fontSize: 10, color: Color(0xFF34D399), fontWeight: FontWeight.bold)),
@@ -1270,7 +1270,7 @@ class _AudiraNativeEmulatorWorkspaceState
                           width: 100,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.5),
+                            color: Colors.white.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),

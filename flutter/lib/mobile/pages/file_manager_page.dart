@@ -518,18 +518,18 @@ class _FileManagerPageState extends State<FileManagerPage> {
                     selectedItems?.isLocal == true &&
                     selectedItems?.items.isNotEmpty == true) ...[
                   if (selectedItems!.items.length == 1 &&
-                      selectedItems!.items.single.isFile)
+                      selectedItems.items.single.isFile)
                     IconButton(
                       tooltip: translate("Save as"),
                       icon: Icon(Icons.save_alt),
                       onPressed: () =>
-                          _exportFile(selectedItems!.items.single),
+                          _exportFile(selectedItems.items.single),
                     )
                   else
                     IconButton(
                       tooltip: translate("Export"),
                       icon: Icon(Icons.drive_folder_upload),
-                      onPressed: () => _exportItems(selectedItems!),
+                      onPressed: () => _exportItems(selectedItems),
                     ),
                 ],
                 IconButton(
@@ -714,7 +714,7 @@ class _FileManagerViewState extends State<FileManagerView> {
                             color: Theme.of(context)
                                 .iconTheme
                                 .color
-                                ?.withOpacity(0.7)))
+                                ?.withValues(alpha: 0.7)))
                     : Icon(
                         entries[index].isFile
                             ? Icons.feed_outlined
@@ -929,7 +929,7 @@ class _FileManagerViewState extends State<FileManagerView> {
         content: TextButton(
             child: Text(e.value),
             style:
-                ButtonStyle(minimumSize: MaterialStateProperty.all(Size(0, 0))),
+                ButtonStyle(minimumSize: WidgetStateProperty.all(Size(0, 0))),
             onPressed: () => onPressed(list.sublist(0, e.key + 1))))));
     return breadCrumbList;
   }

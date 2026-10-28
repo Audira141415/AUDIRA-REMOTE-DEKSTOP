@@ -362,7 +362,26 @@ function Clean-SystemArtifactsAndCache {
         }
     }
 
-    # 5. Refresh cache icon Windows
+    # 5. Bersihkan residu sesi akun lama (access_token & user_info) agar instalasi fresh tanpa akun tertaut
+    $localCfgPaths = @(
+        "$env:APPDATA\Audira Desk\config\Audira Desk_local.toml",
+        "C:\ProgramData\Audira Desk\config\Audira Desk_local.toml"
+    )
+    foreach ($cfg in $localCfgPaths) {
+        if (Test-Path $cfg) {
+            try {
+                $lines = Get-Content $cfg -Encoding UTF8
+                $filtered = $lines | Where-Object {
+                    $_ -notmatch "^\s*access_token\s*=" -and
+                    $_ -notmatch "^\s*user_info\s*="
+                }
+                Set-Content -Path $cfg -Value $filtered -Encoding UTF8
+                Write-Host "       Residu sesi akun dibersihkan agar aplikasi berstatus fresh." -ForegroundColor Green
+            } catch {}
+        }
+    }
+
+    # 6. Refresh cache icon Windows
     try {
         & ie4uinit.exe -show 2>$null | Out-Null
     } catch {}
@@ -419,8 +438,15 @@ function Register-AudiraServiceAndFirewall {
         # Pasang service menggunakan parameter bawaan
         $p = Start-Process -FilePath $ExePath -ArgumentList "--install-service" -Wait -PassThru -NoNewWindow
         
-        # Konfigurasikan startup tipe menjadi Automatic
-        & sc.exe config "Audira Desk" start= auto | Out-Null
+        # Fallback eksplisit jika parameter bawaan terlewat oleh flag konfigurasi
+        $svcTest = Get-Service -Name "Audira Desk" -ErrorAction SilentlyContinue
+        if (-not $svcTest) {
+            $binPath = "`"$ExePath`" --service"
+            & sc.exe create "Audira Desk" binpath= $binPath start= auto DisplayName= "Audira Desk Service" | Out-Null
+            & sc.exe description "Audira Desk" "AUDIRA Remote Desktop Host & Rendezvous Service" | Out-Null
+        } else {
+            & sc.exe config "Audira Desk" start= auto | Out-Null
+        }
         Write-Host "          [OK] Service 'Audira Desk' berhasil didaftarkan (Startup: Automatic)." -ForegroundColor Green
     } catch {
         Write-Host "          [WARN] Gagal mendaftarkan service: $_" -ForegroundColor Yellow
@@ -910,6 +936,12 @@ switch ($Action) {
         $installedExe = Join-Path $InstallPath "AudiraDesk.exe"
         $targetExe = if (Test-Path $installedExe) { $installedExe } else { $srcExe }
         Start-Process -FilePath $targetExe -ArgumentList "--install-service" -Wait
+        $svcCheckManual = Get-Service -Name "Audira Desk" -ErrorAction SilentlyContinue
+        if (-not $svcCheckManual) {
+            $binPath = "`"$targetExe`" --service"
+            & sc.exe create "Audira Desk" binpath= $binPath start= auto DisplayName= "Audira Desk Service" | Out-Null
+            & sc.exe description "Audira Desk" "AUDIRA Remote Desktop Host & Rendezvous Service" | Out-Null
+        }
         Start-AudiraServiceAndVerify
         Write-Host "[SUKSES] Background Service berhasil dipasang dan diperbarui." -ForegroundColor Green
     }

@@ -539,7 +539,7 @@ class _WidgetOPState extends State<WidgetOP> {
                       final bgColor = Theme.of(context)
                           .colorScheme
                           .errorContainer
-                          .withOpacity(0.3);
+                          .withValues(alpha: 0.3);
                       return Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8.0, vertical: 6.0),
@@ -675,10 +675,10 @@ class LoginWidgetUserPass extends StatelessWidget {
               margin: const EdgeInsets.only(top: 10, bottom: 6),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
                 ),
               ),
               child: Column(
@@ -691,7 +691,7 @@ class LoginWidgetUserPass extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Petunjuk Akun & Registrasi',
+                          'Petunjuk Akun & Masuk',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -699,37 +699,15 @@ class LoginWidgetUserPass extends StatelessWidget {
                           ),
                         ),
                       ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(4),
-                        onTap: () {
-                          username.text = 'audira';
-                          pass.text = 'Sigma1993';
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Isi Akun Default',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '• Akun Admin Bawaan: audira (Pass: Sigma1993)\n• Atau masukkan username & password baru untuk auto-register instan.',
+                    'Masukkan username dan kata sandi akun AUDIRA Anda untuk mengakses Buku Alamat dan fitur sinkronisasi.',
                     style: TextStyle(
                       fontSize: 11,
                       height: 1.35,
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.85),
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.85),
                     ),
                   ),
                 ],
@@ -763,7 +741,7 @@ class LoginWidgetUserPass extends StatelessWidget {
                   'Belum memiliki akun?',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
+                    color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -1064,7 +1042,7 @@ Future<bool?> _openLoginDialog() async {
                       .textTheme
                       .titleLarge
                       ?.color
-                      ?.withOpacity(0.55),
+                      ?.withValues(alpha: 0.55),
             ),
             onTap: onDialogCancel,
             hoverColor: Colors.red,

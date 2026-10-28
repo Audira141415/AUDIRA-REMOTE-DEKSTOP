@@ -92,7 +92,7 @@ class AudiraDigitalSignature {
         boxShadow: [
           BoxShadow(
             color: (isValid ? const Color(0xFF10B981) : const Color(0xFFEF4444))
-                .withOpacity(0.15),
+                .withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -386,8 +386,8 @@ class _SimpleCrypto {
   }
 
   static String hmacSha256(String keyStr, String dataStr) {
-    Uint8List key = utf8.encode(keyStr) as Uint8List;
-    Uint8List data = utf8.encode(dataStr) as Uint8List;
+    Uint8List key = utf8.encode(keyStr);
+    Uint8List data = utf8.encode(dataStr);
 
     Uint8List kPrime = Uint8List(64);
     if (key.length > 64) {
