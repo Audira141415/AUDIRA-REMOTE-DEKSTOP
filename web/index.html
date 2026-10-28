@@ -73,8 +73,8 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                   </div>
                   <div class="dropdown-item-content">
-                    <div class="dropdown-item-title" style="color:#fb923c;">⚡ Vibe Studio</div>
-                    <div class="dropdown-item-desc">In-browser IDE, Monaco Editor &amp; PTY terminal</div>
+                    <div class="dropdown-item-title" style="color:#fb923c;">Web Client &amp; Terminal</div>
+                    <div class="dropdown-item-desc">HTML5 WebRTC remote viewer, Monaco IDE &amp; shell</div>
                   </div>
                 </a>
 
@@ -186,7 +186,7 @@
       <div class="mobile-drawer-group-title">Product</div>
       <a href="#features" class="mobile-drawer-link" onclick="closeMobileDrawer()">Features</a>
       <a href="#architecture" class="mobile-drawer-link" onclick="closeMobileDrawer()">Architecture</a>
-      <a href="#vibecode" class="mobile-drawer-link" style="color:#fb923c;" onclick="closeMobileDrawer()">⚡ Vibe Studio</a>
+      <a href="#vibecode" class="mobile-drawer-link" style="color:#fb923c;" onclick="closeMobileDrawer()">Web Client &amp; Terminal</a>
       <a href="#fleet" class="mobile-drawer-link" onclick="closeMobileDrawer()">Fleet Orchestration</a>
 
       <div class="mobile-drawer-group-title">Resources</div>
@@ -207,7 +207,7 @@
       <div class="hero-left-column">
         <div class="hero-badge-wrap">
           <span class="hero-badge-dot"></span>
-          <span data-i18n="heroBadge">P2P NAT Traversal • Hardware AV1/VP9 Codec • 100% Data Sovereignty</span>
+          <span data-i18n="heroBadge">Self-Hosted Infrastructure • Direct UDP Hole-Punching • AV1 Hardware Codec</span>
         </div>
 
         <h1 class="hero-title" data-i18n="heroTitle">
@@ -218,54 +218,6 @@
           Direct peer-to-peer UDP streaming at 60 FPS with hardware AV1/VP9 encoding and end-to-end encryption. Run your own private relay cluster in minutes.
         </p>
 
-        <!-- Superpower Badges (Adopted from 9remote) -->
-        <div class="hero-superpowers-row">
-          <span class="superpower-badge">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            Vibe Coding Ready
-          </span>
-          <span class="superpower-badge">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg>
-            60fps Remote Desktop
-          </span>
-          <span class="superpower-badge">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-            Remote IDE &amp; PTY
-          </span>
-          <span class="superpower-badge">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
-            Jailed File Explorer
-          </span>
-          <span class="superpower-badge">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18h.01M7 21h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z"/></svg>
-            PC &bull; Web &bull; Mobile
-          </span>
-        </div>
-
-        <div class="hero-buttons">
-          <a href="dist/AudiraDesk-Full-Installer.exe" class="btn btn-primary btn-lg" download style="display:inline-flex; align-items:center; gap:0.55rem; text-decoration:none;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.801"/></svg>
-            <span data-i18n="btnHeroWin">Download for Windows (25.1 MB)</span>
-          </a>
-          <button id="heroOpenLoginBtn" class="btn btn-secondary btn-lg">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-            <span data-i18n="btnHeroConsole">Access Web Console</span>
-          </button>
-        </div>
-
-        <div class="hero-specs-row">
-          <div class="spec-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            <span data-i18n="specPortable">Zero-Installation Portable (Single Binary)</span>
-          </div>
-          <div class="spec-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            <span data-i18n="specCrypto">Libsodium X25519-ChaCha20-Poly1305</span>
-          </div>
-          <div class="spec-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            <span data-i18n="specLicense">Audira Commercial License</span>
-          </div>
         </div>
 
         <!-- Live Performance & Sovereignty Stats Strip (Adopted from 9remote) -->
@@ -279,8 +231,8 @@
             <div class="hero-stat-label">Hardware AV1/VP9</div>
           </div>
           <div class="hero-stat-card">
-            <div class="hero-stat-val">30+ Agents</div>
-            <div class="hero-stat-label">Vibe Coding &bull; PTY Shell</div>
+            <div class="hero-stat-val">100% Rust</div>
+            <div class="hero-stat-label">Memory-Safe Core Engine</div>
           </div>
           <div class="hero-stat-card">
             <div class="hero-stat-val">Zero Cloud</div>
@@ -312,14 +264,9 @@
       <div id="telemetry" class="simulator-container">
         <!-- Titlebar -->
         <div class="sim-titlebar">
-          <div class="sim-window-controls">
-            <span class="sim-dot sim-dot-red"></span>
-            <span class="sim-dot sim-dot-yellow"></span>
-            <span class="sim-dot sim-dot-green"></span>
-          </div>
           <div class="sim-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4z"/></svg>
-            <span>AudiraDesk Core v1.5.3 — High-Performance Remote Engine</span>
+            <span class="sim-terminal-prompt">audira-core@host:~$</span>
+            <span>telemetry --node desk.audira.my.id:21116 --p2p-direct</span>
           </div>
           <div class="sim-network-pill">
             <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;"></span>
@@ -715,64 +662,54 @@
     </div>
   </section>
 
-  <!-- Vibe Coding & Next-Gen Cloud Workstation Section (8 Menus) -->
+  <!-- Web Studio & Developer Workstation Section -->
   <section id="vibecode" class="section vibecode-section">
     <div class="container text-center" style="max-width: 1040px; margin: 0 auto; text-align: center;">
       <div class="section-tag vibecode-tag">
         <span class="vibecode-tag-dot"></span>
-        <span>AI-FIRST REMOTE DEV WORKSTATION</span>
+        <span>HTML5 WEBRTC &bull; MONACO IDE</span>
       </div>
 
       <h2 class="section-title vibecode-title">
-        Remote Everything, <br><span class="vibecode-gradient-text">Vibecode Everywhere</span>
+        Web Studio &bull; In-Browser Client &amp; PTY Terminal
       </h2>
 
-      <!-- 8 Pills Badges Grid / Row -->
+      <!-- Capability Chips -->
       <div class="vibecode-pills-row">
-        <a href="viewer.html?mode=vibe" class="vibecode-pill vibecode-pill-primary">
+        <a href="viewer.html?mode=desktop" class="vibecode-pill vibecode-pill-primary">
           <span class="vibecode-pill-dot"></span>
-          Every Harness · One UI
+          Canvas 60 FPS Desktop
         </a>
         <a href="viewer.html?mode=ide" class="vibecode-pill">
-          💻 Remote IDE
+          Monaco Code Editor
         </a>
-        <a href="viewer.html?mode=vibe" class="vibecode-pill vibecode-pill-accent">
-          ⚡ Remote Vibe Coding
-        </a>
-        <a href="viewer.html?mode=desktop" class="vibecode-pill">
-          🖥️ Remote Desktop
+        <a href="viewer.html?mode=vibe" class="vibecode-pill">
+          Interactive PTY Terminal
         </a>
         <a href="viewer.html?mode=ide" class="vibecode-pill">
-          📁 Remote Files
-        </a>
-        <a href="viewer.html?mode=emulator" class="vibecode-pill">
-          📱 Remote Emulator
+          Encrypted File Manager
         </a>
         <a href="viewer.html?mode=localhost" class="vibecode-pill">
-          🌐 Remote Localhost
+          Port Forward &amp; Tunnel
         </a>
         <span class="vibecode-pill vibecode-pill-dim">
-          📱 PC · Web · iPad · Mobile
+          Zero Client Installation
         </span>
       </div>
 
-      <!-- Reference Copywriting -->
-      <p class="vibecode-ref-quote">
-        Codex CLI looks like 1995? Claude Code's TUI hurts? Forget them. Same agents, one UI you'll actually love.
-      </p>
       <p class="section-desc vibecode-subdesc">
-        Leave your laptop behind. Your entire dev workstation goes wherever you go — remote IDE, 60fps desktop, visual file explorer, live mobile emulator, and every AI harness in one UI: Claude Code, Codex, Cursor &amp; 30+ agents on PC, Web, iPad, or phone.
+        Connect to your remote host directly from Chrome, Firefox, or Safari. Inspect code files with hotkey shortcuts, execute server commands inside a native PTY terminal, and manage file transfers over end-to-end encrypted WebRTC channels without installing local software.
       </p>
 
-      <!-- 3 Feature Highlight Bento Cards -->
+      <!-- 3 Technical Capability Cards -->
       <div class="vibecode-grid">
         <div class="vibecode-card card-orange">
           <div class="vibecode-icon-wrap icon-orange">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
           </div>
-          <h4 class="vibecode-card-title">Every Harness · One UI</h4>
+          <h4 class="vibecode-card-title">Native PTY Terminal &amp; Shell</h4>
           <p class="vibecode-card-desc">
-            Visual wrapper modern untuk Claude Code, OpenAI Codex CLI, Cursor Agent, dan Aider. Menampilkan alur langkah AI, tool calls, serta diff visual interaktif yang bisa disetujui dalam 1 klik.
+            Full xterm.js terminal integration connecting directly to host shells (PowerShell, bash, zsh) with ANSI color support, tab completion, and Ctrl+C interrupt handling.
           </p>
         </div>
 
@@ -780,26 +717,26 @@
           <div class="vibecode-icon-wrap icon-cyan">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </div>
-          <h4 class="vibecode-card-title">Remote Monaco IDE &amp; Localhost</h4>
+          <h4 class="vibecode-card-title">Integrated Monaco Code Editor</h4>
           <p class="vibecode-card-desc">
-            Monaco Editor terintegrasi langsung di Web Portal. Buka direktori repositori host, edit berkas via hotkey <code>Ctrl+S</code>, dan preview server lokal (port 3000/5173/8080) secara instan.
+            Inspect and modify project repositories directly from the browser with VS Code-grade syntax highlighting, intelligent indentation, and hotkey file saving.
           </p>
         </div>
 
         <div class="vibecode-card card-emerald">
           <div class="vibecode-icon-wrap icon-emerald">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <h4 class="vibecode-card-title">60fps Desktop &amp; Touch Bar</h4>
+          <h4 class="vibecode-card-title">Hardware 60 FPS Canvas Streaming</h4>
           <p class="vibecode-card-desc">
-            Mode video Crisp Coding Text untuk kejernihan font pemrograman. Dilengkapi Virtual Dev Touch Bar (<code>Esc</code>, <code>Tab</code>, <code>Ctrl</code>, <code>{}</code>) saat dibuka via iPad atau smartphone.
+            Adaptive bitrate video pipeline with crisp subpixel font rendering and virtual mobile touch control keys (Esc, Tab, Ctrl, Alt) for responsive tablet access.
           </p>
         </div>
       </div>
 
       <!-- Action Button -->
-      <a href="viewer.html?mode=vibe" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; padding: 0.85rem 2rem; font-size: 1rem; border-radius: var(--radius-sm); box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);">
-        <span>⚡ Launch Audira Vibe Studio</span>
+      <a href="viewer.html?mode=vibe" class="btn btn-primary btn-lg" style="display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; padding: 0.85rem 2rem; font-size: 1rem; border-radius: var(--radius-sm);">
+        <span>Launch Audira Web Client</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
     </div>
@@ -2352,7 +2289,7 @@
       </p>
 
       <!-- High-Tech QR Visual Mockup -->
-      <div style="background:#ffffff; padding:1.2rem; border-radius:12px; width:200px; height:200px; margin:0 auto 1.2rem auto; display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px rgba(0,240,255,0.3);">
+      <div style="background:#ffffff; padding:1.2rem; border-radius:12px; width:200px; height:200px; margin:0 auto 1.2rem auto; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 1px solid var(--color-border);">
         <svg width="160" height="160" viewBox="0 0 100 100" fill="#000000">
           <!-- QR corners -->
           <rect x="5" y="5" width="25" height="25" fill="none" stroke="#000" stroke-width="4"/>
