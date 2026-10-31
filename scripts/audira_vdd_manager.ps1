@@ -152,9 +152,10 @@ function Remove-VDD {
 }
 
 switch ($Action) {
-    'status'  { Get-VDDStatus | Format-List }
+    'status'  { Get-VDDStatus }
     'install' { Install-VDD }
     'enable'  { Enable-VDD }
     'disable' { Disable-VDD }
     'remove'  { Remove-VDD }
 }
+

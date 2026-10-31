@@ -60,6 +60,7 @@ function Install-ViGEmBus {
 }
 
 switch ($Action) {
-    'status'  { Get-GamepadStatus | Format-List }
+    'status'  { Get-GamepadStatus }
     'install' { Install-ViGEmBus }
 }
+

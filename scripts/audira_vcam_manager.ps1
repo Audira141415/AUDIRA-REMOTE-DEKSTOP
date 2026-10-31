@@ -63,8 +63,9 @@ function Remove-Vcam {
 }
 
 switch ($Action) {
-    'status'  { Get-VcamStatus | Format-List }
+    'status'  { Get-VcamStatus }
     'install' { Install-Vcam }
     'add'     { & $VcamExe add }
     'remove'  { Remove-Vcam }
 }
+
