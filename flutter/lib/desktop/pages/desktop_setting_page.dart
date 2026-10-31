@@ -59,6 +59,7 @@ enum SettingsTabKey {
   safety,
   network,
   display,
+  companion,
   account,
   printer,
   about,
@@ -78,6 +79,7 @@ class DesktopSettingPage extends StatefulWidget {
         bind.mainGetBuildinOption(key: kOptionHideNetworkSetting) != 'Y')
       SettingsTabKey.network,
     if (!bind.isIncomingOnly()) SettingsTabKey.display,
+    SettingsTabKey.companion,
     if (!bind.isDisableAccount()) SettingsTabKey.account,
     if (isWindows &&
         !bind.isDisableSettings() &&
@@ -206,6 +208,10 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           settingTabs.add(_TabInfo(tab, 'Display',
               Icons.desktop_windows_outlined, Icons.desktop_windows));
           break;
+        case SettingsTabKey.companion:
+          settingTabs.add(_TabInfo(
+              tab, 'Companion', Icons.devices_outlined, Icons.devices));
+          break;
         case SettingsTabKey.account:
           settingTabs.add(
               _TabInfo(tab, 'Account', Icons.person_outline, Icons.person));
@@ -238,6 +244,9 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           break;
         case SettingsTabKey.display:
           children.add(const _Display());
+          break;
+        case SettingsTabKey.companion:
+          children.add(const _Companion());
           break;
         case SettingsTabKey.account:
           children.add(const _Account());
@@ -3229,6 +3238,114 @@ class _AboutState extends State<_About> {
         ]),
       );
     });
+  }
+}
+
+class _Companion extends StatefulWidget {
+  const _Companion({Key? key}) : super(key: key);
+
+  @override
+  State<_Companion> createState() => _CompanionState();
+}
+
+class _CompanionState extends State<_Companion> {
+  @override
+  Widget build(BuildContext context) {
+    final scrollController = ScrollController();
+    return ListView(controller: scrollController, children: [
+      _buildDisplayAndAppsCard(context),
+      _buildKvmAndInputCard(context),
+      _buildSecurityAndContinuityCard(context),
+      _buildMediaAndPhoneLinkCard(context),
+    ]).marginOnly(bottom: _kListViewBottomMargin);
+  }
+
+  Widget _buildDisplayAndAppsCard(BuildContext context) {
+    return _Card(
+      title: 'Virtual Display & RemoteApp',
+      children: [
+        _OptionCheckBox(
+          context,
+          'Virtual Extended Desktop (Second Screen)',
+          'enable-virtual-display-extend',
+        ),
+        _OptionCheckBox(
+          context,
+          'Seamless RemoteApp Single-Window Mode',
+          'enable-seamless-remoteapp',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKvmAndInputCard(BuildContext context) {
+    return _Card(
+      title: 'KVM & Input Controls',
+      children: [
+        _OptionCheckBox(
+          context,
+          'One Mouse & Keyboard (KVM Edge Transit)',
+          'enable-kvm-edge-transit',
+        ),
+        _OptionCheckBox(
+          context,
+          'Cross-Screen Edge Drag & Drop Files',
+          'enable-edge-drop',
+        ),
+        _OptionCheckBox(
+          context,
+          'Precision Touchpad Gestures Forwarding',
+          'enable-precision-touchpad-gestures',
+        ),
+        _OptionCheckBox(
+          context,
+          'Virtual Xbox 360 Gamepad (ViGEmBus)',
+          'enable-virtual-gamepad-vigem',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSecurityAndContinuityCard(BuildContext context) {
+    return _Card(
+      title: 'Privacy & Cross-Device Handoff',
+      children: [
+        _OptionCheckBox(
+          context,
+          'Password Manager Clipboard Exclusion (1Password/Bitwarden/KeePass)',
+          'enable-password-manager-clipboard-exclusion',
+          fakeValue: true,
+        ),
+        _OptionCheckBox(
+          context,
+          'Hybrid Logical Clock (HLC) & Image Clipboard Sync',
+          'enable-hlc-clipboard-sync',
+        ),
+        _OptionCheckBox(
+          context,
+          'ReZume Multi-Device Handoff (Browser Tabs & Docs)',
+          'enable-rezume-handoff',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMediaAndPhoneLinkCard(BuildContext context) {
+    return _Card(
+      title: 'Media & Device Telephony',
+      children: [
+        _OptionCheckBox(
+          context,
+          'Windows 11 Native Virtual Camera (MFCreateVirtualCamera)',
+          'enable-native-virtual-camera',
+        ),
+        _OptionCheckBox(
+          context,
+          'Phone Link & Offline BLE / Wi-Fi Direct Pipe',
+          'enable-phone-link-telephony',
+        ),
+      ],
+    );
   }
 }
 
