@@ -36,7 +36,8 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
   final TextEditingController _remoteIdController = TextEditingController();
   final RxBool _hidePassword = true.obs;
   final RxBool _isRefreshingPassword = false.obs;
-  final RxString _activeSidebarTab = 'companion'.obs; // 'pair', 'local', 'companion', 'workspaces'
+  final RxString _activeSidebarTab = 'pair'.obs;
+  final RxString _activeCompanionTab = 'display'.obs; // 'pair', 'local', 'companion', 'workspaces'
 
   Timer? _countdownTimer;
   Timer? _telemetryTimer;
@@ -1292,10 +1293,11 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
 
   // =========================================================================
   // 2.5 CENTER STAGE: TWIN WORKSPACE & COMPANION SUITE (11 ADOPTED CAPABILITIES)
+  // Modular Segmented Architecture (Like TwinDesk & Apple Continuity Preferences)
   // =========================================================================
   Widget _buildCenterCompanionStage(BuildContext context, bool isDark, ServerModel model) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 26),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 680),
@@ -1313,7 +1315,7 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                         Row(
                           children: [
                             Text(
-                              'TwinDesk Companion Suite',
+                              'TwinDesk Continuity Hub',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
@@ -1322,12 +1324,12 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            _buildBadge('11 ADOPTED', const Color(0xFF06B6D4)),
+                            _buildBadge('11 TOOLS', const Color(0xFF06B6D4)),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Multi-device workspace continuity, virtual peripherals, and anti-leak security',
+                          'Pilih kategori perangkat di bawah untuk mengatur fitur kontinuitas & hardware virtual',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -1351,12 +1353,12 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                         onPressed: () => _executeCompanionScript(
                           'audira_companion_suite.ps1',
                           ['-Action', 'status'],
-                          'Status 11 fitur TwinDesk berhasil diperbarui!',
+                          'Status 11 fitur TwinDesk berhasil diverifikasi!',
                         ),
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        tooltip: 'Buka Pengaturan Companion Lengkap',
+                        tooltip: 'Buka Pengaturan Lengkap',
                         icon: const Icon(Icons.tune_rounded, size: 18),
                         color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         onPressed: () => DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.companion),
@@ -1366,293 +1368,360 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
                 ],
               ),
 
+              const SizedBox(height: 18),
+
+              // Segmented Category Pill Tabs (TwinDesk Style: Focused per Category)
+              Obx(() => Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF111827) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    _buildCompanionSubTabTile('display', Icons.desktop_windows_rounded, 'Layar (2)', isDark),
+                    _buildCompanionSubTabTile('input', Icons.sports_esports_rounded, 'KVM & Gamepad (4)', isDark),
+                    _buildCompanionSubTabTile('privacy', Icons.security_rounded, 'Privasi & Sync (3)', isDark),
+                    _buildCompanionSubTabTile('media', Icons.videocam_rounded, 'Kamera & Phone (2)', isDark),
+                  ],
+                ),
+              )),
+
               const SizedBox(height: 20),
 
-              // KPI Quick Metrics Row
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildCompanionKpiCard(
-                      title: 'Layar Virtual',
-                      value: 'IddCx VDD',
-                      sub: 'Dual Display 60 FPS',
-                      color: const Color(0xFF06B6D4),
-                      isDark: isDark,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildCompanionKpiCard(
-                      title: 'Gamepad ViGEm',
-                      value: 'Xbox 360',
-                      sub: 'Virtual Controller 1',
-                      color: const Color(0xFF10B981),
-                      isDark: isDark,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildCompanionKpiCard(
-                      title: 'Clipboard Shield',
-                      value: 'Zero-Leak',
-                      sub: '1Password Protected',
-                      color: const Color(0xFF8B5CF6),
-                      isDark: isDark,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildCompanionKpiCard(
-                      title: 'Continuity',
-                      value: 'ReZume Active',
-                      sub: 'Tabs & Docs Sync',
-                      color: const Color(0xFFF59E0B),
-                      isDark: isDark,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Category 1: Virtual Display & RemoteApp
-              _buildCompanionSectionHeader('1. VIRTUAL DISPLAY & SEAMLESS REMOTEAPP', const Color(0xFF06B6D4)),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '01',
-                title: 'Virtual Extended Desktop (Layar Ke-2)',
-                desc: 'Tambahkan monitor virtual kedua secara instan tanpa perlu membeli hardware dummy plug fisik (HDMI dummy). Mendukung resolusi 1080p dan 2K QuadHD 60 FPS.',
-                tags: ['IddCx VDD', 'Zero Hardware', 'Layar Kedua'],
-                badge: 'Ready (IddCx)',
-                badgeColor: const Color(0xFF06B6D4),
-                actions: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFF06B6D4),
-                      side: const BorderSide(color: Color(0xFF06B6D4)),
-                    ),
-                    icon: const Icon(Icons.add_to_queue_rounded, size: 13),
-                    label: const Text('+ Aktifkan Layar Ke-2'),
-                    onPressed: () => _executeCompanionScript(
-                      'audira_vdd_manager.ps1',
-                      ['-Action', 'enable'],
-                      'Layar virtual ke-2 IddCx berhasil diaktifkan!',
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFFEF4444),
-                      side: const BorderSide(color: Color(0xFFEF4444)),
-                    ),
-                    child: const Text('Lepas Layar'),
-                    onPressed: () => _executeCompanionScript(
-                      'audira_vdd_manager.ps1',
-                      ['-Action', 'disable'],
-                      'Layar virtual dinonaktifkan.',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '02',
-                title: 'Seamless RemoteApp Single-Window Mode',
-                desc: 'Streaming hanya 1 jendela aplikasi tertentu (misal VS Code, Blender, atau Browser) secara melayang (frameless) tanpa memakan bandwidth seluruh tampilan desktop.',
-                tags: ['AppWindows.cs', 'DwmGetWindowAttribute', 'Bandwidth Hemat'],
-                badge: 'Ready (Helper)',
-                badgeColor: const Color(0xFF06B6D4),
-                actions: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFF06B6D4),
-                      side: const BorderSide(color: Color(0xFF06B6D4)),
-                    ),
-                    icon: const Icon(Icons.filter_none_rounded, size: 13),
-                    label: const Text('Streaming Jendela Aplikasi...'),
-                    onPressed: () => DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.companion),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Category 2: KVM & Input Controls
-              _buildCompanionSectionHeader('2. KVM ONE MOUSE & INPUT BRIDGING', const Color(0xFF8B5CF6)),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '03',
-                title: 'One Mouse & Keyboard (KVM Seamless Transit)',
-                desc: 'Kursor mouse dapat menyeberang mulus antar-layar PC host dan PC remote dengan resistansi tepi 120px untuk mencegah kursor tergelincir tidak sengaja.',
-                tags: ['Raw Input Hook', 'Cursor Edge Push', 'One Mouse'],
-                badge: 'Active Engine',
-                badgeColor: const Color(0xFF8B5CF6),
-                actions: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFF8B5CF6),
-                      side: const BorderSide(color: Color(0xFF8B5CF6)),
-                    ),
-                    icon: const Icon(Icons.mouse_rounded, size: 13),
-                    label: const Text('Konfigurasi KVM'),
-                    onPressed: () => DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.companion),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '04',
-                title: 'Cross-Screen Edge Drag & Drop Files (DropEdge)',
-                desc: 'Drag file dokumen, zip, atau gambar langsung ke batas tepi layar monitor fisik untuk mentransfernya secara P2P ke komputer kedua.',
-                tags: ['DropEdge 3px Target', 'OLE Drag', 'P2P Transfer'],
-                badge: 'Ready',
-                badgeColor: const Color(0xFF8B5CF6),
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '05',
-                title: 'Precision Touchpad Gestures Forwarding',
-                desc: 'Meneruskan gesture multi-jari touchpad native Windows (pinch-to-zoom, swipe 3-jari Task View, swipe 4-jari ganti Virtual Desktop) via HID Digitizer.',
-                tags: ['HID Digitizer', 'Multi-Touch', 'Zoom & Swipe'],
-                badge: 'Ready',
-                badgeColor: const Color(0xFF8B5CF6),
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '06',
-                title: 'Virtual Xbox 360 Gamepad (ViGEmBus Emulation)',
-                desc: 'Ubah smartphone, tablet, atau keyboard remote menjadi stik Xbox 360 virtual di PC host melalui kernel driver ViGEmBus untuk cloud gaming latensi ultra rendah.',
-                tags: ['ViGEmBus Driver', 'XInput Xbox 360', 'Gaming 60 FPS'],
-                badge: 'Driver Active',
-                badgeColor: const Color(0xFF10B981),
-                actions: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFF10B981),
-                      side: const BorderSide(color: Color(0xFF10B981)),
-                    ),
-                    icon: const Icon(Icons.sports_esports_rounded, size: 13),
-                    label: const Text('Test Controller ViGEm'),
-                    onPressed: () => _executeCompanionScript(
-                      'audira_gamepad_manager.ps1',
-                      ['-Action', 'status'],
-                      'Status Controller Xbox 360 ViGEmBus Aktif!',
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Category 3: Security & Handoff
-              _buildCompanionSectionHeader('3. PRIVACY SECURITY & CROSS-DEVICE CONTINUITY', const Color(0xFF10B981)),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '07',
-                title: 'Password Manager Privacy Guard (Anti-Leak E2EE)',
-                desc: 'Mendeteksi otomatis format clipboard rahasia dari 1Password, Bitwarden, KeePass, dan Windows Hello. Menolak replikasi rahasia ke remote secara permanen.',
-                tags: ['src/clipboard.rs', 'Zero-Leak E2EE', 'Auto Reject'],
-                badge: 'Active (Rust Core)',
-                badgeColor: const Color(0xFF10B981),
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '08',
-                title: 'Hybrid Logical Clock (HLC) & Image Clipboard Sync',
-                desc: 'Sinkronisasi clipboard dua arah dengan HLC timestamp clamp untuk mencegah echo-loop serta mendukung copy-paste tangkapan layar gambar PNG hingga 10 MB.',
-                tags: ['HLC Timestamp', 'Echo-Loop Free', 'PNG < 10MB'],
-                badge: 'Active',
-                badgeColor: const Color(0xFF10B981),
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '09',
-                title: 'ReZume Multi-Device Handoff (Tabs & Docs)',
-                desc: 'Lanjutkan apa yang sedang Anda kerjakan di PC lain. Membaca URL tab browser aktif via UI Automation dan dokumen aktif untuk dibuka seketika di komputer target.',
-                tags: ['UI Automation', 'Browser URL', '1-Click Resume'],
-                badge: 'Ready',
-                badgeColor: const Color(0xFF10B981),
-                actions: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFF10B981),
-                      side: const BorderSide(color: Color(0xFF10B981)),
-                    ),
-                    icon: const Icon(Icons.sync_alt_rounded, size: 13),
-                    label: const Text('1-Click Resume Handoff'),
-                    onPressed: () => showToast('Membaca tab browser dan dokumen aktif untuk dikirim ke peer...'),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Category 4: Media & Telephony
-              _buildCompanionSectionHeader('4. VIRTUAL MEDIA & PHONE TELEPHONY', const Color(0xFFF59E0B)),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '10',
-                title: 'Windows 11 Native Virtual Camera (MFCreateVirtualCamera)',
-                desc: 'Gunakan kamera smartphone atau webcam remote sebagai kamera sistem virtual melalui Media Foundation untuk Zoom, Microsoft Teams, dan Google Meet.',
-                tags: ['MF Software Source', 'Zero DirectShow', 'Win11 Native'],
-                badge: 'Ready (Win11 MF)',
-                badgeColor: const Color(0xFFF59E0B),
-                actions: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
-                      foregroundColor: const Color(0xFFF59E0B),
-                      side: const BorderSide(color: Color(0xFFF59E0B)),
-                    ),
-                    icon: const Icon(Icons.videocam_rounded, size: 13),
-                    label: const Text('Daftarkan Virtual Camera'),
-                    onPressed: () => _executeCompanionScript(
-                      'audira_vcam_manager.ps1',
-                      ['-Action', 'status'],
-                      'Status Virtual Camera Media Foundation terverifikasi.',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _buildCompanionFeatureCard(
-                isDark: isDark,
-                num: '11',
-                title: 'Phone Link & Offline BLE Pipe',
-                desc: 'Terima panggilan suara dan balas SMS via WinRT PhoneLineTransportDevice. Tetap dapat terhubung dan bertukar file offline via Bluetooth LE GATT tanpa router Wi-Fi.',
-                tags: ['WinRT Hands-Free', 'Bluetooth GATT', 'Offline Pipe'],
-                badge: 'Ready (WinRT)',
-                badgeColor: const Color(0xFFF59E0B),
-              ),
+              // Dynamic Category Content
+              Obx(() {
+                final tab = _activeCompanionTab.value;
+                if (tab == 'display') {
+                  return _buildDisplaysCategory(isDark);
+                } else if (tab == 'input') {
+                  return _buildInputCategory(isDark);
+                } else if (tab == 'privacy') {
+                  return _buildPrivacyCategory(isDark);
+                } else {
+                  return _buildMediaCategory(isDark);
+                }
+              }),
 
               const SizedBox(height: 36),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCompanionSubTabTile(String id, IconData icon, String label, bool isDark) {
+    final isSelected = _activeCompanionTab.value == id;
+    final activeColor = id == 'display'
+        ? const Color(0xFF06B6D4)
+        : (id == 'input'
+            ? const Color(0xFF8B5CF6)
+            : (id == 'privacy' ? const Color(0xFF10B981) : const Color(0xFFF59E0B)));
+
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(9),
+        onTap: () => _activeCompanionTab.value = id,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (isDark ? const Color(0xFF1E293B) : Colors.white)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(9),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    )
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? activeColor : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                      : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Sub-Category 1: Displays & RemoteApp
+  Widget _buildDisplaysCategory(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompanionSectionHeader('VIRTUAL DISPLAY & SEAMLESS REMOTEAPP', const Color(0xFF06B6D4)),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '01',
+          title: 'Virtual Extended Desktop (Layar Ke-2)',
+          desc: 'Tambahkan monitor virtual kedua secara instan tanpa perlu membeli hardware dummy plug HDMI fisik. Mendukung resolusi 1080p dan 2K QuadHD 60 FPS.',
+          tags: ['IddCx VDD', 'Zero Hardware', 'Layar Kedua'],
+          badge: 'Ready (IddCx)',
+          badgeColor: const Color(0xFF06B6D4),
+          actions: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFF06B6D4),
+                side: const BorderSide(color: Color(0xFF06B6D4)),
+              ),
+              icon: const Icon(Icons.add_to_queue_rounded, size: 13),
+              label: const Text('+ Aktifkan Layar Ke-2'),
+              onPressed: () => _executeCompanionScript(
+                'audira_vdd_manager.ps1',
+                ['-Action', 'enable'],
+                'Layar virtual ke-2 IddCx berhasil diaktifkan!',
+              ),
+            ),
+            const SizedBox(width: 6),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFFEF4444),
+                side: const BorderSide(color: Color(0xFFEF4444)),
+              ),
+              child: const Text('Lepas Layar'),
+              onPressed: () => _executeCompanionScript(
+                'audira_vdd_manager.ps1',
+                ['-Action', 'disable'],
+                'Layar virtual dinonaktifkan.',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '02',
+          title: 'Seamless RemoteApp Single-Window Mode',
+          desc: 'Streaming hanya 1 jendela aplikasi tertentu (misal VS Code, Blender, atau Terminal) secara melayang tanpa memakan bandwidth seluruh tampilan desktop.',
+          tags: ['AppWindows.cs', 'DwmGetWindowAttribute', 'Bandwidth Hemat'],
+          badge: 'Ready (Helper)',
+          badgeColor: const Color(0xFF06B6D4),
+          actions: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFF06B6D4),
+                side: const BorderSide(color: Color(0xFF06B6D4)),
+              ),
+              icon: const Icon(Icons.filter_none_rounded, size: 13),
+              label: const Text('Streaming Jendela Aplikasi...'),
+              onPressed: () => DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.companion),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Sub-Category 2: KVM & Gaming
+  Widget _buildInputCategory(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompanionSectionHeader('KVM ONE MOUSE & INPUT BRIDGING', const Color(0xFF8B5CF6)),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '03',
+          title: 'One Mouse & Keyboard (KVM Seamless Transit)',
+          desc: 'Kursor mouse dapat menyeberang mulus antar-layar PC host dan PC remote dengan resistansi tepi 120px untuk mencegah kursor tergelincir tidak sengaja.',
+          tags: ['Raw Input Hook', 'Cursor Edge Push', 'One Mouse'],
+          badge: 'Active Engine',
+          badgeColor: const Color(0xFF8B5CF6),
+          actions: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFF8B5CF6),
+                side: const BorderSide(color: Color(0xFF8B5CF6)),
+              ),
+              icon: const Icon(Icons.mouse_rounded, size: 13),
+              label: const Text('Konfigurasi KVM'),
+              onPressed: () => DesktopTabPage.onAddSetting(initialPage: SettingsTabKey.companion),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '04',
+          title: 'Virtual Xbox 360 Gamepad (ViGEmBus Emulation)',
+          desc: 'Ubah smartphone, tablet, atau keyboard remote menjadi stik Xbox 360 virtual di PC host melalui kernel driver ViGEmBus untuk cloud gaming latensi ultra rendah.',
+          tags: ['ViGEmBus Driver', 'XInput Xbox 360', 'Gaming 60 FPS'],
+          badge: 'Driver Active',
+          badgeColor: const Color(0xFF10B981),
+          actions: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFF10B981),
+                side: const BorderSide(color: Color(0xFF10B981)),
+              ),
+              icon: const Icon(Icons.sports_esports_rounded, size: 13),
+              label: const Text('Test Controller ViGEm'),
+              onPressed: () => _executeCompanionScript(
+                'audira_gamepad_manager.ps1',
+                ['-Action', 'status'],
+                'Status Controller Xbox 360 ViGEmBus Aktif!',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '05',
+          title: 'Cross-Screen Edge Drag & Drop Files (DropEdge)',
+          desc: 'Drag file dokumen, zip, atau gambar langsung ke batas tepi layar monitor fisik untuk mentransfernya secara P2P ke komputer kedua.',
+          tags: ['DropEdge 3px Target', 'OLE Drag', 'P2P Transfer'],
+          badge: 'Ready',
+          badgeColor: const Color(0xFF8B5CF6),
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '06',
+          title: 'Precision Touchpad Gestures Forwarding',
+          desc: 'Meneruskan gesture multi-jari touchpad native Windows (pinch-to-zoom, swipe 3-jari Task View, swipe 4-jari ganti Virtual Desktop) via HID Digitizer.',
+          tags: ['HID Digitizer', 'Multi-Touch', 'Zoom & Swipe'],
+          badge: 'Ready',
+          badgeColor: const Color(0xFF8B5CF6),
+        ),
+      ],
+    );
+  }
+
+  // Sub-Category 3: Privacy & Continuity
+  Widget _buildPrivacyCategory(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompanionSectionHeader('PRIVACY SECURITY & CROSS-DEVICE CONTINUITY', const Color(0xFF10B981)),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '07',
+          title: 'Password Manager Privacy Guard (Anti-Leak E2EE)',
+          desc: 'Mendeteksi otomatis format clipboard rahasia dari 1Password, Bitwarden, KeePass, dan Windows Hello. Menolak replikasi rahasia ke remote secara permanen.',
+          tags: ['src/clipboard.rs', 'Zero-Leak E2EE', 'Auto Reject'],
+          badge: 'Active (Rust Core)',
+          badgeColor: const Color(0xFF10B981),
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '08',
+          title: 'Hybrid Logical Clock (HLC) & Image Clipboard Sync',
+          desc: 'Sinkronisasi clipboard dua arah dengan HLC timestamp clamp untuk mencegah echo-loop serta mendukung copy-paste tangkapan layar gambar PNG hingga 10 MB.',
+          tags: ['HLC Timestamp', 'Echo-Loop Free', 'PNG < 10MB'],
+          badge: 'Active',
+          badgeColor: const Color(0xFF10B981),
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '09',
+          title: 'ReZume Multi-Device Handoff (Tabs & Docs)',
+          desc: 'Lanjutkan apa yang sedang Anda kerjakan di PC lain. Membaca URL tab browser aktif via UI Automation dan dokumen aktif untuk dibuka seketika di komputer target.',
+          tags: ['UI Automation', 'Browser URL', '1-Click Resume'],
+          badge: 'Ready',
+          badgeColor: const Color(0xFF10B981),
+          actions: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFF10B981),
+                side: const BorderSide(color: Color(0xFF10B981)),
+              ),
+              icon: const Icon(Icons.sync_alt_rounded, size: 13),
+              label: const Text('1-Click Resume Handoff'),
+              onPressed: () => showToast('Membaca tab browser dan dokumen aktif untuk dikirim ke peer...'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Sub-Category 4: Media & Telephony
+  Widget _buildMediaCategory(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompanionSectionHeader('VIRTUAL MEDIA & PHONE TELEPHONY', const Color(0xFFF59E0B)),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '10',
+          title: 'Windows 11 Native Virtual Camera (MFCreateVirtualCamera)',
+          desc: 'Gunakan kamera smartphone atau webcam remote sebagai kamera sistem virtual melalui Media Foundation untuk Zoom, Microsoft Teams, dan Google Meet.',
+          tags: ['MF Software Source', 'Zero DirectShow', 'Win11 Native'],
+          badge: 'Ready (Win11 MF)',
+          badgeColor: const Color(0xFFF59E0B),
+          actions: [
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                textStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                foregroundColor: const Color(0xFFF59E0B),
+                side: const BorderSide(color: Color(0xFFF59E0B)),
+              ),
+              icon: const Icon(Icons.videocam_rounded, size: 13),
+              label: const Text('Daftarkan Virtual Camera'),
+              onPressed: () => _executeCompanionScript(
+                'audira_vcam_manager.ps1',
+                ['-Action', 'status'],
+                'Status Virtual Camera Media Foundation terverifikasi.',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildCompanionFeatureCard(
+          isDark: isDark,
+          num: '11',
+          title: 'Phone Link & Offline BLE Pipe',
+          desc: 'Terima panggilan suara dan balas SMS via WinRT PhoneLineTransportDevice. Tetap dapat terhubung dan bertukar file offline via Bluetooth LE GATT tanpa router Wi-Fi.',
+          tags: ['WinRT Hands-Free', 'Bluetooth GATT', 'Offline Pipe'],
+          badge: 'Ready (WinRT)',
+          badgeColor: const Color(0xFFF59E0B),
+        ),
+      ],
     );
   }
 
@@ -1675,55 +1744,6 @@ class _AudiraModernHostDashboardState extends State<AudiraModernHostDashboard> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCompanionKpiCard({
-    required String title,
-    required String value,
-    required String sub,
-    required Color color,
-    required bool isDark,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF111827) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.25),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            sub,
-            style: TextStyle(
-              fontSize: 9.5,
-              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

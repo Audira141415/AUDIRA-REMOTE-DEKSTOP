@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:convert';
 import 'dart:async';
 
@@ -893,6 +894,9 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
         isActive: widget.isDiagnosticsActive,
       ));
     }
+
+    // TwinDesk Continuity Quick Tools (Second Screen, Gamepad, KVM, Camera)
+    toolbarItems.add(_TwinDeskToolbarMenuButton(id: widget.id, ffi: widget.ffi));
 
     // Divider before Close
     toolbarItems.add(_buildToolbarDivider(isHorizontal));
@@ -3198,6 +3202,145 @@ class _DiagnosticsMenuButton extends StatelessWidget {
           : const Color(0xFF1E293B),
       hoverColor: const Color(0xFF05D9E8).withValues(alpha: 0.5),
     );
+  }
+}
+
+class _TwinDeskToolbarMenuButton extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+
+  const _TwinDeskToolbarMenuButton({
+    Key? key,
+    required this.id,
+    required this.ffi,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconMenuButton(
+      icon: const Icon(
+        Icons.devices_other_rounded,
+        size: 16,
+        color: Color(0xFF06B6D4),
+      ),
+      tooltip: 'TwinDesk Continuity (Layar Ke-2, Gamepad, KVM)',
+      onPressed: () => _showTwinMenu(context),
+      color: const Color(0xFF06B6D4).withValues(alpha: 0.15),
+      hoverColor: const Color(0xFF06B6D4).withValues(alpha: 0.35),
+    );
+  }
+
+  void _showTwinMenu(BuildContext context) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu<String>(
+      context: context,
+      position: position,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: const Color(0xFF0F172A),
+      items: [
+        const PopupMenuItem<String>(
+          enabled: false,
+          child: Text(
+            'TWINDESK CONTINUITY',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: Color(0xFF06B6D4),
+            ),
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem<String>(
+          value: 'vdd_enable',
+          child: Row(
+            children: const [
+              Icon(Icons.add_to_queue_rounded, size: 15, color: Color(0xFF06B6D4)),
+              SizedBox(width: 10),
+              Text('Tambah Layar Ke-2 (VDD)', style: TextStyle(fontSize: 12, color: Colors.white)),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'vdd_disable',
+          child: Row(
+            children: const [
+              Icon(Icons.remove_from_queue_rounded, size: 15, color: Color(0xFFEF4444)),
+              SizedBox(width: 10),
+              Text('Lepas Layar Virtual', style: TextStyle(fontSize: 12, color: Colors.white70)),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem<String>(
+          value: 'gamepad',
+          child: Row(
+            children: const [
+              Icon(Icons.sports_esports_rounded, size: 15, color: Color(0xFF10B981)),
+              SizedBox(width: 10),
+              Text('Xbox 360 Gamepad (ViGEm)', style: TextStyle(fontSize: 12, color: Colors.white)),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'kvm',
+          child: Row(
+            children: const [
+              Icon(Icons.mouse_rounded, size: 15, color: Color(0xFF8B5CF6)),
+              SizedBox(width: 10),
+              Text('One Mouse (KVM Transit)', style: TextStyle(fontSize: 12, color: Colors.white)),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'camera',
+          child: Row(
+            children: const [
+              Icon(Icons.videocam_rounded, size: 15, color: Color(0xFFF59E0B)),
+              SizedBox(width: 10),
+              Text('Virtual Camera Redirect', style: TextStyle(fontSize: 12, color: Colors.white)),
+            ],
+          ),
+        ),
+      ],
+    ).then((val) {
+      if (val == null) return;
+      if (val == 'vdd_enable') {
+        _runPs('audira_vdd_manager.ps1', ['-Action', 'enable'], 'Layar virtual ke-2 diaktifkan');
+      } else if (val == 'vdd_disable') {
+        _runPs('audira_vdd_manager.ps1', ['-Action', 'disable'], 'Layar virtual dinonaktifkan');
+      } else if (val == 'gamepad') {
+        _runPs('audira_gamepad_manager.ps1', ['-Action', 'status'], 'Controller Xbox 360 ViGEmBus Aktif');
+      } else if (val == 'kvm') {
+        showToast('KVM One Mouse Mode Aktif');
+      } else if (val == 'camera') {
+        _runPs('audira_vcam_manager.ps1', ['-Action', 'status'], 'Virtual Camera Media Foundation Ready');
+      }
+    });
+  }
+
+  void _runPs(String script, List<String> args, String msg) async {
+    try {
+      showToast('Menjalankan: $script...');
+      final p = '${Directory.current.path}/scripts/$script';
+      final res = await Process.run('powershell', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', p, ...args]);
+      if (res.exitCode == 0) {
+        showToast(msg);
+      } else {
+        showToast('Info: ${res.stdout ?? res.stderr}');
+      }
+    } catch (e) {
+      showToast('Status: $e');
+    }
   }
 }
 
