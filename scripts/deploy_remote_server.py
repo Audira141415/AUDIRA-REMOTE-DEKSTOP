@@ -22,6 +22,7 @@ commands = [
     f"mkdir -p {REMOTE_PROJECT_DIR}/data",
     f"mkdir -p {REMOTE_PROJECT_DIR}/web/css",
     f"mkdir -p {REMOTE_PROJECT_DIR}/web/js",
+    f"mkdir -p {REMOTE_PROJECT_DIR}/web/dist",
     f"ln -sfn {REMOTE_PROJECT_DIR} /home/audira/audira-remote-desktop"
 ]
 
@@ -49,6 +50,8 @@ files_to_upload = [
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\css\admin.css", f"{REMOTE_PROJECT_DIR}/web/css/admin.css"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\js\app.js", f"{REMOTE_PROJECT_DIR}/web/js/app.js"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\js\admin.js", f"{REMOTE_PROJECT_DIR}/web/js/admin.js"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-Full-Installer.exe", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk-Full-Installer.exe"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-Portable.exe", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk-Portable.exe"),
 ]
 
 for local_file, remote_file in files_to_upload:
