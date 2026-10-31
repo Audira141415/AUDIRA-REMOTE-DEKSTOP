@@ -31,6 +31,11 @@ const RUSTDESK_CLIPBOARD_OWNER_FORMAT: &'static str = "dyn.com.rustdesk.owner";
 // Add special format for Excel XML Spreadsheet
 const CLIPBOARD_FORMAT_EXCEL_XML_SPREADSHEET: &'static str = "XML Spreadsheet";
 
+// Privacy formats registered by password managers (1Password, Bitwarden, KeePass, Windows Hello, etc.)
+// to mark secrets that must be ignored by remote sync tools.
+const CLIPBOARD_FORMAT_EXCLUDE_PROCESSING: &'static str = "ExcludeClipboardContentFromMonitorProcessing";
+const CLIPBOARD_FORMAT_VIEWER_IGNORE: &'static str = "Clipboard Viewer Ignore";
+
 #[cfg(not(target_os = "android"))]
 lazy_static::lazy_static! {
     static ref ARBOARD_MTX: Arc<Mutex<()>> = Arc::new(Mutex::new(()));
@@ -69,6 +74,8 @@ const SUPPORTED_FORMATS: &[ClipboardFormat] = &[
     ClipboardFormat::FileUrl,
     ClipboardFormat::Special(CLIPBOARD_FORMAT_EXCEL_XML_SPREADSHEET),
     ClipboardFormat::Special(RUSTDESK_CLIPBOARD_OWNER_FORMAT),
+    ClipboardFormat::Special(CLIPBOARD_FORMAT_EXCLUDE_PROCESSING),
+    ClipboardFormat::Special(CLIPBOARD_FORMAT_VIEWER_IGNORE),
 ];
 
 #[cfg(not(target_os = "android"))]
@@ -416,10 +423,23 @@ impl ClipboardContext {
                 }
             }
         }
+        // Privacy filter: drop clipboard content if marked sensitive by a password manager
+        for c in data.iter() {
+            if let ClipboardData::Special((s, _)) = c {
+                if s == CLIPBOARD_FORMAT_EXCLUDE_PROCESSING || s == CLIPBOARD_FORMAT_VIEWER_IGNORE {
+                    log::info!("Sensitive clipboard content ignored (password manager detected)");
+                    return Ok(vec![]);
+                }
+            }
+        }
         Ok(data
             .into_iter()
             .filter(|c| match c {
-                ClipboardData::Special((s, _)) => s != RUSTDESK_CLIPBOARD_OWNER_FORMAT,
+                ClipboardData::Special((s, _)) => {
+                    s != RUSTDESK_CLIPBOARD_OWNER_FORMAT
+                        && s != CLIPBOARD_FORMAT_EXCLUDE_PROCESSING
+                        && s != CLIPBOARD_FORMAT_VIEWER_IGNORE
+                }
                 // Skip synchronizing empty text to the remote clipboard
                 ClipboardData::Text(text) => !text.is_empty(),
                 _ => true,
