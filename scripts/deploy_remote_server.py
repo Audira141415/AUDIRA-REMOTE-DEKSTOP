@@ -50,6 +50,8 @@ files_to_upload = [
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\css\admin.css", f"{REMOTE_PROJECT_DIR}/web/css/admin.css"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\js\app.js", f"{REMOTE_PROJECT_DIR}/web/js/app.js"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\js\admin.js", f"{REMOTE_PROJECT_DIR}/web/js/admin.js"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\web\nginx.conf", f"{REMOTE_PROJECT_DIR}/web/nginx.conf"),
+    (r"f:\AUDIRA-REMOTE-DEKSTOP\scripts\audira_api.py", f"{REMOTE_PROJECT_DIR}/audira_api.py"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-Full-Installer.exe", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk-Full-Installer.exe"),
     (r"f:\AUDIRA-REMOTE-DEKSTOP\web\dist\AudiraDesk-Portable.exe", f"{REMOTE_PROJECT_DIR}/web/dist/AudiraDesk-Portable.exe"),
 ]
