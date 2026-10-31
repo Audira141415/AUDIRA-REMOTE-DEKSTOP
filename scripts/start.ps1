@@ -65,14 +65,14 @@ if (Test-Path (Join-Path $masterKeyDir "id_ed25519")) {
 }
 
 
-# 2. Periksa keberadaan binary executable Audira Desk yang sudah terkompilasi
+# 2. Periksa keberadaan binary executable Audira Desk yang sudah terkompilasi (Prioritaskan build lokal terbaru)
 $potentialBinaries = @(
-    "C:\Program Files\Audira Desk\Audira Desk.exe",
-    "C:\Program Files\Audira Desk\AudiraDesk.exe",
-    (Join-Path $rootDir "dist\AudiraDesk-v1.5.0-x86_64.exe"),
-    (Join-Path $rootDir "AudiraDesk.exe"),
     (Join-Path $rootDir "flutter\build\windows\x64\runner\Release\audira.exe"),
-    (Join-Path $rootDir "audira.exe")
+    (Join-Path $rootDir "AudiraDesk-Full-Installer.exe"),
+    (Join-Path $rootDir "audira.exe"),
+    (Join-Path $rootDir "dist\AudiraDesk-Full-Installer.exe"),
+    "C:\Program Files\Audira Desk\Audira Desk.exe",
+    "C:\Program Files\Audira Desk\AudiraDesk.exe"
 )
 
 $foundBinary = $null
